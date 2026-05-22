@@ -1,0 +1,358 @@
+# Amino Acid Schema Configuration
+# This file defines the 20 amino acids and their properties of interest
+#
+# Each amino acid has:
+#   - one-letter: One-letter code as occurring in the protein sequences
+#   - three-letters: Three-letter code
+#   - name: Full name
+#   - mw: Average molecular weight in Da
+#   - category: acidic, basic, polar, non-polar or aromatic, used for colors coding in the histograms
+#   - category-bachem: acidic, basic, polar or non-polar, used for colors coding in the histograms, based on bachem.com
+#   - pka_n: pka if amino acid is at the N-terminus (for the current proteins only M of relevance)
+#   - pka_c: pka if amino acid is at the C-terminus (for the current proteins only H of relevance)
+# Some amino acids have:
+#   - pka: pka of ionizable side chain (only for D, E, C, Y, H, K, R), rest 0
+# (all pka-values taken from https://peptideweb.com/images/pdf/pKa-and-pI-values-of-amino-acids.pdf, vary with source)
+#   - ec: extinction coefficient in (M⁻¹cm⁻¹) for amino acids absorbing at 280 nm (C, W, Y), rest 0
+
+
+amino_acids:
+  - one_letter: "A"
+    three_letters: "Ala"
+    name: "Alanine"
+    mw: 89.1
+    formula:
+      c: 3
+      n: 1
+      h: 7
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 9.69
+    pka_c: 2.34
+    pka: 0
+    ec: 0
+
+  - one_letter: "C"
+    three_letters: "Cys"
+    name: "Cysteine"
+    mw: 121.1
+    formula:
+      c: 3
+      n: 1
+      h: 7
+      o: 2
+      s: 1
+    category: "polar"
+    category-bachem: "polar"
+    pka_n: 10.78
+    pka_c: 1.71
+    pka: 8.33
+    ec: 125
+
+  - one_letter: "D"
+    three_letters: "Asp"
+    name: "Aspartic acid"
+    mw: 133.1
+    formula:
+      c: 4
+      n: 1
+      h: 7
+      o: 4
+      s: 0
+    category: "acidic"
+    category-bachem: "acidic"
+    pka_n: 9.82
+    pka_c: 2.09
+    pka: 3.86
+    ec: 0
+
+  - one_letter: "E"
+    three_letters: "Glu"
+    name: "Glutamic acid"
+    mw: 147.1
+    formula:
+      c: 5
+      n: 1
+      h: 9
+      o: 4
+      s: 0
+    category: "acidic"
+    category-bachem: "acidic"
+    pka_n: 9.67
+    pka_c: 2.19
+    pka: 4.25
+    ec: 0
+
+  - one_letter: "F"
+    three_letters: "Phe"
+    name: "Phenylalanine"
+    mw: 165.2
+    formula:
+      c: 9
+      n: 1
+      h: 11
+      o: 2
+      s: 0
+    category: "aromatic"
+    category-bachem: "non-polar"
+    pka_n: 9.13
+    pka_c: 1.83
+    pka: 0
+    ec: 0
+
+  - one_letter: "G"
+    three_letters: "Gly"
+    name: "Glycine"
+    mw: 75.1
+    formula:
+      c: 2
+      n: 1
+      h: 5
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "polar"
+    pka_n: 9.60
+    pka_c: 2.34
+    pka: 0
+    ec: 0
+
+  - one_letter: "H"
+    three_letters: "His"
+    name: "Histidine"
+    mw: 155.2
+    formula:
+      c: 6
+      n: 3
+      h: 9
+      o: 2
+      s: 0
+    category: "aromatic"
+    category-bachem: "basic"
+    pka_n: 9.17
+    pka_c: 1.82
+    pka: 6.00
+    ec: 0
+
+  - one_letter: "I"
+    three_letters: "Ile"
+    name: "Isoleucine"
+    mw: 131.2
+    formula:
+      c: 6
+      n: 1
+      h: 13
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 9.60
+    pka_c: 2.36
+    pka: 0
+    ec: 0
+
+  - one_letter: "K"
+    three_letters: "Lys"
+    name: "Lysine"
+    mw: 146.2
+    formula:
+      c: 6
+      n: 2
+      h: 14
+      o: 2
+      s: 0
+    category: "basic"
+    category-bachem: "basic"
+    pka_n: 8.95
+    pka_c: 2.18
+    pka: 10.79
+    ec: 0
+
+  - one_letter: "L"
+    three_letters: "Leu"
+    name: "Leucine"
+    mw: 131.2
+    formula:
+      c: 6
+      n: 1
+      h: 13
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 9.60
+    pka_c: 2.36
+    pka: 0
+    ec: 0
+
+  - one_letter: "M"
+    three_letters: "Met"
+    name: "Methionine"
+    mw: 149.2
+    formula:
+      c: 5
+      n: 1
+      h: 11
+      o: 2
+      s: 1
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 9.21
+    pka_c: 2.28
+    pka: 0
+    ec: 0
+
+  - one_letter: "N"
+    three_letters: "Asn"
+    name: "Asparagine"
+    mw: 132.1
+    formula:
+      c: 4
+      n: 2
+      h: 8
+      o: 3
+      s: 0
+    category: "polar"
+    category-bachem: "polar"
+    pka_n: 8.80
+    pka_c: 2.02
+    pka: 0
+    ec: 0
+
+  - one_letter: "P"
+    three_letters: "Pro"
+    name: "Proline"
+    mw: 115.1
+    formula:
+      c: 5
+      n: 1
+      h: 9
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 10.60
+    pka_c: 1.99
+    pka: 0
+    ec: 0
+
+  - one_letter: "Q"
+    three_letters: "Gln"
+    name: "Glutamine"
+    mw: 146.2
+    formula:
+      c: 5
+      n: 2
+      h: 10
+      o: 3
+      s: 0
+    category: "polar"
+    category-bachem: "polar"
+    pka_n: 9.13
+    pka_c: 2.17
+    pka: 0
+    ec: 0
+
+  - one_letter: "R"
+    three_letters: "Arg"
+    name: "Arginine"
+    mw: 174.2
+    formula:
+      c: 6
+      n: 4
+      h: 14
+      o: 2
+      s: 0
+    category: "basic"
+    category-bachem: "basic"
+    pka_n: 9.04
+    pka_c: 2.17
+    pka: 12.48
+    ec: 0
+
+  - one_letter: "S"
+    three_letters: "Ser"
+    name: "Serine"
+    mw: 105.1
+    formula:
+      c: 3
+      n: 1
+      h: 7
+      o: 3
+      s: 0
+    category: "polar"
+    category-bachem: "polar"
+    pka_n: 9.15
+    pka_c: 2.21
+    pka: 0
+    ec: 0
+
+  - one_letter: "T"
+    three_letters: "Thr"
+    name: "Threonine"
+    mw: 119.1
+    formula:
+      c: 4
+      n: 1
+      h: 9
+      o: 3
+      s: 0
+    category: "polar"
+    category-bachem: "polar"
+    pka_n: 9.10
+    pka_c: 2.09
+    pka: 0
+    ec: 0
+
+  - one_letter: "V"
+    three_letters: "Val"
+    name: "Valine"
+    mw: 117.1
+    formula:
+      c: 5
+      n: 1
+      h: 11
+      o: 2
+      s: 0
+    category: "non-polar"
+    category-bachem: "non-polar"
+    pka_n: 9.62
+    pka_c: 2.32
+    pka: 0
+    ec: 0
+
+  - one_letter: "W"
+    three_letters: "Trp"
+    name: "Tryptophan"
+    mw: 204.2
+    formula:
+      c: 11
+      n: 2
+      h: 12
+      o: 2
+      s: 0
+    category: "aromatic"
+    category-bachem: "non-polar"
+    pka_n: 9.44
+    pka_c: 2.43
+    pka: 0
+    ec: 5500
+
+  - one_letter: "Y"
+    three_letters: "Tyr"
+    name: "Tyrosine"
+    mw: 181.2
+    formula:
+      c: 9
+      n: 1
+      h: 11
+      o: 3
+      s: 0
+    category: "aromatic"
+    category-bachem: "polar"
+    pka_n: 9.11
+    pka_c: 2.20
+    pka: 10.07
+    ec: 1490
