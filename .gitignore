@@ -308,3 +308,6 @@ __marimo__/
 
 # Claude
 /.claude/
+
+# macOS Finder
+.DS_store
