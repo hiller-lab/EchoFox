@@ -27,13 +27,7 @@ In addition to NMR-related functionality, EchoFox also includes scripts and util
 The latest main release of EchoFox can be installed using pip:
 
 ```bash
-pip install echofox
-```
-
-The latest (potentially unstable) version can be installed by cloning the repository and installing it so:
-
-```bash
-[build instructions]
+python -m pip install echofox
 ```
 
 ## Short examples
