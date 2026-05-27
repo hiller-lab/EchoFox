@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="logo_placeholder.jpg" width="220">
+  <img src="https://raw.githubusercontent.com/hiller-lab/EchoFox/main/logo_placeholder.jpg" width="220">
   <br>
   <b>EchoFox</b>
   <br>
