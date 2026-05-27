@@ -3,7 +3,6 @@ name: CI
 on:
   workflow_dispatch: # Manual trigger
   pull_request: # On PR
-  push:
   release: # Full release
     types: [published]
 
