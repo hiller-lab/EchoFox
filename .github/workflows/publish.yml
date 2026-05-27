@@ -35,6 +35,28 @@ jobs:
           name: python-package-distributions
           path: dist/
 
+  upload-to-github-release:
+    name: Upload assets to GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download distribution artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+
   publish-to-pypi:
     name: Publish to PyPI
     needs: build
