@@ -60,8 +60,8 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/echofox"
-Repository = "https://github.com/yourusername/echofox"
+Homepage = "https://pypi.org/project/echofox/"
+Repository = "https://github.com/hiller-lab/EchoFox"
 Documentation = "https://echofox.readthedocs.io"
 
 [tool.setuptools.packages.find]
