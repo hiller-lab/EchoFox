@@ -6,6 +6,14 @@
   <br>
 </h1>
 
+<p align="center">
+  <a href="https://pypi.org/project/echofox/"><img src="https://img.shields.io/pypi/pyversions/echofox" alt="Supported Python Versions"></a>
+  <a href="https://pypi.org/project/echofox/"><img src="https://badge.fury.io/py/echofox.svg" alt="PyPI version"></a>
+  <a href="https://www.biozentrum.unibas.ch/research/research-groups/research-groups-a-z/overview/unit/research-group-sebastian-hiller"><img src="https://img.shields.io/badge/Hiller%20Lab%20Homepage-8A2BE2" alt="The Hiller Lab Homepage"></a>
+</p>
+
+---
+
 ## General Information
 
 Welcome to the EchoFox repository!
