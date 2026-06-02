@@ -5,13 +5,15 @@ from matplotlib import rcParams
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib.patches import Rectangle
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 
 # matplotlib.use('TkAgg')
 rcParams['pdf.fonttype'] = 42  # Configure Matplotlib to use TrueType fonts
 rcParams['ps.fonttype'] = 42  # If exporting to PostScript as well
 
-from typing import Union, List, Tuple, TypeAlias, Literal
+from collections.abc import Sequence
+from typing import (Any, Union, List, Literal, Tuple, TypeAlias)
 
 # echofox imports
 
@@ -34,6 +36,14 @@ from echofox.echofoxplot.plot.spectrum.exceptions import (
 Spectra: TypeAlias = Union[NmrSpectrum, List[NmrSpectrum]]
 TraceType2D: TypeAlias = list[ChemicalShift | Number, Literal['f1', 'f2'], Union[int, List[int]] | Literal['all'], dict]
 ProjectionType2D: TypeAlias = list[Literal['f1', 'f2'], Union[int, List[int]] | Literal['all'], bool, dict]
+
+PpmValue: TypeAlias = float | str | ChemicalShift
+PpmRangeLike: TypeAlias = PpmRange | tuple[PpmValue, PpmValue]
+PpmRange2D: TypeAlias = tuple[PpmRangeLike | None, PpmRangeLike | None]
+
+TickSpacing1D: TypeAlias = list[Number]
+TickSpacing2D: TypeAlias = list[TickSpacing1D | None]
+
 
 class Trace2D(object):
     def __init__(self, spectra: Spectra,
@@ -181,44 +191,41 @@ class Projection2D(object):
             raise InvalidAxisError(val)
 
 
-def plot2d(spec,
-
-           ppm_range: Tuple[
-               Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-               Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]]
-           ] = (None, None),
-
-           tick_spacing: list[list[Number, Number] | None, list[Number, Number] | None] = config.tick_spacing_2d,
-           label: str | None = None,
-           label_kwargs=None,
-           pick_peaks: bool = False,
-           pick_peaks_kwargs: dict | None = None,
-           expected_sidechainpeaks: int = 0,
-           mark_peaks: bool = False,
-           mark_peaks_kwargs: dict | None = None,
-           show_f1_axis: bool = True,
-           show_f2_axis: bool = True,
-           show_f1_label: bool = True,
-           show_f2_label: bool = True,
-           f1_label_kwargs: dict | None = None,
-           f2_label_kwargs: dict | None = None,
-           f1_ticklabel_kwargs: dict | None = None,
-           f2_ticklabel_kwargs: dict | None = None,
-           current_figure: Figure | None = None,
-           current_ax: SpectrumAxes | None = None,
-           projection_f1_ratio: float = config.projection_f1_ratio,
-           projection_f2_ratio: float = config.projection_f2_ratio,
-           markers_f1=None,
-           markers_f1_kwargs: dict | None = None,
-           markers_f2=None,
-           markers_f2_kwargs: dict | None = None,
-           projections: Union[ProjectionType2D, list[ProjectionType2D]] | None = None,
-           traces: Union[TraceType2D, list[TraceType2D]] | None = None,
-           insets=None,
-           legend: bool = False,
-           legend_kwargs: dict | None = None,
-           set_axis_off: bool = False,
-           **kwargs):
+def plot2d(
+    spec: Any,
+    ppm_range: PpmRange2D = (None, None),
+    tick_spacing: TickSpacing2D = config.tick_spacing_2d,
+    label: str | None = None,
+    label_kwargs: dict[str, Any] | None = None,
+    pick_peaks: bool = False,
+    pick_peaks_kwargs: dict[str, Any] | None = None,
+    expected_sidechainpeaks: int = 0,
+    mark_peaks: bool = False,
+    mark_peaks_kwargs: dict[str, Any] | None = None,
+    show_f1_axis: bool = True,
+    show_f2_axis: bool = True,
+    show_f1_label: bool = True,
+    show_f2_label: bool = True,
+    f1_label_kwargs: dict[str, Any] | None = None,
+    f2_label_kwargs: dict[str, Any] | None = None,
+    f1_ticklabel_kwargs: dict[str, Any] | None = None,
+    f2_ticklabel_kwargs: dict[str, Any] | None = None,
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    projection_f1_ratio: float = config.projection_f1_ratio,
+    projection_f2_ratio: float = config.projection_f2_ratio,
+    markers_f1: Sequence[Any] | None = None,
+    markers_f1_kwargs: dict[str, Any] | None = None,
+    markers_f2: Sequence[Any] | None = None,
+    markers_f2_kwargs: dict[str, Any] | None = None,
+    projections: ProjectionType2D | Sequence[ProjectionType2D] | None = None,
+    traces: TraceType2D | Sequence[TraceType2D] | None = None,
+    insets: Sequence[Any] | None = None,
+    legend: bool = False,
+    legend_kwargs: dict[str, Any] | None = None,
+    set_axis_off: bool = False,
+    **kwargs: Any,
+) -> tuple[Figure, SpectrumAxes]:
 
     # set default lists and dicts
     if markers_f1 is None: markers_f1 = []

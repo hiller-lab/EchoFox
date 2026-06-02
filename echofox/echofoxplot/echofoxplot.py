@@ -89,8 +89,14 @@ def _create_new_context( spectrum_axes: bool = True):
 # High-level MiraPlot plotting functions
 #
 
-def plot2d(*args, current_figure: Figure | None = None, current_ax: SpectrumAxes | None = None,
-           dpi: Number = None, figure_size: tuple[Number, Number] | tuple[str, str] = None, **kwargs):
+def plot2d(
+    *args,
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    dpi: Number = None,
+    figure_size: tuple[Number, Number] | tuple[str, str] = None,
+    **kwargs
+) -> tuple[Figure, SpectrumAxes]:
     """
     Wrapper for 2D spectrum plotting using MiraPlot.
     """
