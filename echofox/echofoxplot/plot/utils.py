@@ -7,7 +7,11 @@ from matplotlib.lines import Line2D
 from echofox.nmr.spectrum import NmrSpectrum
 
 
-def _add_label(ax, label_list, label_kwargs_list):
+def _add_label(
+    ax,
+    label_list,
+    label_kwargs_list
+) -> None:
     for i, label in enumerate(label_list):
         label_kwargs = label_kwargs_list[i]
 
@@ -56,7 +60,10 @@ def _add_label(ax, label_list, label_kwargs_list):
         ax.text(text_x, text_y, label, **label_kwargs)
 
 
-def _add_legend(ax, legend_kwargs):
+def _add_legend(
+    ax,
+    legend_kwargs
+) -> None:
     custom_lines = []
     custom_labels = []
     for i, spectrum in enumerate(ax.spectra):

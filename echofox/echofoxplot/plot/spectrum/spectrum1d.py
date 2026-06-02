@@ -25,38 +25,34 @@ from echofox.echofoxplot.plot.utils import _add_legend
 # typing
 
 
-def plot1d(spec,
-           ppm_range: tuple[Number, Number] | None = None,
-           intensity_range: tuple[Number, Number] | None = None,
-           tick_spacing: tuple[Number, Number] | None = config.tick_spacing_1d,
-           f1_ticks: list[Number] | None = None,
-           f1_ticklabels: list[str] | None = None,
-           label: str | None = None,
-           label_kwargs=None,
-
-           show_f1_axis: bool = True,
-           show_f1_label: bool = True,
-           f1_label_kwargs: dict | None = None,
-           f1_ticklabel_kwargs: dict | None = None,
-
-           show_intensity_axis: bool = True,
-           show_intensity_label: bool = True,
-           intensity_label_kwargs: dict | None = None,
-           intensity_ticklabel_kwargs: dict | None = None,
-
-           current_figure: Figure | None = None,
-           current_ax: SpectrumAxes | None = None,
-           show_frame: bool = False,
-
-           reverse_spectra: bool = False,
-
-           normalize: bool = False,
-
-           insets=None,  # think of how to do this
-           legend: bool = False,
-           legend_kwargs: dict | None = None,
-           set_axis_off: bool = False,
-           **kwargs):
+def plot1d(
+    spec,
+    ppm_range: tuple[Number, Number] | None = None,
+    intensity_range: tuple[Number, Number] | None = None,
+    tick_spacing: tuple[Number, Number] | None = config.tick_spacing_1d,
+    f1_ticks: list[Number] | None = None,
+    f1_ticklabels: list[str] | None = None,
+    label: str | None = None,
+    label_kwargs=None,
+    show_f1_axis: bool = True,
+    show_f1_label: bool = True,
+    f1_label_kwargs: dict | None = None,
+    f1_ticklabel_kwargs: dict | None = None,
+    show_intensity_axis: bool = True,
+    show_intensity_label: bool = True,
+    intensity_label_kwargs: dict | None = None,
+    intensity_ticklabel_kwargs: dict | None = None,
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    show_frame: bool = False,
+    reverse_spectra: bool = False,
+    normalize: bool = False,
+    insets=None,  # think of how to do this
+    legend: bool = False,
+    legend_kwargs: dict | None = None,
+    set_axis_off: bool = False,
+    **kwargs
+) -> tuple[Figure, SpectrumAxes]:
 
     # set default lists and dicts
     if label_kwargs is None: label_kwargs = {}

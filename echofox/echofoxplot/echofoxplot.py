@@ -33,10 +33,12 @@ from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
 # Helper function to determine and return the current figure and axis to plot on
 #
 
-def _get_context(current_figure: Figure | None = None,
-                 current_ax: SpectrumAxes | None = None,
-                 figure_size: tuple[Number, Number] | tuple[str, str] = None,
-                 spectrum_axes: bool = True):
+def _get_context(
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    figure_size: tuple[Number, Number] | tuple[str, str] = None,
+    spectrum_axes: bool = True
+) -> tuple[Figure, SpectrumAxes]:
     """
     Returns a figure and axis object to plot on. If none exist, they are created.
     This function supports both standard and SpectrumAxes (a specialized axis class).
@@ -71,7 +73,8 @@ def _get_context(current_figure: Figure | None = None,
 
     return figure, ax
 
-def _create_new_context( spectrum_axes: bool = True):
+
+def _create_new_context(spectrum_axes: bool = True) -> tuple[Figure, SpectrumAxes]:
     """
     Returns a figure and axis object to plot on.
     This function supports both standard and SpectrumAxes (a specialized axis class).
@@ -105,8 +108,14 @@ def plot2d(
     return _plot2d(current_ax=ax, current_figure=figure, *args, **kwargs)
 
 
-def plot1d(*args, current_figure: Figure | None = None, current_ax: SpectrumAxes | None = None,
-           dpi: Number = None, figure_size: tuple[Number, Number] | tuple[str, str] = None, **kwargs):
+def plot1d(
+    *args,
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    dpi: Number = None,
+    figure_size: tuple[Number, Number] | tuple[str, str] = None,
+    **kwargs
+) -> tuple[Figure, SpectrumAxes]:
     """
     Wrapper for 1D spectrum plotting using MiraPlot.
     """
@@ -115,10 +124,14 @@ def plot1d(*args, current_figure: Figure | None = None, current_ax: SpectrumAxes
     return _plot1d(current_ax=ax, current_figure=figure, *args, **kwargs)
 
 
-
-
-def plot_empty(*args, current_figure: Figure | None = None, current_ax: SpectrumAxes | None = None,
-           dpi: Number = None, figure_size: tuple[Number, Number] | tuple[str, str] = None, **kwargs):
+def plot_empty(
+    *args,
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    dpi: Number = None,
+    figure_size: tuple[Number, Number] | tuple[str, str] = None,
+    **kwargs
+) -> tuple[Figure, SpectrumAxes]:
     """
     Wrapper for empty 2D spectrum plotting using MiraPlot.
     """
@@ -133,8 +146,12 @@ def plot_empty(*args, current_figure: Figure | None = None, current_ax: Spectrum
 # Utility functions to set background colors
 #
 
-def set_figure_background(color: str = 'white', current_figure: Figure | None = None,
-                          current_ax: SpectrumAxes | None = None, **kwargs):
+def set_figure_background(
+    color: str = 'white',
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    **kwargs
+) -> None:
     """
     Set the background color of the figure canvas.
     """
@@ -142,9 +159,12 @@ def set_figure_background(color: str = 'white', current_figure: Figure | None = 
     figure.patch.set_facecolor(Color(color).hex)
 
 
-
-def set_axes_background(color: str | list[str] = 'white', current_figure: Figure | None = None,
-                        current_ax: SpectrumAxes | None = None, **kwargs):
+def set_axes_background(
+    color: str | list[str] = 'white',
+    current_figure: Figure | None = None,
+    current_ax: SpectrumAxes | None = None,
+    **kwargs
+) -> None:
     """
     Set the background color for each axis in the figure. Accepts a list for multiple axes.
     """
@@ -162,27 +182,27 @@ def set_axes_background(color: str | list[str] = 'white', current_figure: Figure
 # Wrapper functions for matplotlib
 #
 
-def figure(*args, **kwargs):
+def figure(*args,**kwargs) -> Figure:
     """Create a new matplotlib figure."""
     return plt.figure(*args, **kwargs)
 
 
-def show(*args, **kwargs):
+def show(*args, **kwargs) -> None:
     """Display the plot."""
     plt.show(*args, **kwargs)
 
 
-def tight_layout(*args, **kwargs):
+def tight_layout(*args, **kwargs) -> None:
     """Adjust subplot parameters to fit into figure area."""
     plt.tight_layout(*args, **kwargs)
 
 
-def savefig(*args, **kwargs):
+def savefig(*args, **kwargs) -> None:
     """Save the current figure to a file."""
     plt.savefig(*args, **kwargs)
 
 
-def close(*args, **kwargs):
+def close(*args, **kwargs) -> None:
     """Close the current figure."""
     plt.close(*args, **kwargs)
 

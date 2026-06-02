@@ -484,7 +484,13 @@ def plot2d(
     return figure, ax
 
 
-def _add_projections(spectra, projections, ax, f1_proj_ax, f2_proj_ax):
+def _add_projections(
+    spectra,
+    projections,
+    ax,
+    f1_proj_ax,
+    f2_proj_ax
+) -> None:
     for projection in projections:
 
         if projection.is_external is True:
@@ -527,7 +533,11 @@ def _add_projections(spectra, projections, ax, f1_proj_ax, f2_proj_ax):
                                                                      **projection_kwargs[i])
 
 
-def _add_traces(spectra, traces, ax):
+def _add_traces(
+    spectra,
+    traces,
+    ax
+) -> None:
     for trace in traces:
 
         trace_ppm = trace.chemical_shift.ppm
@@ -546,7 +556,11 @@ def _add_traces(spectra, traces, ax):
                 ax.plot_1d_trace_or_projection_from_2d_spectrum(spectrum, trace_ppm=trace_ppm, axis=axis,
                                                                 **trace_kwargs[i])
 
-def _mark_peaks(spectrum, ax, mark_peaks_kwargs):
+def _mark_peaks(
+    spectrum,
+    ax,
+    mark_peaks_kwargs
+) -> None:
 
     if spectrum.peaklist is None or len(spectrum.peaklist) == 0:
         print('No peaks found in spectrum. Skipping marking of peaks.')
@@ -584,14 +598,19 @@ def _mark_peaks(spectrum, ax, mark_peaks_kwargs):
             ax.text(x, y, peak_number, fontsize=6)
 
 
-def _pick_peak(spectrum, ppm_range,pick_peaks_kwargs):
+def _pick_peak(
+    spectrum,
+    ppm_range,
+    pick_peaks_kwargs
+) -> None:
     spectrum.pick_2d(ppm_range=ppm_range, sino=pick_peaks_kwargs['pick_sino'])
 
 
-
-
-
-def _draw_peaks_from_list(peaks, ax, group):  # for usage in GUI without a need for new picking
+def _draw_peaks_from_list(
+    peaks,
+    ax,
+    group
+) -> None:  # for usage in GUI without a need for new picking
     if not peaks is None and len(peaks) > 0:
         if len(peaks[0]) < 8:
             x_val, y_val, marker_size_f1_ppm, marker_size_f2_ppm = zip(*[(a[1], a[0], 0.1, 0.1) for a in peaks])
