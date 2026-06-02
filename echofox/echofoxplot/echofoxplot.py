@@ -18,6 +18,8 @@ from echofox.core.colors import Color
 # Import echofoxplot config
 from .config import config
 
+# Expose utils
+from echofox.echofoxplot.plot.utils import configure_font
 
 # Import echofoxplot axes
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes

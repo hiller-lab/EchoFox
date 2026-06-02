@@ -1,3 +1,7 @@
+from typing import (Literal, Tuple)
+
+from matplotlib import rcParams
+import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 from echofox.nmr.spectrum import NmrSpectrum
@@ -90,3 +94,41 @@ def _add_legend(ax, legend_kwargs):
     if not 'handlelength' in legend_kwargs.keys(): legend_kwargs['handlelength'] = 1
 
     legend = ax.legend(custom_lines, custom_labels, **legend_kwargs)
+
+
+def configure_font(
+    font: str = "Helvetica",
+    family: Literal["serif", "sans-serif"] = "sans-serif",
+    sizes: Tuple[int, int, int] = (8, 10, 12),
+) -> None:
+    """
+    Configure Matplotlib font settings for editable PDF/PS output.
+
+    Parameters
+    ----------
+    font
+        Name of the sans-serif font to use, e.g. "Helvetica", "Arial",
+        or "DejaVu Sans". The font must be installed and discoverable by
+        Matplotlib.
+    sizes
+        Three font sizes: default text size, axes/tick/legend size,
+        and figure title size.
+    """
+    small, medium, large = sizes
+    
+    rcParams['pdf.fonttype'] = 42  # TrueType fonts
+    rcParams['ps.fonttype'] = 42   # PostScript compatibility
+    
+    rcParams["font.family"] = family
+    
+    if family == "serif":
+        rcParams["font.serif"] = [font, "Times New Roman", "DejaVu Serif"]
+    else:
+        rcParams["font.sans-serif"] = [font, "Helvetica", "Arial", "DejaVu Sans"]
+    
+    plt.rc("font", size=small)                          # controls default text sizes
+    plt.rc("axes", titlesize=medium, labelsize=medium)  # axes title and axis label sizes
+    plt.rc("xtick", labelsize=small)                    # fontsize of the tick labels
+    plt.rc("ytick", labelsize=small)                    # fontsize of the tick labels
+    plt.rc("legend", fontsize=small)                    # legend fontsize
+    plt.rc("figure", titlesize=large)                   # fontsize of the figure title
