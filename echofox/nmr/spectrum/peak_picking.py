@@ -1,23 +1,26 @@
 from __future__ import annotations
 
-from typing import Literal, Tuple, Union
+import logging
+from typing import Literal
 
 import nmrglue as ng
 import numpy as np
 
 from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
 from echofox.nmr.peak import NmrPeak, PeakList
+
 from .exceptions import InvalidDimensionalityError
 from .models import _PeakCandidate
 
+log = logging.getLogger(__name__)
 
 
 def prepare_pick_2d_parameters(
     self,
     sino: int | float | None,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ],
 ) -> tuple[float, list[PpmRange]]:
     if self.ndim != 2:
@@ -28,8 +31,7 @@ def prepare_pick_2d_parameters(
 
     if self.is_pseudo_nd:
         raise InvalidDimensionalityError(
-            f"pick_2d() cannot be used on pseudo-nD spectra. "
-            f"Use pick_pseudo_nd() to pick peaks from all planes."
+            "pick_2d() cannot be used on pseudo-nD spectra. Use pick_pseudo_nd() to pick peaks from all planes."
         )
 
     if sino is None:
@@ -37,7 +39,7 @@ def prepare_pick_2d_parameters(
 
     ppm_filters: list[PpmRange] = []
     if ppm_range != (None, None):
-        for current_range, default_range in zip(ppm_range, self._dimension_ranges[:2]):
+        for current_range, default_range in zip(ppm_range, self._dimension_ranges[:2], strict=True):
             if current_range is None:
                 ppm_filters.append(default_range)
             elif isinstance(current_range, PpmRange):
@@ -84,7 +86,7 @@ def fit_gaussian_multipoint(
             break
 
         left_side = y_values[:half_width]
-        right_side = y_values[half_width + 1:]
+        right_side = y_values[half_width + 1 :]
 
         if not np.all(np.diff(left_side) > 0):
             break
@@ -121,7 +123,7 @@ def fit_gaussian_multipoint(
 
             if len(residuals) > 0:
                 ss_res = residuals[0] if residuals.size > 0 else 0.0
-                ss_tot = np.sum((ln_y - np.mean(ln_y))**2)
+                ss_tot = np.sum((ln_y - np.mean(ln_y)) ** 2)
                 fit_quality = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
                 fit_quality = max(0.0, min(1.0, fit_quality))
             else:
@@ -189,7 +191,7 @@ def fit_lorentzian_multipoint(
             break
 
         left_side = y_values[:half_width]
-        right_side = y_values[half_width + 1:]
+        right_side = y_values[half_width + 1 :]
         if not np.all(np.diff(left_side) > 0):
             break
         if not np.all(np.diff(right_side) < 0):
@@ -210,7 +212,7 @@ def fit_lorentzian_multipoint(
             if abs(offset) > 0.5:
                 offset = np.clip(offset, -0.5, 0.5)
 
-            q = c - a * (offset ** 2)
+            q = c - a * (offset**2)
             if q <= 0:
                 break
 
@@ -259,7 +261,7 @@ def build_peaklist_from_candidates(
     self,
     candidates: list[_PeakCandidate],
     ppm_filters: list[PpmRange],
-    fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian',
+    fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
 ) -> PeakList:
     data_shape_f1, data_shape_f2 = self.data.shape
 
@@ -273,13 +275,10 @@ def build_peaklist_from_candidates(
 
     peaklist = PeakList()
 
-    fit_method = (fit_method or 'gaussian').lower()
-    if fit_method not in ('gaussian', 'lorentzian'):
+    fit_method = (fit_method or "gaussian").lower()
+    if fit_method not in ("gaussian", "lorentzian"):
         raise ValueError(f"Unsupported fit_method '{fit_method}'")
-    fit_function = (
-        fit_gaussian_multipoint if fit_method == 'gaussian'
-        else fit_lorentzian_multipoint
-    )
+    fit_function = fit_gaussian_multipoint if fit_method == "gaussian" else fit_lorentzian_multipoint
 
     for candidate in candidates:
         center_f1_idx = int(candidate.center[0])
@@ -339,13 +338,13 @@ def build_peaklist_from_candidates(
             f1_lw_hz = f1_fwhm_pts * resolution_f1_hz
             f2_lw_hz = f2_fwhm_pts * resolution_f2_hz
             fitted_linewidths = [f1_lw_hz, f2_lw_hz]
-        if fit_method == 'gaussian' and f1_shape_param_pts > 0 and f2_shape_param_pts > 0:
+        if fit_method == "gaussian" and f1_shape_param_pts > 0 and f2_shape_param_pts > 0:
             gaussian_sigmas = [
                 f1_shape_param_pts * resolution_f1_hz,
                 f2_shape_param_pts * resolution_f2_hz,
             ]
             volume_estimate = intensity * (2.0 * np.pi * f1_shape_param_pts * f2_shape_param_pts)
-        elif fit_method == 'lorentzian' and f1_shape_param_pts > 0 and f2_shape_param_pts > 0:
+        elif fit_method == "lorentzian" and f1_shape_param_pts > 0 and f2_shape_param_pts > 0:
             lorentzian_gammas = [
                 f1_shape_param_pts * resolution_f1_hz,
                 f2_shape_param_pts * resolution_f2_hz,
@@ -364,15 +363,15 @@ def build_peaklist_from_candidates(
             frequencies=[freq_f1, freq_f2],
         )
         if fitted_linewidths is not None:
-            peak_kwargs['linewidths'] = fitted_linewidths
+            peak_kwargs["linewidths"] = fitted_linewidths
         if gaussian_sigmas is not None:
-            peak_kwargs['gaussian_sigmas'] = gaussian_sigmas
+            peak_kwargs["gaussian_sigmas"] = gaussian_sigmas
         if lorentzian_gammas is not None:
-            peak_kwargs['lorentzian_gammas'] = lorentzian_gammas
+            peak_kwargs["lorentzian_gammas"] = lorentzian_gammas
         if volume_estimate is not None:
-            peak_kwargs['volume'] = volume_estimate
+            peak_kwargs["volume"] = volume_estimate
         elif candidate.volume is not None:
-            peak_kwargs['volume'] = candidate.volume
+            peak_kwargs["volume"] = candidate.volume
 
         try:
             adjusted_peak = NmrPeak(
@@ -380,15 +379,16 @@ def build_peaklist_from_candidates(
                 **peak_kwargs,
             )
 
-            adjusted_peak._extra_properties['fit_f1_n_points'] = f1_n_points
-            adjusted_peak._extra_properties['fit_f2_n_points'] = f2_n_points
-            adjusted_peak._extra_properties['fit_f1_quality'] = f1_quality
-            adjusted_peak._extra_properties['fit_f2_quality'] = f2_quality
-            adjusted_peak._extra_properties['fit_quality_avg'] = (f1_quality + f2_quality) / 2.0
+            adjusted_peak._extra_properties["fit_f1_n_points"] = f1_n_points
+            adjusted_peak._extra_properties["fit_f2_n_points"] = f2_n_points
+            adjusted_peak._extra_properties["fit_f1_quality"] = f1_quality
+            adjusted_peak._extra_properties["fit_f2_quality"] = f2_quality
+            adjusted_peak._extra_properties["fit_quality_avg"] = (f1_quality + f2_quality) / 2.0
 
         except Exception as exc:
             log.exception("Exception in NmrSpectrum")
             import warnings
+
             warnings.warn(
                 f"Failed to create adjusted peak: {exc}. Skipping peak.",
                 stacklevel=2,
@@ -396,8 +396,8 @@ def build_peaklist_from_candidates(
             continue
 
         if not (
-            ppm_filters[0].contains(adjusted_peak.get_chemical_shift(0)) and
-            ppm_filters[1].contains(adjusted_peak.get_chemical_shift(1))
+            ppm_filters[0].contains(adjusted_peak.get_chemical_shift(0))
+            and ppm_filters[1].contains(adjusted_peak.get_chemical_shift(1))
         ):
             continue
 
@@ -411,12 +411,12 @@ def pick_2d(
     sino: int | float | None = None,
     msep=(1, 1),
     edge=0,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
     peaklist_name: str | None = None,
-    fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian',
+    fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
 ) -> PeakList | None:
     sino, ppm_filters = prepare_pick_2d_parameters(self, sino, ppm_range)
 
@@ -430,8 +430,8 @@ def pick_2d(
             edge_free_data,
             pthres=self.noise_level * sino,
             msep=msep,
-            algorithm='thres',
-            lineshapes=['gauss', 'gauss'],
+            algorithm="thres",
+            lineshapes=["gauss", "gauss"],
         )
         peaks: list[_PeakCandidate] = []
         for peak in raw_peaks:
@@ -472,12 +472,12 @@ def pick_pseudo_nd(
     sino: int | float | None = None,
     msep=(1, 1),
     edge=0,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
-    time_param: str = 'delay_time',
-    fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian',
+    time_param: str = "delay_time",
+    fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
 ) -> PeakList:
     if not self.is_pseudo_nd:
         raise ValueError("Spectrum must be pseudo-nD. Use pick_2d() for regular 2D spectra.")
@@ -494,9 +494,7 @@ def pick_pseudo_nd(
     n_planes = self.shape[0]
 
     if len(self.pseudo_axis_values) != n_planes:
-        raise ValueError(
-            f"Mismatch: {n_planes} planes but {len(self.pseudo_axis_values)} pseudo_axis_values"
-        )
+        raise ValueError(f"Mismatch: {n_planes} planes but {len(self.pseudo_axis_values)} pseudo_axis_values")
 
     combined_peaklist = PeakList()
 
@@ -523,8 +521,6 @@ def pick_pseudo_nd(
         if self._ppm_scales[2] is not None:
             temp_spectrum._ppm_scales[1] = self._ppm_scales[2]
 
-
-
         plane_peaklist = pick_2d(
             temp_spectrum,
             sino=sino,
@@ -537,7 +533,7 @@ def pick_pseudo_nd(
         pseudo_value = self.pseudo_axis_values[plane_idx]
         for peak in plane_peaklist:
             peak._extra_properties[time_param] = pseudo_value
-            peak._extra_properties['plane_index'] = plane_idx
+            peak._extra_properties["plane_index"] = plane_idx
 
         combined_peaklist.extend(plane_peaklist)
 

@@ -1,10 +1,15 @@
-from dataclasses import dataclass, field
-from typing import Tuple
-import re
 import math
+import re
+from dataclasses import dataclass, field
+
 from matplotlib import colors as mcolors
 
-from .exceptions import InvalidHexError, InvalidColorInput, InvalidColorComponent, UnsupportedColorFormat
+from .exceptions import (
+    InvalidColorComponent,
+    InvalidColorInput,
+    InvalidHexError,
+    UnsupportedColorFormat,
+)
 
 
 @dataclass
@@ -37,13 +42,14 @@ class Color:
     _b: int = field(init=False, repr=False)
     _a: float = field(init=False, repr=False, default=1.0)
 
-    HEX_LONG = re.compile(r'^#?([0-9A-Fa-f]{6})([0-9A-Fa-f]{2})?$')
-    HEX_SHORT = re.compile(r'^#?([0-9A-Fa-f]{3})([0-9A-Fa-f]{1})?$')
-    RGB_FUNC  = re.compile(r'^rgba?\s*\((.+)\)$', re.IGNORECASE)
-    HSL_FUNC  = re.compile(r'^hsla?\s*\((.+)\)$', re.IGNORECASE)
+    HEX_LONG = re.compile(r"^#?([0-9A-Fa-f]{6})([0-9A-Fa-f]{2})?$")
+    HEX_SHORT = re.compile(r"^#?([0-9A-Fa-f]{3})([0-9A-Fa-f]{1})?$")
+    RGB_FUNC = re.compile(r"^rgba?\s*\((.+)\)$", re.IGNORECASE)
+    HSL_FUNC = re.compile(r"^hsla?\s*\((.+)\)$", re.IGNORECASE)
 
     NAMED = mcolors.CSS4_COLORS
-    if 'transparent' not in NAMED: NAMED['transparent'] = '#0000'
+    if "transparent" not in NAMED:
+        NAMED["transparent"] = "#0000"
 
     def __init__(self, *args):
         """
@@ -84,10 +90,10 @@ class Color:
         m = self.HEX_SHORT.match(s)
         if m:
             rgb, a = m.groups()
-            self._r = int(rgb[0]*2, 16)
-            self._g = int(rgb[1]*2, 16)
-            self._b = int(rgb[2]*2, 16)
-            self._a = int(a*2, 16) / 255 if a else 1.0
+            self._r = int(rgb[0] * 2, 16)
+            self._g = int(rgb[1] * 2, 16)
+            self._b = int(rgb[2] * 2, 16)
+            self._a = int(a * 2, 16) / 255 if a else 1.0
             return
 
         raise InvalidHexError(s)
@@ -122,18 +128,18 @@ class Color:
           - space+slash alpha: 'a b c / d'
         Returns list of 3 or 4 parts.
         """
-        s = re.sub(r'\s+', ' ', arg_str.strip())
-        if '/' in s:  # space+slash alpha form
-            left, right = [p.strip() for p in s.split('/', 1)]
-            if ',' in left:
-                left_parts = [p.strip() for p in left.split(',') if p.strip()]
+        s = re.sub(r"\s+", " ", arg_str.strip())
+        if "/" in s:  # space+slash alpha form
+            left, right = [p.strip() for p in s.split("/", 1)]
+            if "," in left:
+                left_parts = [p.strip() for p in left.split(",") if p.strip()]
             else:
-                left_parts = [p for p in left.split(' ') if p]
+                left_parts = [p for p in left.split(" ") if p]
             return left_parts + [right]
         # no slash → either commas or spaces
-        if ',' in s:
-            return [p.strip() for p in s.split(',') if p.strip()]
-        return [p for p in s.split(' ') if p]
+        if "," in s:
+            return [p.strip() for p in s.split(",") if p.strip()]
+        return [p for p in s.split(" ") if p]
 
     def _init_from_rgb_func(self, inner: str):
         parts = self._split_args(inner)
@@ -149,11 +155,11 @@ class Color:
         parts = self._split_args(inner)
         if len(parts) not in (3, 4):
             raise InvalidColorComponent("hsl/hsla", inner, "3 or 4 components")
-        h = self._parse_hue(parts[0])
-        s = self._parse_percent(parts[1])  # 0..1
-        l = self._parse_percent(parts[2])  # 0..1
+        hue = self._parse_hue(parts[0])
+        saturation = self._parse_percent(parts[1])  # 0..1
+        lightness = self._parse_percent(parts[2])  # 0..1
         a = 1.0 if len(parts) == 3 else self._parse_alpha(parts[3])
-        r, g, b = self._hsl_to_rgb(h, s, l)
+        r, g, b = self._hsl_to_rgb(hue, saturation, lightness)
         self._init_from_rgba(r, g, b, a)
 
     # ------------ parsers & converters ------------
@@ -205,17 +211,23 @@ class Color:
         return v % 360.0
 
     @staticmethod
-    def _hsl_to_rgb(h_deg: float, s: float, l: float) -> Tuple[int, int, int]:
-        c = (1 - abs(2 * l - 1)) * s
-        h = (h_deg / 60.0) % 6
+    def _hsl_to_rgb(hue_deg: float, saturation: float, lightness: float) -> tuple[int, int, int]:
+        c = (1 - abs(2 * lightness - 1)) * saturation
+        h = (hue_deg / 60.0) % 6
         x = c * (1 - abs(h % 2 - 1))
-        if   0 <= h < 1: r1, g1, b1 = c, x, 0
-        elif 1 <= h < 2: r1, g1, b1 = x, c, 0
-        elif 2 <= h < 3: r1, g1, b1 = 0, c, x
-        elif 3 <= h < 4: r1, g1, b1 = 0, x, c
-        elif 4 <= h < 5: r1, g1, b1 = x, 0, c
-        else:            r1, g1, b1 = c, 0, x
-        m = l - c / 2
+        if 0 <= h < 1:
+            r1, g1, b1 = c, x, 0
+        elif 1 <= h < 2:
+            r1, g1, b1 = x, c, 0
+        elif 2 <= h < 3:
+            r1, g1, b1 = 0, c, x
+        elif 3 <= h < 4:
+            r1, g1, b1 = 0, x, c
+        elif 4 <= h < 5:
+            r1, g1, b1 = x, 0, c
+        else:
+            r1, g1, b1 = c, 0, x
+        m = lightness - c / 2
         r = int(round((r1 + m) * 255))
         g = int(round((g1 + m) * 255))
         b = int(round((b1 + m) * 255))
@@ -224,7 +236,7 @@ class Color:
     # ------------ validation ------------
     @staticmethod
     def _check_rgb(r, g, b):
-        for n, v in zip("rgb", (r, g, b)):
+        for n, v in zip("rgb", (r, g, b), strict=True):
             if not (isinstance(v, int) and 0 <= v <= 255):
                 raise InvalidColorComponent(n, v, "int 0..255")
 
@@ -235,20 +247,18 @@ class Color:
 
     # ------------ properties ------------
     @property
-    def rgb(self) -> Tuple[int, int, int]:
+    def rgb(self) -> tuple[int, int, int]:
         return (self._r, self._g, self._b)
 
     @property
-    def rgba(self) -> Tuple[int, int, int, float]:
+    def rgba(self) -> tuple[int, int, int, float]:
         return (self._r, self._g, self._b, self._a)
 
     @property
     def hex(self) -> str:
         if self._a < 1.0:
-            return "#{:02X}{:02X}{:02X}{:02X}".format(
-                self._r, self._g, self._b, round(self._a * 255)
-            )
-        return "#{:02X}{:02X}{:02X}".format(self._r, self._g, self._b)
+            return f"#{self._r:02X}{self._g:02X}{self._b:02X}{round(self._a * 255):02X}"
+        return f"#{self._r:02X}{self._g:02X}{self._b:02X}"
 
     def to_css_rgba(self) -> str:
         return f"rgba({self._r}, {self._g}, {self._b}, {self._a:.3f})"

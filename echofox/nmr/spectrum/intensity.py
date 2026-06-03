@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 import numpy as np
 
-from .exceptions import DimensionMismatchError, InvalidDimensionalityError
 from . import axes
+from .exceptions import DimensionMismatchError, InvalidDimensionalityError
 
 
 def get_max_intensity(self) -> float:
@@ -20,14 +18,11 @@ def get_intensity_at(self, *ppm_values: float) -> float:
     if len(ppm_values) != self._ndim:
         raise DimensionMismatchError("ppm_values", self._ndim, len(ppm_values))
 
-    indices = tuple(
-        self.ppm_to_index(dim, ppm)
-        for dim, ppm in enumerate(ppm_values)
-    )
+    indices = tuple(self.ppm_to_index(dim, ppm) for dim, ppm in enumerate(ppm_values))
     return float(self._data[indices])
 
 
-def extent(self) -> Tuple[float, float, float, float]:
+def extent(self) -> tuple[float, float, float, float]:
     if self._ndim != 2:
         raise InvalidDimensionalityError(self._ndim, expected=2)
 

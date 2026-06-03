@@ -3,26 +3,31 @@
 
 class AminoAcidError(Exception):
     """Base exception for all amino acid-related errors"""
+
     pass
 
 
 class SchemaError(AminoAcidError):
     """Raised when there is an error loading or parsing the schema file"""
+
     pass
 
 
 class SchemaFileNotFoundError(SchemaError):
     """Raised when the schema YAML file is not found"""
+
     pass
 
 
 class SchemaParseError(SchemaError):
     """Raised when the schema YAML file cannot be parsed"""
+
     pass
 
 
 class SchemaMissingFieldError(SchemaError):
     """Raised when required fields are missing from the schema"""
+
     pass
 
 

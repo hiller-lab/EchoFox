@@ -1,6 +1,6 @@
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Union
 
 from .peak_list import PeakList
 
@@ -18,8 +18,8 @@ class PeakListCollection:
         name: Optional collection name for bookkeeping
     """
 
-    def __init__(self, name: Optional[str] = None):
-        self._peaklists: Dict[str, PeakList] = {}
+    def __init__(self, name: str | None = None):
+        self._peaklists: dict[str, PeakList] = {}
         self.name = name
 
     def add(self, key: str, peaklist: PeakList) -> None:
@@ -41,7 +41,7 @@ class PeakListCollection:
         """Remove a peak list by key."""
         del self._peaklists[key]
 
-    def get(self, key: str, default=None) -> Optional[PeakList]:
+    def get(self, key: str, default=None) -> PeakList | None:
         """Return the PeakList for key or default if missing."""
         return self._peaklists.get(key, default)
 
@@ -49,19 +49,19 @@ class PeakListCollection:
         """Remove all stored peak lists."""
         self._peaklists.clear()
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         """Return list of keys."""
         return list(self._peaklists.keys())
 
-    def values(self) -> List[PeakList]:
+    def values(self) -> list[PeakList]:
         """Return list of PeakList objects."""
         return list(self._peaklists.values())
 
-    def items(self) -> List[tuple[str, PeakList]]:
+    def items(self) -> list[tuple[str, PeakList]]:
         """Return list of (key, PeakList) tuples."""
         return list(self._peaklists.items())
 
-    def filter(self, predicate) -> 'PeakListCollection':
+    def filter(self, predicate) -> "PeakListCollection":
         """
         Filter peak lists using a predicate.
 
@@ -84,34 +84,32 @@ class PeakListCollection:
     def to_dict(self) -> dict:
         """Serialize collection to a dictionary."""
         return {
-            'name': self.name,
-            'count': len(self._peaklists),
-            'peaklists': {
-                key: pl.to_dict() for key, pl in self._peaklists.items()
-            }
+            "name": self.name,
+            "count": len(self._peaklists),
+            "peaklists": {key: pl.to_dict() for key, pl in self._peaklists.items()},
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'PeakListCollection':
+    def from_dict(cls, data: dict) -> "PeakListCollection":
         """Create a collection from its dictionary representation."""
-        collection = cls(name=data.get('name'))
-        for key, pl_data in data.get('peaklists', {}).items():
+        collection = cls(name=data.get("name"))
+        for key, pl_data in data.get("peaklists", {}).items():
             peaklist = PeakList.from_dict(pl_data)
             collection.add(key, peaklist)
         return collection
 
-    def save(self, file_path: Union[str, Path], indent: int = 2) -> None:
+    def save(self, file_path: str | Path, indent: int = 2) -> None:
         """Save collection to a JSON file."""
         file_path = Path(file_path)
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(self.to_dict(), f, indent=indent)
 
     @classmethod
-    def load(cls, file_path: Union[str, Path]) -> 'PeakListCollection':
+    def load(cls, file_path: str | Path) -> "PeakListCollection":
         """Load collection from a JSON file."""
         file_path = Path(file_path)
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
         return cls.from_dict(data)
 

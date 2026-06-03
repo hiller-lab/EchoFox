@@ -1,4 +1,3 @@
-
 class PeakError(Exception):
     """Base class for peak-related exceptions."""
 

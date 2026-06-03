@@ -1,4 +1,3 @@
-
 class ChemicalShiftError(Exception):
     """Base class for chemical shift-related exceptions."""
 
@@ -19,7 +18,9 @@ class InvalidChemicalShiftFormat(ChemicalShiftError):
     """Raised when chemical shift string format is invalid."""
 
     def __init__(self, value):
-        message = f"Invalid chemical shift format: {value!r}. Expected format: '<number> ppm' (e.g., '3.5 ppm', '7.2ppm')"
+        message = (
+            f"Invalid chemical shift format: {value!r}. Expected format: '<number> ppm' (e.g., '3.5 ppm', '7.2ppm')"
+        )
         super().__init__(message)
         self.value = value
 
@@ -28,7 +29,10 @@ class UnsupportedChemicalShiftType(ChemicalShiftError):
     """Raised when an unsupported type is provided for chemical shift."""
 
     def __init__(self, value, type_received):
-        message = f"Unsupported type for chemical shift: {type_received.__name__}. Expected int, float, or str. Got: {value!r}"
+        message = (
+            f"Unsupported type for chemical shift: {type_received.__name__}. Expected int, float, or str. "
+            f"Got: {value!r}"
+        )
         super().__init__(message)
         self.value = value
         self.type_received = type_received
@@ -47,9 +51,11 @@ class ChemicalShiftRangeError(ChemicalShiftError):
         self.min_val = min_val
         self.max_val = max_val
 
+
 """
 Custom exceptions for PpmRange operations.
 """
+
 
 class PpmRangeError(Exception):
     """Base class for ppm range-related exceptions."""
