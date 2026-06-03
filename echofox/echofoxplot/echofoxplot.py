@@ -4,11 +4,6 @@ from matplotlib import rcParams
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
-# Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
-rcParams["pdf.fonttype"] = 42
-rcParams["ps.fonttype"] = 42
-rcParams["figure.constrained_layout.use"] = True
-
 # Import echofox.core components
 from echofox.core.colors import Color
 from echofox.core.typing import Number
@@ -23,6 +18,11 @@ from echofox.utils.units import convert_to_inches
 
 # Import echofoxplot config
 from .config import config
+
+# Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
+rcParams["pdf.fonttype"] = 42
+rcParams["ps.fonttype"] = 42
+rcParams["figure.constrained_layout.use"] = True
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Helper function to determine and return the current figure and axis to plot on
@@ -103,7 +103,7 @@ def plot2d(
     """
     figure, ax = _get_context(current_figure, current_ax, figure_size)
     figure.set_dpi(dpi if dpi is not None else config.figure_dpi)
-    return _plot2d(current_ax=ax, current_figure=figure, *args, **kwargs)
+    return _plot2d(*args, current_ax=ax, current_figure=figure, **kwargs)
 
 
 def plot1d(
@@ -119,7 +119,7 @@ def plot1d(
     """
     figure, ax = _get_context(current_figure, current_ax, figure_size)
     figure.set_dpi(dpi if dpi is not None else config.figure_dpi)
-    return _plot1d(current_ax=ax, current_figure=figure, *args, **kwargs)
+    return _plot1d(*args, current_ax=ax, current_figure=figure, **kwargs)
 
 
 def plot_empty(

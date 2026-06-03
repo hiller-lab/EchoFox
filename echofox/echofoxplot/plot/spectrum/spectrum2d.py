@@ -1,3 +1,6 @@
+# echofox imports
+from typing import Literal, TypeAlias
+
 import numpy as np
 
 # matplotlib
@@ -6,13 +9,6 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
 
-# matplotlib.use('TkAgg')
-rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
-rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
-
-from typing import Literal, TypeAlias
-
-# echofox imports
 from echofox.core.typing import Number
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
 from echofox.echofoxplot.config import config
@@ -25,6 +21,11 @@ from echofox.echofoxplot.plot.spectrum.exceptions import (
 from echofox.echofoxplot.plot.utils import _add_label, _add_legend
 from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
 from echofox.nmr.spectrum import NmrSpectrum, read_spectra
+
+# matplotlib.use('TkAgg')
+rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
+rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
+
 
 Spectra: TypeAlias = NmrSpectrum | list[NmrSpectrum]
 TraceType2D: TypeAlias = list[
@@ -610,12 +611,13 @@ def _mark_peaks(spectrum, ax, mark_peaks_kwargs):
                 peak.linewidths[1] / peak.frequencies[1],
             )
             for peak in peaks
-        ]
+        ],
+        strict=True,
     )
 
     # Add rectangles manually at each (x, y) position
     peak_number = 0
-    for x, y, w, h in zip(x_val, y_val, marker_size_f2_ppm, marker_size_f1_ppm):
+    for x, y, w, h in zip(x_val, y_val, marker_size_f2_ppm, marker_size_f1_ppm, strict=True):
         peak_number += 1
 
         f2_max, f2_min = ax.get_xlim()
@@ -648,14 +650,14 @@ def _draw_peaks_from_list(
     if peaks is not None and len(peaks) > 0:
         if len(peaks[0]) < 8:
             x_val, y_val, marker_size_f1_ppm, marker_size_f2_ppm = zip(
-                *[(a[1], a[0], 0.1, 0.1) for a in peaks]
+                *[(a[1], a[0], 0.1, 0.1) for a in peaks], strict=True
             )
         else:
             x_val, y_val, marker_size_f1_ppm, marker_size_f2_ppm = zip(
-                *[(a[2], a[1], a[7], a[8]) for a in peaks]
+                *[(a[2], a[1], a[7], a[8]) for a in peaks], strict=True
             )
 
-        for x, y, w, h in zip(x_val, y_val, marker_size_f2_ppm, marker_size_f1_ppm):
+        for x, y, w, h in zip(x_val, y_val, marker_size_f2_ppm, marker_size_f1_ppm, strict=True):
             scale2 = 0.4  # here set to absolute values, otherwise boxes too small when called in zoomed mode
             scale = 0.05
             if group == "all":

@@ -521,7 +521,7 @@ class SpectrumAxes(Axes):
         yticks = [t for t in yticks if min(self.get_ylim()) <= t <= max(self.get_ylim())]
         self.set_yticks(yticks)
 
-        ticklabels = [item.get_text() for item in self.get_yticklabels()]
+        # ticklabels = [item.get_text() for item in self.get_yticklabels()]
         # self.set_yticklabels(ticklabels, **intensity_ticklabel_kwargs) #doesnt work yet
 
     def set2D_f1_label_text(
@@ -760,7 +760,7 @@ class SpectrumAxes(Axes):
             axes_class=SpectrumAxes,
         )
 
-        (x1, y1), (x2, y2) = zip(excerpt[1], excerpt[0])
+        (x1, y1), (x2, y2) = zip(excerpt[1], excerpt[0], strict=True)
         x1 = ChemicalShift(x1).ppm
         y1 = ChemicalShift(y1).ppm
         x2 = ChemicalShift(x2).ppm

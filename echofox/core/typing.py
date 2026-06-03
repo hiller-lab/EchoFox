@@ -36,7 +36,7 @@ def is_typealias_instance(value, expected_type) -> bool:
             isinstance(value, tuple)  # Must be a tuple
             and len(value) == len(args)  # Must have the same number of elements
             and all(
-                is_typealias_instance(v, t) for v, t in zip(value, args)
+                is_typealias_instance(v, t) for v, t in zip(value, args, strict=True)
             )  # Element-wise validation
         )
 

@@ -5,6 +5,7 @@ NMR Spectrum representation for n-dimensional spectral data.
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from typing import Literal
 
 import numpy as np

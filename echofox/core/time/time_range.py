@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 """
 Time range representation for relaxation time points.
 """
 
+from __future__ import annotations
 
 import math
 import re

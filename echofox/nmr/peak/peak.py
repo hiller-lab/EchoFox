@@ -129,7 +129,8 @@ class NmrPeak:
         if lorentzian_gammas is not None:
             if len(lorentzian_gammas) != self._ndim:
                 raise InvalidPeakDimensionError(
-                    f"Number of Lorentzian gammas ({len(lorentzian_gammas)}) must match number of dimensions ({self._ndim})"
+                    f"Number of Lorentzian gammas ({len(lorentzian_gammas)}) must match number of dimensions "
+                    f"({self._ndim})"
                 )
             self._lorentzian_gammas = [float(g) for g in lorentzian_gammas]
         else:
@@ -482,7 +483,7 @@ class NmrPeak:
 
         # Check if nuclei match when both peaks have nuclei defined
         if self._nuclei is not None and other._nuclei is not None:
-            for i, (nuc1, nuc2) in enumerate(zip(self._nuclei, other._nuclei)):
+            for i, (nuc1, nuc2) in enumerate(zip(self._nuclei, other._nuclei, strict=True)):
                 if nuc1 != nuc2:
                     raise NucleusMismatchError(self._nuclei, other._nuclei, dimension=i)
 
@@ -495,7 +496,7 @@ class NmrPeak:
 
         squared_diff = sum(
             (w * (cs1.ppm - cs2.ppm)) ** 2
-            for w, cs1, cs2 in zip(weights, self._chemical_shifts, other._chemical_shifts)
+            for w, cs1, cs2 in zip(weights, self._chemical_shifts, other._chemical_shifts, strict=True)
         )
         return np.sqrt(squared_diff)
 
@@ -521,7 +522,7 @@ class NmrPeak:
 
         # Check if nuclei match when both peaks have nuclei defined
         if self._nuclei is not None and other._nuclei is not None:
-            for i, (nuc1, nuc2) in enumerate(zip(self._nuclei, other._nuclei)):
+            for i, (nuc1, nuc2) in enumerate(zip(self._nuclei, other._nuclei, strict=True)):
                 if nuc1 != nuc2:
                     raise NucleusMismatchError(self._nuclei, other._nuclei, dimension=i)
 
@@ -533,7 +534,7 @@ class NmrPeak:
             )
 
         for cs1, cs2, tol in zip(
-            self._chemical_shifts, other._chemical_shifts, tolerances
+            self._chemical_shifts, other._chemical_shifts, tolerances, strict=True
         ):
             if abs(cs1.ppm - cs2.ppm) > tol:
                 return False
@@ -601,7 +602,7 @@ class NmrPeak:
             return False
 
         return all(
-            cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts)
+            cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts, strict=True)
         )
 
     def __hash__(self) -> int:

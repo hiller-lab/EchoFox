@@ -155,11 +155,11 @@ class Color:
         parts = self._split_args(inner)
         if len(parts) not in (3, 4):
             raise InvalidColorComponent("hsl/hsla", inner, "3 or 4 components")
-        h = self._parse_hue(parts[0])
-        s = self._parse_percent(parts[1])  # 0..1
-        l = self._parse_percent(parts[2])  # 0..1
+        hue = self._parse_hue(parts[0])
+        saturation = self._parse_percent(parts[1])  # 0..1
+        lightness = self._parse_percent(parts[2])  # 0..1
         a = 1.0 if len(parts) == 3 else self._parse_alpha(parts[3])
-        r, g, b = self._hsl_to_rgb(h, s, l)
+        r, g, b = self._hsl_to_rgb(hue, saturation, lightness)
         self._init_from_rgba(r, g, b, a)
 
     # ------------ parsers & converters ------------
@@ -213,9 +213,9 @@ class Color:
         return v % 360.0
 
     @staticmethod
-    def _hsl_to_rgb(h_deg: float, s: float, l: float) -> tuple[int, int, int]:
-        c = (1 - abs(2 * l - 1)) * s
-        h = (h_deg / 60.0) % 6
+    def _hsl_to_rgb(hue_deg: float, saturation: float, lightness: float) -> tuple[int, int, int]:
+        c = (1 - abs(2 * lightness - 1)) * saturation
+        h = (hue_deg / 60.0) % 6
         x = c * (1 - abs(h % 2 - 1))
         if 0 <= h < 1:
             r1, g1, b1 = c, x, 0
@@ -229,7 +229,7 @@ class Color:
             r1, g1, b1 = x, 0, c
         else:
             r1, g1, b1 = c, 0, x
-        m = l - c / 2
+        m = lightness - c / 2
         r = int(round((r1 + m) * 255))
         g = int(round((g1 + m) * 255))
         b = int(round((b1 + m) * 255))
@@ -238,7 +238,7 @@ class Color:
     # ------------ validation ------------
     @staticmethod
     def _check_rgb(r, g, b):
-        for n, v in zip("rgb", (r, g, b)):
+        for n, v in zip("rgb", (r, g, b), strict=True):
             if not (isinstance(v, int) and 0 <= v <= 255):
                 raise InvalidColorComponent(n, v, "int 0..255")
 

@@ -1,26 +1,19 @@
-# matplotlib
+import numpy as np
 from matplotlib import rcParams
 from matplotlib.figure import Figure
 
-from echofox.echofoxplot.plot.spectrum.exceptions import LabelMismatchError
-
-# matplotlib.use('TkAgg')
-rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
-rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
-
-import numpy as np
-
 from echofox.core.typing import Number
-
-# MiraPlot
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
 from echofox.echofoxplot.config import config
+from echofox.echofoxplot.plot.spectrum.exceptions import LabelMismatchError
 from echofox.echofoxplot.plot.utils import _add_label, _add_legend
 from echofox.nmr.chemical_shift import PpmRange
 from echofox.nmr.spectrum import read_spectra
 
-# typing
+# matplotlib.use("TkAgg")
 
+rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
+rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
 
 def plot1d(
     spec,
@@ -90,7 +83,7 @@ def plot1d(
     max_value = 0
     min_value = 0
 
-    for i, spectrum in enumerate(spectra):
+    for _i, spectrum in enumerate(spectra):
         if spectrum.data.ndim == 1:  # normal 1D spectrum
             max_val = np.max(spectrum.data)
             min_val = np.min(spectrum.data)
@@ -201,12 +194,12 @@ def plot1d(
         ax.set_tick_spacing("f1", tick_spacing[0], tick_spacing[1])
 
     # set spectrum limits to ppm_range if provided
-    if ppm_range != (None):
+    if ppm_range is not (None):
         ppm_range = PpmRange(*ppm_range)
         # set spectrum limits to ppm_range if provided
         ax.set_xlim(ppm_range.high_ppm, ppm_range.low_ppm)
 
-    if not intensity_range == None:
+    if intensity_range is not None:
         ax.set_ylim(intensity_range[0], intensity_range[1])
 
     pos_f1 = f1_label_kwargs.pop("pos", None)

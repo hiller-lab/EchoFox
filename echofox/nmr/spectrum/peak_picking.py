@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Literal
 
 import nmrglue as ng
@@ -10,6 +11,8 @@ from echofox.nmr.peak import NmrPeak, PeakList
 
 from .exceptions import InvalidDimensionalityError
 from .models import _PeakCandidate
+
+log = logging.getLogger(__name__)
 
 
 def prepare_pick_2d_parameters(
@@ -37,7 +40,7 @@ def prepare_pick_2d_parameters(
 
     ppm_filters: list[PpmRange] = []
     if ppm_range != (None, None):
-        for current_range, default_range in zip(ppm_range, self._dimension_ranges[:2]):
+        for current_range, default_range in zip(ppm_range, self._dimension_ranges[:2], strict=True):
             if current_range is None:
                 ppm_filters.append(default_range)
             elif isinstance(current_range, PpmRange):

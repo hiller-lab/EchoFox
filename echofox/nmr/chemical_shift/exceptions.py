@@ -18,7 +18,9 @@ class InvalidChemicalShiftFormat(ChemicalShiftError):
     """Raised when chemical shift string format is invalid."""
 
     def __init__(self, value):
-        message = f"Invalid chemical shift format: {value!r}. Expected format: '<number> ppm' (e.g., '3.5 ppm', '7.2ppm')"
+        message = (
+            f"Invalid chemical shift format: {value!r}. Expected format: '<number> ppm' (e.g., '3.5 ppm', '7.2ppm')"
+        )
         super().__init__(message)
         self.value = value
 
@@ -27,7 +29,10 @@ class UnsupportedChemicalShiftType(ChemicalShiftError):
     """Raised when an unsupported type is provided for chemical shift."""
 
     def __init__(self, value, type_received):
-        message = f"Unsupported type for chemical shift: {type_received.__name__}. Expected int, float, or str. Got: {value!r}"
+        message = (
+            f"Unsupported type for chemical shift: {type_received.__name__}. Expected int, float, or str. "
+            f"Got: {value!r}"
+        )
         super().__init__(message)
         self.value = value
         self.type_received = type_received

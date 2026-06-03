@@ -31,7 +31,7 @@ def read_spectra(
 
     # create spectrum objects
     spectra = []
-    for i, spectrum_info in enumerate(spec):
+    for _i, spectrum_info in enumerate(spec):
         spectrum_name, spectrum_path, spectrum_format = spectrum_info
 
         spectrum = NmrSpectrum.from_file(spectrum_path, spectrum_format, spectrum_name)

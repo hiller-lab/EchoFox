@@ -200,7 +200,7 @@ def extract_trace(
                 len(dimension_positions),
             )
         dimension_dict = {
-            dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions)
+            dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions, strict=True)
         }
 
     elif isinstance(dimension_positions, dict):

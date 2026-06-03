@@ -53,7 +53,7 @@ def _from_bruker(cls, path: str, name: str | None = None):
         dic, data = ng.bruker.read_pdata(path)
         udic = ng.bruker.guess_udic(dic, data)
     except Exception as exc:
-        raise CouldNotReadSpectrumError(path, str(exc))
+        raise CouldNotReadSpectrumError(path, str(exc)) from exc
 
     return _from_udic(cls, data, dic, udic, name, path, "bruker")
 
@@ -67,7 +67,7 @@ def _from_pipe(cls, path: str, name: str | None = None):
         dic, data = ng.pipe.read(path)
         udic = ng.pipe.guess_udic(dic, data)
     except Exception as exc:
-        raise CouldNotReadSpectrumError(path, str(exc))
+        raise CouldNotReadSpectrumError(path, str(exc)) from exc
 
     return _from_udic(cls, data, dic, udic, name, path, "pipe")
 
@@ -113,7 +113,7 @@ def from_pseudo_nd(
             spec = cls.from_file(str(f), spectrum_format)
             spectra.append(spec)
         except Exception as exc:
-            raise CouldNotReadSpectrumError(str(f), str(exc))
+            raise CouldNotReadSpectrumError(str(f), str(exc)) from exc
 
     if not spectra:
         raise SpectrumFileNotFoundError(str(path), "readable spectra")

@@ -98,4 +98,4 @@ def _add_legend(ax, legend_kwargs):
     if "handlelength" not in legend_kwargs.keys():
         legend_kwargs["handlelength"] = 1
 
-    legend = ax.legend(custom_lines, custom_labels, **legend_kwargs)
+    ax.legend(custom_lines, custom_labels, **legend_kwargs)
