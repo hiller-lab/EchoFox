@@ -47,6 +47,7 @@ dev = [
     "ipython>=8.14.0",
     "jupyter>=1.0.0",
     "ipykernel>=6.25.0",
+    "ruff",
 ]
 
 docs = [
@@ -98,3 +99,12 @@ no_implicit_reexport = false
 strict_equality = true
 files = ["echofox"]
 exclude = ["build", "dist", ".eggs", "*.egg-info"]
+
+[tool.ruff]
+line-length = 90
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = []
