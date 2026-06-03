@@ -1,1 +1,1 @@
-from .echofoxplot import *
+from .echofoxplot import *  # noqa: F403

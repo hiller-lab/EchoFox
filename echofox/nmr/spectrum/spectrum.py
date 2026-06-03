@@ -1,18 +1,22 @@
 """
 NMR Spectrum representation for n-dimensional spectral data.
 """
+
 from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Literal, Optional, Tuple, Union
+from pathlib import Path
+from typing import Literal
 
 import numpy as np
 from nmrglue.fileio.fileiobase import unit_conversion
 
+from echofox.core.time import TimeRange, TimeValue
 from echofox.core.typing import Number
 from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
-from echofox.nmr.peak import NmrPeak, PeakList, PeakListCollection
-from echofox.core.time import TimeRange, TimeValue
 from echofox.nmr.config import config
+from echofox.nmr.peak import NmrPeak, PeakList, PeakListCollection
+
 from . import axes as spectrum_axes
 from . import intensity as spectrum_intensity
 from . import io as spectrum_io
@@ -23,7 +27,7 @@ from . import serialization as spectrum_serialization
 from . import slicing as spectrum_slicing
 from .exceptions import DimensionMismatchError, InvalidSpectrumDataError
 from .models import _PeakCandidate
-from .types import SpectrumFormat, SpectrumParam
+from .types import SpectrumFormat
 
 
 class NmrSpectrum:
@@ -78,29 +82,29 @@ class NmrSpectrum:
         **kwargs: Additional metadata
     """
 
-    SUPPORTED_FORMATS = ['bruker', 'pipe']
+    SUPPORTED_FORMATS = ["bruker", "pipe"]
     DEFAULT_PEAKLIST_KEY = "default"
 
     def __init__(
         self,
         data: np.ndarray,
-        dimension_ranges: List[Union[PpmRange, TimeRange, Tuple[float, float]]],
-        nuclei: Optional[List[str]] = None,
-        frequencies: Optional[List[float]] = None,
-        acquisition_date: Optional[datetime] = None,
-        processing_info: Optional[dict] = None,
-        spectrum_format: Optional[str] = None,
-        name: Optional[str] = None,
-        path: Optional[str | list[str]] = None,
-        pseudo_axis_values: Optional[List[Number | str]] = None,
-        pseudo_axis_label: Optional[str] = None,
-        pseudo_axis_unit: Optional[str] = None,
-        source_files: Optional[List[str]] = None,
-        dic: Optional[dict] = None,
-        udic: Optional[dict] = None,
-        peaklist: Optional[List[NmrPeak]] = None,
-        peaklists: Optional[PeakListCollection] = None,
-        **kwargs
+        dimension_ranges: list[PpmRange | TimeRange | tuple[float, float]],
+        nuclei: list[str] | None = None,
+        frequencies: list[float] | None = None,
+        acquisition_date: datetime | None = None,
+        processing_info: dict | None = None,
+        spectrum_format: str | None = None,
+        name: str | None = None,
+        path: str | list[str] | None = None,
+        pseudo_axis_values: list[Number | str] | None = None,
+        pseudo_axis_label: str | None = None,
+        pseudo_axis_unit: str | None = None,
+        source_files: list[str] | None = None,
+        dic: dict | None = None,
+        udic: dict | None = None,
+        peaklist: list[NmrPeak] | None = None,
+        peaklists: PeakListCollection | None = None,
+        **kwargs,
     ):
         if not isinstance(data, np.ndarray):
             raise InvalidSpectrumDataError(f"Data must be numpy array, got {type(data).__name__}")
@@ -122,7 +126,7 @@ class NmrSpectrum:
         if len(dimension_ranges) != self._ndim:
             raise DimensionMismatchError("dimension_ranges", self._ndim, len(dimension_ranges))
 
-        self._dimension_ranges: List[Union[PpmRange, TimeRange]] = []
+        self._dimension_ranges: list[PpmRange | TimeRange] = []
         for r in dimension_ranges:
             if isinstance(r, (PpmRange, TimeRange)):
                 self._dimension_ranges.append(r)
@@ -161,12 +165,12 @@ class NmrSpectrum:
         self._udic = udic
 
         # Unit converters for each dimension
-        self._unit_converters: List[Optional[unit_conversion]] = [None] * self._ndim
+        self._unit_converters: list[unit_conversion | None] = [None] * self._ndim
 
         # Cached properties
-        self._noise_level: Optional[float] = None
+        self._noise_level: float | None = None
         self._min_sino: float = config.default_min_sino
-        self._ppm_scales: List[Optional[np.ndarray]] = [None] * self._ndim
+        self._ppm_scales: list[np.ndarray | None] = [None] * self._ndim
         self._projections: dict = {}  # Cache keyed by (axis, method)
 
         # Initialize unit converters if we have frequencies
@@ -177,33 +181,28 @@ class NmrSpectrum:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def from_file(
-        cls,
-        path: str,
-        spectrum_format: SpectrumFormat = None,
-        name: Optional[str] = None
-    ) -> 'NmrSpectrum':
+    def from_file(cls, path: str, spectrum_format: SpectrumFormat = None, name: str | None = None) -> NmrSpectrum:
         return spectrum_io.from_file(cls, path, spectrum_format, name)
 
     @classmethod
-    def _from_bruker(cls, path: str, name: Optional[str] = None) -> 'NmrSpectrum':
+    def _from_bruker(cls, path: str, name: str | None = None) -> NmrSpectrum:
         return spectrum_io._from_bruker(cls, path, name)
 
     @classmethod
-    def _from_pipe(cls, path: str, name: Optional[str] = None) -> 'NmrSpectrum':
+    def _from_pipe(cls, path: str, name: str | None = None) -> NmrSpectrum:
         return spectrum_io._from_pipe(cls, path, name)
 
     @classmethod
     def from_pseudo_nd(
         cls,
-        path: Union[str, List[str]],
-        spectrum_format: SpectrumFormat = 'pipe',
-        name: Optional[str] = None,
+        path: str | list[str],
+        spectrum_format: SpectrumFormat = "pipe",
+        name: str | None = None,
         file_pattern: str = "*.ft*",
-        pseudo_axis_values: Optional[List[Number | str]] = None,
-        pseudo_axis_label: str = 'pseudo',
-        pseudo_axis_unit: Optional[str] = None
-    ) -> 'NmrSpectrum':
+        pseudo_axis_values: list[Number | str] | None = None,
+        pseudo_axis_label: str = "pseudo",
+        pseudo_axis_unit: str | None = None,
+    ) -> NmrSpectrum:
         return spectrum_io.from_pseudo_nd(
             cls,
             path,
@@ -221,10 +220,10 @@ class NmrSpectrum:
         data: np.ndarray,
         dic: dict,
         udic: dict,
-        name: Optional[str],
+        name: str | None,
         path: str,
-        spectrum_format: str
-    ) -> 'NmrSpectrum':
+        spectrum_format: str,
+    ) -> NmrSpectrum:
         return spectrum_io._from_udic(cls, data, dic, udic, name, path, spectrum_format)
 
     # -------------------------------------------------------------------------
@@ -248,12 +247,12 @@ class NmrSpectrum:
         self._peaklists = value
 
     @property
-    def peaklist(self) -> Optional[PeakList]:
+    def peaklist(self) -> PeakList | None:
         """Convenience accessor for the default peak list (for backward compatibility)."""
         return self._peaklists.get(self.DEFAULT_PEAKLIST_KEY)
 
     @peaklist.setter
-    def peaklist(self, value: Optional[List[NmrPeak] | PeakList]) -> None:
+    def peaklist(self, value: list[NmrPeak] | PeakList | None) -> None:
         if value is None:
             if self.DEFAULT_PEAKLIST_KEY in self._peaklists:
                 del self._peaklists[self.DEFAULT_PEAKLIST_KEY]
@@ -295,27 +294,27 @@ class NmrSpectrum:
         return self._ndim
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         """Returns shape of spectral data."""
         return self._data.shape
 
     @property
-    def dimension_ranges(self) -> List[Union[PpmRange, TimeRange]]:
+    def dimension_ranges(self) -> list[PpmRange | TimeRange]:
         """Returns list of range objects for each dimension."""
         return self._dimension_ranges.copy()
 
     @property
-    def nuclei(self) -> Optional[List[str]]:
+    def nuclei(self) -> list[str] | None:
         """Returns list of nucleus labels."""
         return self._nuclei.copy() if self._nuclei else None
 
     @property
-    def frequencies(self) -> Optional[List[float]]:
+    def frequencies(self) -> list[float] | None:
         """Returns list of spectrometer frequencies in MHz."""
         return self._frequencies.copy() if self._frequencies else None
 
     @property
-    def acquisition_date(self) -> Optional[datetime]:
+    def acquisition_date(self) -> datetime | None:
         """Returns acquisition timestamp."""
         return self._acquisition_date
 
@@ -330,17 +329,17 @@ class NmrSpectrum:
         return self._metadata.copy()
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """Returns spectrum name."""
         return self._name
 
     @name.setter
-    def name(self, value: Optional[str]) -> None:
+    def name(self, value: str | None) -> None:
         """Set spectrum name."""
         self._name = value
 
     @property
-    def path(self) -> Optional[str]:
+    def path(self) -> str | None:
         """Returns file path if loaded from file."""
         return self._path
 
@@ -372,32 +371,32 @@ class NmrSpectrum:
         return self._pseudo_axis_values is not None or self._source_files is not None
 
     @property
-    def pseudo_axis_values(self) -> Optional[List[Number | str]]:
+    def pseudo_axis_values(self) -> list[Number | str] | None:
         """Returns the values for the pseudo dimension (e.g., time points)."""
         return self._pseudo_axis_values
 
     @property
-    def pseudo_axis_label(self) -> Optional[str]:
+    def pseudo_axis_label(self) -> str | None:
         """Returns the label for the pseudo dimension (e.g., 'time')."""
         return self._pseudo_axis_label
 
     @property
-    def pseudo_axis_unit(self) -> Optional[str]:
+    def pseudo_axis_unit(self) -> str | None:
         """Returns the unit for the pseudo dimension (e.g., 'ms')."""
         return self._pseudo_axis_unit
 
     @property
-    def source_files(self) -> Optional[List[str]]:
+    def source_files(self) -> list[str] | None:
         """Returns list of source files if loaded from pseudo-ND."""
         return self._source_files
 
     @property
-    def dic(self) -> Optional[dict]:
+    def dic(self) -> dict | None:
         """Returns raw nmrglue dictionary from file (Bruker/Pipe specific)."""
         return self._dic
 
     @property
-    def udic(self) -> Optional[dict]:
+    def udic(self) -> dict | None:
         """Returns universal dictionary from nmrglue."""
         return self._udic
 
@@ -406,11 +405,11 @@ class NmrSpectrum:
     # -------------------------------------------------------------------------
 
     @staticmethod
-    def _range_bounds(range_obj: Union[PpmRange, TimeRange]) -> Tuple[float, float]:
+    def _range_bounds(range_obj: PpmRange | TimeRange) -> tuple[float, float]:
         return spectrum_axes.range_bounds(range_obj)
 
     @staticmethod
-    def _coerce_range_value(range_obj: Union[PpmRange, TimeRange], value: Union[float, int, str, TimeValue]) -> float:
+    def _coerce_range_value(range_obj: PpmRange | TimeRange, value: float | int | str | TimeValue) -> float:
         return spectrum_axes.coerce_range_value(range_obj, value)
 
     def _init_unit_converters(self) -> None:
@@ -423,7 +422,7 @@ class NmrSpectrum:
         """Alias for get_ppm_axis."""
         return spectrum_axes.get_ppm_scale(self, dimension)
 
-    def ppm_to_index(self, dimension: int, ppm_value: Union[float, int, str, TimeValue]) -> int:
+    def ppm_to_index(self, dimension: int, ppm_value: float | int | str | TimeValue) -> int:
         return spectrum_axes.ppm_to_index(self, dimension, ppm_value)
 
     def index_to_ppm(self, dimension: int, index: int) -> float:
@@ -433,10 +432,10 @@ class NmrSpectrum:
     # Nucleus and frequency access
     # -------------------------------------------------------------------------
 
-    def get_nucleus(self, dimension: int) -> Optional[str]:
+    def get_nucleus(self, dimension: int) -> str | None:
         return spectrum_axes.get_nucleus(self, dimension)
 
-    def get_frequency(self, dimension: int) -> Optional[float]:
+    def get_frequency(self, dimension: int) -> float | None:
         return spectrum_axes.get_frequency(self, dimension)
 
     def get_label_text(self, dimension: int) -> str:
@@ -446,50 +445,32 @@ class NmrSpectrum:
     # Extraction methods
     # -------------------------------------------------------------------------
 
-    def get_row(self, idx: Union[int, str, float, ChemicalShift]) -> np.ndarray:
+    def get_row(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
         return spectrum_slicing.get_row(self, idx)
 
-
-    def get_column(self, idx: Union[int, str, float, ChemicalShift]) -> np.ndarray:
+    def get_column(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
         return spectrum_slicing.get_column(self, idx)
-
 
     def get_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0) -> np.ndarray:
         return spectrum_slicing.get_segment(self, min_ppm, max_ppm, dimension)
 
-    def extract_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0) -> 'NmrSpectrum':
+    def extract_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0) -> NmrSpectrum:
         return spectrum_slicing.extract_segment(self, min_ppm, max_ppm, dimension)
 
-    def extract_subspectrum(
-        self,
-        dimension_positions: dict,
-        tolerance: Optional[float] = None
-    ) -> 'NmrSpectrum':
+    def extract_subspectrum(self, dimension_positions: dict, tolerance: float | None = None) -> NmrSpectrum:
         return spectrum_slicing.extract_subspectrum(self, dimension_positions, tolerance)
 
-    def extract_trace(
-        self,
-        trace_dimension: int,
-        dimension_positions: Union[float, List[float], dict]
-    ) -> 'NmrSpectrum':
+    def extract_trace(self, trace_dimension: int, dimension_positions: float | list[float] | dict) -> NmrSpectrum:
         return spectrum_slicing.extract_trace(self, trace_dimension, dimension_positions)
 
-    def extract_projection(
-        self,
-        axis: int,
-        method: Literal['sum', 'max', 'min', 'mean'] = 'sum'
-    ) -> 'NmrSpectrum':
+    def extract_projection(self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum") -> NmrSpectrum:
         return spectrum_projections.extract_projection(self, axis, method)
 
     # -------------------------------------------------------------------------
     # Projection methods
     # -------------------------------------------------------------------------
 
-    def get_projection(
-        self,
-        axis: int,
-        method: Literal['sum', 'max', 'min', 'mean'] = 'sum'
-    ) -> np.ndarray:
+    def get_projection(self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum") -> np.ndarray:
         return spectrum_projections.get_projection(self, axis, method)
 
     @property
@@ -503,10 +484,8 @@ class NmrSpectrum:
         return spectrum_projections.projection_f2(self)
 
     def get_subspectrum(
-        self,
-        dimension_positions: dict,
-        tolerance: Optional[float] = None
-    ) -> Tuple[np.ndarray, dict, dict]:
+        self, dimension_positions: dict, tolerance: float | None = None
+    ) -> tuple[np.ndarray, dict, dict]:
         return spectrum_slicing.get_subspectrum(self, dimension_positions, tolerance)
 
     # -------------------------------------------------------------------------
@@ -547,7 +526,7 @@ class NmrSpectrum:
     # -------------------------------------------------------------------------
 
     @property
-    def extent(self) -> Tuple[float, float, float, float]:
+    def extent(self) -> tuple[float, float, float, float]:
         """
         Get extent for imshow plotting (2D spectra).
 
@@ -593,9 +572,9 @@ class NmrSpectrum:
     def _prepare_pick_2d_parameters(
         self,
         sino: int | float | None,
-        ppm_range: Tuple[
-            Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-            Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]]
+        ppm_range: tuple[
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
         ],
     ) -> tuple[float, list[PpmRange]]:
         return spectrum_peak_picking.prepare_pick_2d_parameters(self, sino, ppm_range)
@@ -605,7 +584,7 @@ class NmrSpectrum:
         intensities: np.ndarray,
         center_idx: int,
         max_points: int = 5,
-        consistency_threshold: float = 0.1
+        consistency_threshold: float = 0.1,
     ) -> tuple[float, float, float, float, int, float]:
         return spectrum_peak_picking.fit_gaussian_multipoint(
             intensities,
@@ -619,7 +598,7 @@ class NmrSpectrum:
         intensities: np.ndarray,
         center_idx: int,
         max_points: int = 5,
-        consistency_threshold: float = 0.1
+        consistency_threshold: float = 0.1,
     ) -> tuple[float, float, float, float, int, float]:
         return spectrum_peak_picking.fit_lorentzian_multipoint(
             intensities,
@@ -632,7 +611,7 @@ class NmrSpectrum:
         self,
         candidates: list[_PeakCandidate],
         ppm_filters: list[PpmRange],
-        fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian',
+        fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
     ) -> PeakList:
         return spectrum_peak_picking.build_peaklist_from_candidates(
             self,
@@ -641,16 +620,18 @@ class NmrSpectrum:
             fit_method=fit_method,
         )
 
-    def pick_2d(self, sino: int | float | None = None,
-                msep=(1, 1), edge=0,
-                ppm_range: Tuple[
-                    Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-                    Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]]
-                ] = (None, None),
-                peaklist_name: str | None = None,
-                fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian',
-
-                ) -> PeakList | None:
+    def pick_2d(
+        self,
+        sino: int | float | None = None,
+        msep=(1, 1),
+        edge=0,
+        ppm_range: tuple[
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        ] = (None, None),
+        peaklist_name: str | None = None,
+        fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
+    ) -> PeakList | None:
         return spectrum_peak_picking.pick_2d(
             self,
             sino=sino,
@@ -661,15 +642,18 @@ class NmrSpectrum:
             fit_method=fit_method,
         )
 
-    def pick_pseudo_nd(self, sino: int | float | None = None,
-                       msep=(1, 1), edge=0,
-                       ppm_range: Tuple[
-                           Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-                           Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]]
-                       ] = (None, None),
-                       time_param: str = 'delay_time',
-                       fit_method: Literal['gaussian', 'lorentzian'] = 'gaussian'
-                       ) -> PeakList:
+    def pick_pseudo_nd(
+        self,
+        sino: int | float | None = None,
+        msep=(1, 1),
+        edge=0,
+        ppm_range: tuple[
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+            PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        ] = (None, None),
+        time_param: str = "delay_time",
+        fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
+    ) -> PeakList:
         return spectrum_peak_picking.pick_pseudo_nd(
             self,
             sino=sino,

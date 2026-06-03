@@ -1,11 +1,10 @@
-from typing import Union
 import re
 
 from ..config import config
 from .exceptions import (
+    ChemicalShiftRangeError,
     InvalidChemicalShiftFormat,
     UnsupportedChemicalShiftType,
-    ChemicalShiftRangeError
 )
 
 
@@ -33,10 +32,10 @@ class ChemicalShift:
 
     def __init__(
         self,
-        val: Union[int, float, str],
+        val: int | float | str,
         validate_range: bool = None,
         min_ppm: float = None,
-        max_ppm: float = None
+        max_ppm: float = None,
     ):
         self._min_ppm = min_ppm if min_ppm is not None else config.chemical_shift_min
         self._max_ppm = max_ppm if max_ppm is not None else config.chemical_shift_max
@@ -49,11 +48,11 @@ class ChemicalShift:
         return self._ppm
 
     @ppm.setter
-    def ppm(self, val: Union[int, float, str]) -> None:
+    def ppm(self, val: int | float | str) -> None:
         """Sets the chemical shift value from int, float, or string."""
         self._ppm = self._convert_to_float(val)
 
-    def _convert_to_float(self, value: Union[int, float, str]) -> float:
+    def _convert_to_float(self, value: int | float | str) -> float:
         """
         Converts various input formats to a float representing ppm.
 
@@ -99,8 +98,8 @@ class ChemicalShift:
         value = value.strip()
 
         # If no 'ppm' suffix, add it for parsing
-        if not re.search(r'ppm$', value, re.IGNORECASE):
-            value = value + ' ppm'
+        if not re.search(r"ppm$", value, re.IGNORECASE):
+            value = value + " ppm"
 
         # Match strings like "3.5 ppm", "3.5ppm", "-0.5 PPM"
         match = re.match(r"^([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*ppm$", value, re.IGNORECASE)

@@ -43,10 +43,10 @@ class NmrConfig:
     # -------------------------------------------------------------------------
 
     # Default file format for loading spectra
-    default_spectrum_format: Literal['bruker', 'pipe'] = 'bruker'
+    default_spectrum_format: Literal["bruker", "pipe"] = "bruker"
 
     # Default noise estimation method ('std' or 'median_absolute')
-    default_noise_method: Literal['std', 'median_absolute'] = 'median_absolute'
+    default_noise_method: Literal["std", "median_absolute"] = "median_absolute"
 
     # Default minimum signal-to-noise ratio for peak picking
     default_min_sino: float = 8.0
@@ -71,7 +71,7 @@ class NmrConfig:
     default_peak_threshold: float = 5.0
 
     # Peak adjustment algorithm
-    peak_picking_adjust: str = 'gaussian'
+    peak_picking_adjust: str = "gaussian"
 
     # -------------------------------------------------------------------------
     # File patterns
@@ -102,7 +102,7 @@ class NmrConfig:
     # -------------------------------------------------------------------------
 
     # Default fitting method for relaxation curves
-    default_relaxation_fit_method: str = 'leastsq'
+    default_relaxation_fit_method: str = "leastsq"
 
     # Maximum iterations for fitting
     max_fit_iterations: int = 1000

@@ -1,9 +1,9 @@
 """
 Package-wide configuration and default values for echofox-plot.
 """
+
 import os
 from dataclasses import dataclass, field
-from typing import List, Tuple
 
 
 @dataclass
@@ -33,30 +33,30 @@ class PlotConfig:
 
     file_path = os.path.dirname(os.path.abspath(__file__))
     ECHOFOX_MAIN_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    ECHOFOX_EXAMPLE_DATA_DIR = os.path.join(ECHOFOX_MAIN_DIR, 'examples','example_data')
+    ECHOFOX_EXAMPLE_DATA_DIR = os.path.join(ECHOFOX_MAIN_DIR, "examples", "example_data")
 
     # -------------------------------------------------------------------------
     # Figure settings
     # -------------------------------------------------------------------------
 
     # Default figure size [width, height] in inches
-    figure_size: List[float] = field(default_factory=lambda: [5.83, 4.13])
+    figure_size: list[float] = field(default_factory=lambda: [5.83, 4.13])
 
     # DPI for figure output
     figure_dpi: int = 150
 
     # Default figure format for saving
-    default_save_format: str = 'png'
+    default_save_format: str = "png"
 
     # -------------------------------------------------------------------------
     # Tick spacing settings
     # -------------------------------------------------------------------------
 
     # Tick spacing for 2D plots [[major_f1, minor_f1], [major_f2, minor_f2]]
-    tick_spacing_2d: List[List[float]] = field(default_factory=lambda: [[5, 1], [1, 0.2]])
+    tick_spacing_2d: list[list[float]] = field(default_factory=lambda: [[5, 1], [1, 0.2]])
 
     # Tick spacing for 1D plots [major, minor]
-    tick_spacing_1d: List[float] = field(default_factory=lambda: [1, 0.2])
+    tick_spacing_1d: list[float] = field(default_factory=lambda: [1, 0.2])
 
     # -------------------------------------------------------------------------
     # Projection settings
@@ -82,10 +82,10 @@ class PlotConfig:
     contour_level_factor: float = 1.4
 
     # Default positive contour color
-    positive_contour_color: str = 'black'
+    positive_contour_color: str = "black"
 
     # Default negative contour color
-    negative_contour_color: str = 'red'
+    negative_contour_color: str = "red"
 
     # Default contour line width
     contour_linewidth: float = 0.3
@@ -95,7 +95,7 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     # Default line color for 1D spectra
-    default_line_color: str = 'black'
+    default_line_color: str = "black"
 
     # Default line width for 1D spectra
     default_linewidth: float = 1
@@ -121,13 +121,13 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     # Default marker for peaks
-    peak_marker: str = 'x'
+    peak_marker: str = "x"
 
     # Default marker size for peaks
     peak_marker_size: float = 5.0
 
     # Default color for peak markers
-    peak_marker_color: str = 'red'
+    peak_marker_color: str = "red"
 
     # Font size for peak labels
     peak_label_fontsize: int = 6
@@ -137,15 +137,34 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     # Default colormap for 2D spectra
-    default_colormap: str = 'viridis'
+    default_colormap: str = "viridis"
 
     # Background color
-    background_color: str = 'white'
+    background_color: str = "white"
 
-    color1D: List = field(default_factory=lambda: ['#0C5DA5', '#00B945', '#FF9500', '#FF2C00', '#845B97', '#474747', '#9e9e9e'])
+    color1D: list = field(
+        default_factory=lambda: [
+            "#0C5DA5",
+            "#00B945",
+            "#FF9500",
+            "#FF2C00",
+            "#845B97",
+            "#474747",
+            "#9e9e9e",
+        ]
+    )
 
-    color2D: List = field(
-        default_factory=lambda: ['#0C5DA5', '#00B945', '#FF9500', '#FF2C00', '#845B97', '#474747', '#9e9e9e'])
+    color2D: list = field(
+        default_factory=lambda: [
+            "#0C5DA5",
+            "#00B945",
+            "#FF9500",
+            "#FF2C00",
+            "#845B97",
+            "#474747",
+            "#9e9e9e",
+        ]
+    )
 
 
 # Global configuration instance

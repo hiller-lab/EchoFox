@@ -4,13 +4,17 @@ from typing import Literal
 
 import numpy as np
 
-from .exceptions import InvalidDimensionIndexError, InvalidDimensionalityError, SpectrumProcessingError
+from .exceptions import (
+    InvalidDimensionalityError,
+    InvalidDimensionIndexError,
+    SpectrumProcessingError,
+)
 
 
 def extract_projection(
     self,
     axis: int,
-    method: Literal['sum', 'max', 'min', 'mean'] = 'sum',
+    method: Literal["sum", "max", "min", "mean"] = "sum",
 ):
     if self._ndim == 1:
         raise InvalidDimensionalityError(self._ndim, expected="2D or higher")
@@ -56,26 +60,23 @@ def extract_projection(
 def get_projection(
     self,
     axis: int,
-    method: Literal['sum', 'max', 'min', 'mean'] = 'sum',
+    method: Literal["sum", "max", "min", "mean"] = "sum",
 ) -> np.ndarray:
     if axis < 0 or axis >= self._ndim:
         raise InvalidDimensionIndexError(axis, self._ndim)
 
     cache_key = (axis, method)
     if cache_key not in self._projections:
-        if method == 'sum':
+        if method == "sum":
             self._projections[cache_key] = np.sum(self._data, axis=axis)
-        elif method == 'max':
+        elif method == "max":
             self._projections[cache_key] = np.max(self._data, axis=axis)
-        elif method == 'min':
+        elif method == "min":
             self._projections[cache_key] = np.min(self._data, axis=axis)
-        elif method == 'mean':
+        elif method == "mean":
             self._projections[cache_key] = np.mean(self._data, axis=axis)
         else:
-            raise SpectrumProcessingError(
-                f"Unknown projection method: {method}. "
-                f"Use 'sum', 'max', 'min', or 'mean'."
-            )
+            raise SpectrumProcessingError(f"Unknown projection method: {method}. Use 'sum', 'max', 'min', or 'mean'.")
 
     return self._projections[cache_key]
 

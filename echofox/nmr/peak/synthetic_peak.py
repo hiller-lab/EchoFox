@@ -1,12 +1,12 @@
 """Synthetic peak class for generating n-dimensional Voigt profiles"""
 
-from typing import Union, List, Optional, Tuple
 import numpy as np
 from scipy.special import wofz
 
-from .peak import NmrPeak
 from echofox.nmr.chemical_shift import ChemicalShift
+
 from .exceptions import InvalidPeakDimensionError, InvalidPeakIntensityError
+from .peak import NmrPeak
 
 
 class SyntheticPeak(NmrPeak):
@@ -54,14 +54,14 @@ class SyntheticPeak(NmrPeak):
 
     def __init__(
         self,
-        chemical_shifts: List[Union[float, int, str, ChemicalShift]],
+        chemical_shifts: list[float | int | str | ChemicalShift],
         amplitude: float,
-        gaussian_widths: List[float],
-        lorentzian_widths: List[float],
-        nuclei: Optional[List[str]] = None,
-        frequencies: Optional[List[float]] = None,
-        assignments: Optional[List[str]] = None,
-        **kwargs
+        gaussian_widths: list[float],
+        lorentzian_widths: list[float],
+        nuclei: list[str] | None = None,
+        frequencies: list[float] | None = None,
+        assignments: list[str] | None = None,
+        **kwargs,
     ):
         # Initialize the base Peak class
         super().__init__(
@@ -70,7 +70,7 @@ class SyntheticPeak(NmrPeak):
             frequencies=frequencies,
             intensity=amplitude,
             assignments=assignments,
-            **kwargs
+            **kwargs,
         )
 
         # Validate amplitude
@@ -81,16 +81,14 @@ class SyntheticPeak(NmrPeak):
         # Validate and set Gaussian widths
         if len(gaussian_widths) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Gaussian widths ({len(gaussian_widths)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Gaussian widths ({len(gaussian_widths)}) must match number of dimensions ({self._ndim})"
             )
         self._gaussian_widths = [float(sigma) for sigma in gaussian_widths]
 
         # Validate and set Lorentzian widths
         if len(lorentzian_widths) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Lorentzian widths ({len(lorentzian_widths)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Lorentzian widths ({len(lorentzian_widths)}) must match number of dimensions ({self._ndim})"
             )
         self._lorentzian_widths = [float(gamma) for gamma in lorentzian_widths]
 
@@ -109,32 +107,30 @@ class SyntheticPeak(NmrPeak):
         self._intensity = float(value)
 
     @property
-    def gaussian_widths(self) -> List[float]:
+    def gaussian_widths(self) -> list[float]:
         """Returns the Gaussian width parameters (sigma) for each dimension."""
         return self._gaussian_widths.copy()
 
     @gaussian_widths.setter
-    def gaussian_widths(self, value: List[float]) -> None:
+    def gaussian_widths(self, value: list[float]) -> None:
         """Sets the Gaussian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Gaussian widths ({len(value)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Gaussian widths ({len(value)}) must match number of dimensions ({self._ndim})"
             )
         self._gaussian_widths = [float(sigma) for sigma in value]
 
     @property
-    def lorentzian_widths(self) -> List[float]:
+    def lorentzian_widths(self) -> list[float]:
         """Returns the Lorentzian width parameters (gamma) for each dimension."""
         return self._lorentzian_widths.copy()
 
     @lorentzian_widths.setter
-    def lorentzian_widths(self, value: List[float]) -> None:
+    def lorentzian_widths(self, value: list[float]) -> None:
         """Sets the Lorentzian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Lorentzian widths ({len(value)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Lorentzian widths ({len(value)}) must match number of dimensions ({self._ndim})"
             )
         self._lorentzian_widths = [float(gamma) for gamma in value]
 
@@ -159,7 +155,7 @@ class SyntheticPeak(NmrPeak):
         # Return the real part of the Faddeeva function
         return np.real(wofz(z))
 
-    def evaluate(self, coordinates: Union[List[np.ndarray], np.ndarray]) -> np.ndarray:
+    def evaluate(self, coordinates: list[np.ndarray] | np.ndarray) -> np.ndarray:
         """
         Evaluate the n-dimensional Voigt profile at given coordinates.
 
@@ -190,16 +186,13 @@ class SyntheticPeak(NmrPeak):
         # Handle single array input for 1D case
         if isinstance(coordinates, np.ndarray):
             if self._ndim != 1:
-                raise ValueError(
-                    f"For {self._ndim}D peak, provide a list of {self._ndim} coordinate arrays"
-                )
+                raise ValueError(f"For {self._ndim}D peak, provide a list of {self._ndim} coordinate arrays")
             coordinates = [coordinates]
 
         # Validate number of coordinate arrays
         if len(coordinates) != self._ndim:
             raise ValueError(
-                f"Number of coordinate arrays ({len(coordinates)}) must match "
-                f"peak dimensions ({self._ndim})"
+                f"Number of coordinate arrays ({len(coordinates)}) must match peak dimensions ({self._ndim})"
             )
 
         # Start with amplitude
@@ -239,10 +232,7 @@ class SyntheticPeak(NmrPeak):
             raise ValueError("Points must be a 2D array of shape (N, ndim)")
 
         if points.shape[1] != self._ndim:
-            raise ValueError(
-                f"Points must have {self._ndim} columns to match peak dimensions, "
-                f"got {points.shape[1]}"
-            )
+            raise ValueError(f"Points must have {self._ndim} columns to match peak dimensions, got {points.shape[1]}")
 
         # Start with amplitude
         result = np.full(points.shape[0], self._amplitude)
@@ -316,14 +306,14 @@ class SyntheticPeak(NmrPeak):
             Dictionary containing all peak properties including Voigt parameters
         """
         result = super().to_dict()
-        result['amplitude'] = self._amplitude
-        result['gaussian_widths'] = self._gaussian_widths
-        result['lorentzian_widths'] = self._lorentzian_widths
-        result['peak_type'] = 'synthetic_voigt'
+        result["amplitude"] = self._amplitude
+        result["gaussian_widths"] = self._gaussian_widths
+        result["lorentzian_widths"] = self._lorentzian_widths
+        result["peak_type"] = "synthetic_voigt"
         return result
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'SyntheticPeak':
+    def from_dict(cls, data: dict) -> "SyntheticPeak":
         """
         Create a SyntheticPeak from a dictionary representation.
 
@@ -333,19 +323,28 @@ class SyntheticPeak(NmrPeak):
         Returns:
             SyntheticPeak object
         """
-        chemical_shifts = data['chemical_shifts']
-        amplitude = data['amplitude']
-        gaussian_widths = data['gaussian_widths']
-        lorentzian_widths = data['lorentzian_widths']
-        nuclei = data.get('nuclei')
-        frequencies = data.get('frequencies')
-        assignments = data.get('assignments')
+        chemical_shifts = data["chemical_shifts"]
+        amplitude = data["amplitude"]
+        gaussian_widths = data["gaussian_widths"]
+        lorentzian_widths = data["lorentzian_widths"]
+        nuclei = data.get("nuclei")
+        frequencies = data.get("frequencies")
+        assignments = data.get("assignments")
 
         # Extract extra properties
         extra_keys = {
-            'chemical_shifts', 'ndim', 'nuclei', 'frequencies',
-            'intensity', 'volume', 'linewidths', 'assignments',
-            'amplitude', 'gaussian_widths', 'lorentzian_widths', 'peak_type'
+            "chemical_shifts",
+            "ndim",
+            "nuclei",
+            "frequencies",
+            "intensity",
+            "volume",
+            "linewidths",
+            "assignments",
+            "amplitude",
+            "gaussian_widths",
+            "lorentzian_widths",
+            "peak_type",
         }
         kwargs = {}
         for k, v in data.items():
@@ -360,17 +359,17 @@ class SyntheticPeak(NmrPeak):
             nuclei=nuclei,
             frequencies=frequencies,
             assignments=assignments,
-            **kwargs
+            **kwargs,
         )
 
     @classmethod
     def from_peak(
         cls,
         peak: NmrPeak,
-        amplitude: Optional[float] = None,
-        gaussian_widths: Optional[List[float]] = None,
-        lorentzian_widths: Optional[List[float]] = None
-    ) -> 'SyntheticPeak':
+        amplitude: float | None = None,
+        gaussian_widths: list[float] | None = None,
+        lorentzian_widths: list[float] | None = None,
+    ) -> "SyntheticPeak":
         """
         Create a SyntheticPeak from an existing Peak object.
 
@@ -407,7 +406,7 @@ class SyntheticPeak(NmrPeak):
             lorentzian_widths=lorentzian_widths,
             nuclei=peak.nuclei,
             frequencies=peak.frequencies,
-            assignments=peak.assignments
+            assignments=peak.assignments,
         )
 
     def __str__(self) -> str:
@@ -423,7 +422,7 @@ class SyntheticPeak(NmrPeak):
             f"chemical_shifts={shifts}",
             f"amplitude={self._amplitude}",
             f"gaussian_widths={self._gaussian_widths}",
-            f"lorentzian_widths={self._lorentzian_widths}"
+            f"lorentzian_widths={self._lorentzian_widths}",
         ]
 
         if self._nuclei is not None:
