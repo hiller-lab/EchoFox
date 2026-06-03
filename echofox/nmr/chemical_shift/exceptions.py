@@ -1,4 +1,3 @@
-
 class ChemicalShiftError(Exception):
     """Base class for chemical shift-related exceptions."""
 
@@ -47,9 +46,11 @@ class ChemicalShiftRangeError(ChemicalShiftError):
         self.min_val = min_val
         self.max_val = max_val
 
+
 """
 Custom exceptions for PpmRange operations.
 """
+
 
 class PpmRangeError(Exception):
     """Base class for ppm range-related exceptions."""

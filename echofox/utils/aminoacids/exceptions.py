@@ -3,26 +3,31 @@
 
 class AminoAcidError(Exception):
     """Base exception for all amino acid-related errors"""
+
     pass
 
 
 class SchemaError(AminoAcidError):
     """Raised when there is an error loading or parsing the schema file"""
+
     pass
 
 
 class SchemaFileNotFoundError(SchemaError):
     """Raised when the schema YAML file is not found"""
+
     pass
 
 
 class SchemaParseError(SchemaError):
     """Raised when the schema YAML file cannot be parsed"""
+
     pass
 
 
 class SchemaMissingFieldError(SchemaError):
     """Raised when required fields are missing from the schema"""
+
     pass
 
 
@@ -42,7 +47,9 @@ class AminoAcidNotFoundError(AminoAcidError):
         """
         self.identifier = identifier
         self.search_type = search_type
-        super().__init__(f"Amino acid not found: {identifier} (searched by {search_type})")
+        super().__init__(
+            f"Amino acid not found: {identifier} (searched by {search_type})"
+        )
 
 
 class InvalidAminoAcidCodeError(AminoAcidError):

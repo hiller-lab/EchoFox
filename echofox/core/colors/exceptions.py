@@ -1,18 +1,24 @@
-
 class ColorError(Exception):
     """Base class for colors-related exceptions."""
 
+
 class InvalidHexError(ColorError):
     """Invalid hex string."""
+
     def __init__(self, value):
-        super().__init__(f"Invalid HEX colors: {value} - use #RGB, #RGBA, #RRGGBB, or #RRGGBBAA")
+        super().__init__(
+            f"Invalid HEX colors: {value} - use #RGB, #RGBA, #RRGGBB, or #RRGGBBAA"
+        )
         self.value = value
+
 
 class UnsupportedColorFormat(ColorError):
     """Unsupported input format like 'cmyk()'."""
+
     def __init__(self, fmt):
         super().__init__(f"Unsupported colors format: {fmt}")
         self.format = fmt
+
 
 class InvalidColorInput(ColorError):
     """Raised when Color() receives invalid or unsupported input."""

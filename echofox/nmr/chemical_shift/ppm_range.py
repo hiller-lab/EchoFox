@@ -11,7 +11,7 @@ from .exceptions import (
     PpmRangeValueError,
     PpmRangeOverlapError,
     EmptyPpmRangeError,
-    PpmRangeIndexError
+    PpmRangeIndexError,
 )
 
 
@@ -31,7 +31,7 @@ class PpmRange:
         self,
         low: Union[float, int, str, ChemicalShift],
         high: Union[float, int, str, ChemicalShift],
-        validate_range: bool = None
+        validate_range: bool = None,
     ):
         if validate_range is None:
             validate_range = config.validate_chemical_shifts
@@ -103,7 +103,7 @@ class PpmRange:
 
         return self._low.ppm <= ppm <= self._high.ppm
 
-    def overlaps(self, other: 'PpmRange') -> bool:
+    def overlaps(self, other: "PpmRange") -> bool:
         """
         Check if this range overlaps with another.
 
@@ -115,7 +115,7 @@ class PpmRange:
         """
         return not (self._high.ppm < other.low_ppm or self._low.ppm > other.high_ppm)
 
-    def intersection(self, other: 'PpmRange') -> 'PpmRange':
+    def intersection(self, other: "PpmRange") -> "PpmRange":
         """
         Get intersection with another range.
 
@@ -136,7 +136,7 @@ class PpmRange:
 
         return PpmRange(new_low, new_high, validate_range=False)
 
-    def expand(self, margin: float) -> 'PpmRange':
+    def expand(self, margin: float) -> "PpmRange":
         """
         Create new range expanded by margin on both sides.
 
@@ -147,9 +147,7 @@ class PpmRange:
             New expanded PpmRange
         """
         return PpmRange(
-            self._low.ppm - margin,
-            self._high.ppm + margin,
-            validate_range=False
+            self._low.ppm - margin, self._high.ppm + margin, validate_range=False
         )
 
     def to_tuple(self) -> Tuple[float, float]:
@@ -176,11 +174,15 @@ class PpmRange:
     def __eq__(self, other) -> bool:
         """Check equality with another PpmRange or tuple."""
         if isinstance(other, PpmRange):
-            return (abs(self._low.ppm - other.low_ppm) < 1e-9 and
-                    abs(self._high.ppm - other.high_ppm) < 1e-9)
+            return (
+                abs(self._low.ppm - other.low_ppm) < 1e-9
+                and abs(self._high.ppm - other.high_ppm) < 1e-9
+            )
         elif isinstance(other, tuple) and len(other) == 2:
-            return (abs(self._low.ppm - other[0]) < 1e-9 and
-                    abs(self._high.ppm - other[1]) < 1e-9)
+            return (
+                abs(self._low.ppm - other[0]) < 1e-9
+                and abs(self._high.ppm - other[1]) < 1e-9
+            )
         return False
 
     def __hash__(self) -> int:

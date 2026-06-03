@@ -10,9 +10,9 @@ def estimate_noise_level(self, method: str = None) -> float:
     if method is None:
         method = config.default_noise_method
 
-    if method == 'std':
+    if method == "std":
         return float(np.std(self._data))
-    if method == 'median_absolute':
+    if method == "median_absolute":
         return median_absolute_deviation(self)
     raise NoiseEstimationError(method, "Unknown method")
 

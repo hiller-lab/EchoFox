@@ -9,7 +9,8 @@ from .exceptions import (
     InvalidPeakDimensionError,
     InvalidPeakIntensityError,
     DimensionMismatchError,
-    NucleusMismatchError, PeakError
+    NucleusMismatchError,
+    PeakError,
 )
 
 
@@ -46,7 +47,7 @@ class NmrPeak:
         assignments: Optional[List[str]] = None,
         gaussian_sigmas: Optional[List[float]] = None,
         lorentzian_gammas: Optional[List[float]] = None,
-        **kwargs
+        **kwargs,
     ):
         if not chemical_shifts:
             raise InvalidPeakDimensionError("Peak must have at least one dimension")
@@ -148,7 +149,7 @@ class NmrPeak:
             if not hasattr(self.__class__, key):
                 setattr(self.__class__, key, self.make_property(key))
 
-    def make_property(self,attr):
+    def make_property(self, attr):
         def getter(self):
             return getattr(self, "_" + attr)
 
@@ -156,7 +157,6 @@ class NmrPeak:
             setattr(self, "_" + attr, value)
 
         return property(getter, setter)
-
 
     @property
     def chemical_shifts(self) -> List[ChemicalShift]:
@@ -285,7 +285,11 @@ class NmrPeak:
     @property
     def lorentzian_gammas(self) -> Optional[List[float]]:
         """Returns Lorentzian width (gamma) values for each dimension."""
-        return self._lorentzian_gammas.copy() if self._lorentzian_gammas is not None else None
+        return (
+            self._lorentzian_gammas.copy()
+            if self._lorentzian_gammas is not None
+            else None
+        )
 
     @lorentzian_gammas.setter
     def lorentzian_gammas(self, value: Optional[List[float]]) -> None:
@@ -313,10 +317,14 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
         return self._chemical_shifts[dimension]
 
-    def set_chemical_shift(self, dimension: int, value: Union[float, int, str, ChemicalShift]) -> None:
+    def set_chemical_shift(
+        self, dimension: int, value: Union[float, int, str, ChemicalShift]
+    ) -> None:
         """
         Sets the chemical shift for a specific dimension.
 
@@ -328,7 +336,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
 
         if isinstance(value, ChemicalShift):
             self._chemical_shifts[dimension] = value
@@ -349,7 +359,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
         return self._nuclei[dimension] if self._nuclei is not None else None
 
     def set_nucleus(self, dimension: int, value: str) -> None:
@@ -364,7 +376,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
 
         if self._nuclei is None:
             self._nuclei = [None] * self._ndim
@@ -385,7 +399,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
         return self._frequencies[dimension] if self._frequencies is not None else None
 
     def set_frequency(self, dimension: int, value: float) -> None:
@@ -400,7 +416,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
 
         if self._frequencies is None:
             self._frequencies = [None] * self._ndim
@@ -421,7 +439,9 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
         return self._assignments[dimension] if self._assignments is not None else None
 
     def set_assignment(self, dimension: int, value: Optional[str]) -> None:
@@ -436,14 +456,18 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
+            raise IndexError(
+                f"Dimension {dimension} is out of range for {self._ndim}D peak"
+            )
 
         if self._assignments is None:
             self._assignments = [None] * self._ndim
 
         self._assignments[dimension] = str(value) if value is not None else None
 
-    def distance_to(self, other: 'NmrPeak', weights: Optional[List[float]] = None) -> float:
+    def distance_to(
+        self, other: "NmrPeak", weights: Optional[List[float]] = None
+    ) -> float:
         """
         Calculates the Euclidean distance to another peak in chemical shift space.
 
@@ -481,9 +505,7 @@ class NmrPeak:
         return np.sqrt(squared_diff)
 
     def is_within_tolerance(
-        self,
-        other: 'NmrPeak',
-        tolerances: Union[float, List[float]]
+        self, other: "NmrPeak", tolerances: Union[float, List[float]]
     ) -> bool:
         """
         Checks if another peak is within specified tolerance(s) in each dimension.
@@ -515,7 +537,9 @@ class NmrPeak:
                 f"Number of tolerances ({len(tolerances)}) must match number of dimensions ({self._ndim})"
             )
 
-        for cs1, cs2, tol in zip(self._chemical_shifts, other._chemical_shifts, tolerances):
+        for cs1, cs2, tol in zip(
+            self._chemical_shifts, other._chemical_shifts, tolerances
+        ):
             if abs(cs1.ppm - cs2.ppm) > tol:
                 return False
         return True
@@ -581,7 +605,9 @@ class NmrPeak:
         if self._ndim != other._ndim:
             return False
 
-        return all(cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts))
+        return all(
+            cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts)
+        )
 
     def __hash__(self) -> int:
         """Returns hash of the peak based on chemical shifts."""
@@ -596,7 +622,9 @@ class NmrPeak:
         """
         return self.get_chemical_shift(dimension)
 
-    def __setitem__(self, dimension: int, value: Union[float, int, str, ChemicalShift]) -> None:
+    def __setitem__(
+        self, dimension: int, value: Union[float, int, str, ChemicalShift]
+    ) -> None:
         """
         Allows indexing to set chemical shift for a dimension.
 
@@ -616,32 +644,29 @@ class NmrPeak:
         Returns:
             Dictionary containing all peak properties
         """
-        result = {
-            'chemical_shifts': self.ppm_values,
-            'ndim': self._ndim
-        }
+        result = {"chemical_shifts": self.ppm_values, "ndim": self._ndim}
 
         if self._nuclei is not None:
-            result['nuclei'] = self._nuclei
+            result["nuclei"] = self._nuclei
         if self._frequencies is not None:
-            result['frequencies'] = self._frequencies
+            result["frequencies"] = self._frequencies
         if self._intensity is not None:
-            result['intensity'] = self._intensity
+            result["intensity"] = self._intensity
         if self._volume is not None:
-            result['volume'] = self._volume
+            result["volume"] = self._volume
         if self._linewidths is not None:
-            result['linewidths'] = self._linewidths
+            result["linewidths"] = self._linewidths
         if self._assignments is not None:
-            result['assignments'] = self._assignments
+            result["assignments"] = self._assignments
         if self._gaussian_sigmas is not None:
-            result['gaussian_sigmas'] = self._gaussian_sigmas
+            result["gaussian_sigmas"] = self._gaussian_sigmas
         if self._lorentzian_gammas is not None:
-            result['lorentzian_gammas'] = self._lorentzian_gammas
+            result["lorentzian_gammas"] = self._lorentzian_gammas
 
         # Serialize extra properties
         for key, value in self._extra_properties.items():
             # Handle PeakAdjustmentFitResult objects
-            if hasattr(value, 'to_dict'):
+            if hasattr(value, "to_dict"):
                 result[key] = value.to_dict()
             else:
                 result[key] = value
@@ -649,7 +674,7 @@ class NmrPeak:
         return result
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'NmrPeak':
+    def from_dict(cls, data: dict) -> "NmrPeak":
         """
         Creates a Peak from a dictionary representation.
 
@@ -660,23 +685,30 @@ class NmrPeak:
             Peak object
         """
         try:
-            chemical_shifts = data['chemical_shifts']
-            nuclei = data.get('nuclei')
-            frequencies = data.get('frequencies')
-            intensity = data.get('intensity')
-            volume = data.get('volume')
-            linewidths = data.get('linewidths')
-            assignments = data.get('assignments')
-            gaussian_sigmas = data.get('gaussian_sigmas')
-            lorentzian_gammas = data.get('lorentzian_gammas')
+            chemical_shifts = data["chemical_shifts"]
+            nuclei = data.get("nuclei")
+            frequencies = data.get("frequencies")
+            intensity = data.get("intensity")
+            volume = data.get("volume")
+            linewidths = data.get("linewidths")
+            assignments = data.get("assignments")
+            gaussian_sigmas = data.get("gaussian_sigmas")
+            lorentzian_gammas = data.get("lorentzian_gammas")
         except KeyError as e:
             raise PeakError(f"Missing required property '{e.args[0]}'") from e
 
         # Extract extra properties
         extra_keys = {
-            'chemical_shifts', 'ndim', 'nuclei', 'frequencies',
-            'intensity', 'volume', 'linewidths', 'assignments',
-            'gaussian_sigmas', 'lorentzian_gammas'
+            "chemical_shifts",
+            "ndim",
+            "nuclei",
+            "frequencies",
+            "intensity",
+            "volume",
+            "linewidths",
+            "assignments",
+            "gaussian_sigmas",
+            "lorentzian_gammas",
         }
         kwargs = {}
         for k, v in data.items():
@@ -693,9 +725,5 @@ class NmrPeak:
             assignments=assignments,
             gaussian_sigmas=gaussian_sigmas,
             lorentzian_gammas=lorentzian_gammas,
-            **kwargs
+            **kwargs,
         )
-
-
-
-

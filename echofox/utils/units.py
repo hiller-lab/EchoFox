@@ -22,7 +22,7 @@ def convert_to_inches(value: str | Number):
     conversion_factors = {
         "mm": 0.0393701,  # 1 mm = 0.0393701 inches
         "cm": 0.393701,  # 1 cm = 0.393701 inches
-        "m": 39.3701  # 1 m = 39.3701 inches
+        "m": 39.3701,  # 1 m = 39.3701 inches
     }
 
     value = str(value).strip()
@@ -40,4 +40,6 @@ def convert_to_inches(value: str | Number):
         return number * conversion_factors[unit]  # Convert to inches
 
     # If input is invalid
-    raise ValueError(f"Invalid input format: {value}. Expected format: '10mm', '5 cm', '2m', or '10'.")
+    raise ValueError(
+        f"Invalid input format: {value}. Expected format: '10mm', '5 cm', '2m', or '10'."
+    )

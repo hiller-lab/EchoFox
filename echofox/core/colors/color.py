@@ -4,7 +4,12 @@ import re
 import math
 from matplotlib import colors as mcolors
 
-from .exceptions import InvalidHexError, InvalidColorInput, InvalidColorComponent, UnsupportedColorFormat
+from .exceptions import (
+    InvalidHexError,
+    InvalidColorInput,
+    InvalidColorComponent,
+    UnsupportedColorFormat,
+)
 
 
 @dataclass
@@ -37,13 +42,14 @@ class Color:
     _b: int = field(init=False, repr=False)
     _a: float = field(init=False, repr=False, default=1.0)
 
-    HEX_LONG = re.compile(r'^#?([0-9A-Fa-f]{6})([0-9A-Fa-f]{2})?$')
-    HEX_SHORT = re.compile(r'^#?([0-9A-Fa-f]{3})([0-9A-Fa-f]{1})?$')
-    RGB_FUNC  = re.compile(r'^rgba?\s*\((.+)\)$', re.IGNORECASE)
-    HSL_FUNC  = re.compile(r'^hsla?\s*\((.+)\)$', re.IGNORECASE)
+    HEX_LONG = re.compile(r"^#?([0-9A-Fa-f]{6})([0-9A-Fa-f]{2})?$")
+    HEX_SHORT = re.compile(r"^#?([0-9A-Fa-f]{3})([0-9A-Fa-f]{1})?$")
+    RGB_FUNC = re.compile(r"^rgba?\s*\((.+)\)$", re.IGNORECASE)
+    HSL_FUNC = re.compile(r"^hsla?\s*\((.+)\)$", re.IGNORECASE)
 
     NAMED = mcolors.CSS4_COLORS
-    if 'transparent' not in NAMED: NAMED['transparent'] = '#0000'
+    if "transparent" not in NAMED:
+        NAMED["transparent"] = "#0000"
 
     def __init__(self, *args):
         """
@@ -84,10 +90,10 @@ class Color:
         m = self.HEX_SHORT.match(s)
         if m:
             rgb, a = m.groups()
-            self._r = int(rgb[0]*2, 16)
-            self._g = int(rgb[1]*2, 16)
-            self._b = int(rgb[2]*2, 16)
-            self._a = int(a*2, 16) / 255 if a else 1.0
+            self._r = int(rgb[0] * 2, 16)
+            self._g = int(rgb[1] * 2, 16)
+            self._b = int(rgb[2] * 2, 16)
+            self._a = int(a * 2, 16) / 255 if a else 1.0
             return
 
         raise InvalidHexError(s)
@@ -122,18 +128,18 @@ class Color:
           - space+slash alpha: 'a b c / d'
         Returns list of 3 or 4 parts.
         """
-        s = re.sub(r'\s+', ' ', arg_str.strip())
-        if '/' in s:  # space+slash alpha form
-            left, right = [p.strip() for p in s.split('/', 1)]
-            if ',' in left:
-                left_parts = [p.strip() for p in left.split(',') if p.strip()]
+        s = re.sub(r"\s+", " ", arg_str.strip())
+        if "/" in s:  # space+slash alpha form
+            left, right = [p.strip() for p in s.split("/", 1)]
+            if "," in left:
+                left_parts = [p.strip() for p in left.split(",") if p.strip()]
             else:
-                left_parts = [p for p in left.split(' ') if p]
+                left_parts = [p for p in left.split(" ") if p]
             return left_parts + [right]
         # no slash → either commas or spaces
-        if ',' in s:
-            return [p.strip() for p in s.split(',') if p.strip()]
-        return [p for p in s.split(' ') if p]
+        if "," in s:
+            return [p.strip() for p in s.split(",") if p.strip()]
+        return [p for p in s.split(" ") if p]
 
     def _init_from_rgb_func(self, inner: str):
         parts = self._split_args(inner)
@@ -174,7 +180,9 @@ class Color:
     def _parse_percent(tok: str) -> float:
         tok = tok.strip()
         if not tok.endswith("%"):
-            raise InvalidColorComponent("percentage", tok, "value ending with '%' like '50%'")
+            raise InvalidColorComponent(
+                "percentage", tok, "value ending with '%' like '50%'"
+            )
         v = float(tok[:-1]) / 100.0
         if not (0.0 <= v <= 1.0):
             raise InvalidColorComponent("percentage", tok, "0%..100%")
@@ -209,12 +217,18 @@ class Color:
         c = (1 - abs(2 * l - 1)) * s
         h = (h_deg / 60.0) % 6
         x = c * (1 - abs(h % 2 - 1))
-        if   0 <= h < 1: r1, g1, b1 = c, x, 0
-        elif 1 <= h < 2: r1, g1, b1 = x, c, 0
-        elif 2 <= h < 3: r1, g1, b1 = 0, c, x
-        elif 3 <= h < 4: r1, g1, b1 = 0, x, c
-        elif 4 <= h < 5: r1, g1, b1 = x, 0, c
-        else:            r1, g1, b1 = c, 0, x
+        if 0 <= h < 1:
+            r1, g1, b1 = c, x, 0
+        elif 1 <= h < 2:
+            r1, g1, b1 = x, c, 0
+        elif 2 <= h < 3:
+            r1, g1, b1 = 0, c, x
+        elif 3 <= h < 4:
+            r1, g1, b1 = 0, x, c
+        elif 4 <= h < 5:
+            r1, g1, b1 = x, 0, c
+        else:
+            r1, g1, b1 = c, 0, x
         m = l - c / 2
         r = int(round((r1 + m) * 255))
         g = int(round((g1 + m) * 255))

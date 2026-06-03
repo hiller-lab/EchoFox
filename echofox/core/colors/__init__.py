@@ -1,3 +1,3 @@
-__all__ = ['Color']
+__all__ = ["Color"]
 
 from .color import Color

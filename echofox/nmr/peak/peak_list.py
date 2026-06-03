@@ -46,7 +46,12 @@ class PeakList:
         name: Optional name for the peak list
     """
 
-    def __init__(self, peaks: Optional[List[NmrPeak]] = None, name: Optional[str] = None, metadata: Optional[dict] = None):
+    def __init__(
+        self,
+        peaks: Optional[List[NmrPeak]] = None,
+        name: Optional[str] = None,
+        metadata: Optional[dict] = None,
+    ):
         self._peaks: List[NmrPeak] = []
         self.name = name
         self._metadata = metadata or {}
@@ -106,7 +111,7 @@ class PeakList:
         """Remove all peaks from the list."""
         self._peaks.clear()
 
-    def extend(self, peaks: Union['PeakList', List[NmrPeak]]) -> None:
+    def extend(self, peaks: Union["PeakList", List[NmrPeak]]) -> None:
         """
         Add multiple peaks to the list.
 
@@ -118,7 +123,7 @@ class PeakList:
         for peak in peaks:
             self.add(peak)
 
-    def filter_by_dimension(self, ndim: int) -> 'PeakList':
+    def filter_by_dimension(self, ndim: int) -> "PeakList":
         """
         Filter peaks by number of dimensions.
 
@@ -131,7 +136,9 @@ class PeakList:
         filtered = [peak for peak in self._peaks if peak.ndim == ndim]
         return PeakList(filtered, name=f"{self.name}_dim{ndim}" if self.name else None)
 
-    def filter_by_nucleus(self, nucleus: str, dimension: Optional[int] = None) -> 'PeakList':
+    def filter_by_nucleus(
+        self, nucleus: str, dimension: Optional[int] = None
+    ) -> "PeakList":
         """
         Filter peaks by nucleus type.
 
@@ -158,7 +165,9 @@ class PeakList:
 
         return PeakList(filtered, name=f"{self.name}_{nucleus}" if self.name else None)
 
-    def filter_by_assignment(self, assignment_pattern: str, dimension: Optional[int] = None) -> 'PeakList':
+    def filter_by_assignment(
+        self, assignment_pattern: str, dimension: Optional[int] = None
+    ) -> "PeakList":
         """
         Filter peaks by assignment pattern.
 
@@ -181,13 +190,18 @@ class PeakList:
                     filtered.append(peak)
             else:
                 # Check any dimension
-                if any(assignment and assignment_pattern in assignment
-                       for assignment in peak.assignments if assignment is not None):
+                if any(
+                    assignment and assignment_pattern in assignment
+                    for assignment in peak.assignments
+                    if assignment is not None
+                ):
                     filtered.append(peak)
 
-        return PeakList(filtered, name=f"{self.name}_{assignment_pattern}" if self.name else None)
+        return PeakList(
+            filtered, name=f"{self.name}_{assignment_pattern}" if self.name else None
+        )
 
-    def filter_assigned(self, dimension: Optional[int] = None) -> 'PeakList':
+    def filter_assigned(self, dimension: Optional[int] = None) -> "PeakList":
         """
         Filter peaks that have assignments.
 
@@ -213,23 +227,23 @@ class PeakList:
 
         return PeakList(filtered, name=f"{self.name}_assigned" if self.name else None)
 
-    def filter_unassigned(self) -> 'PeakList':
+    def filter_unassigned(self) -> "PeakList":
         """
         Filter peaks that have no assignments.
 
         Returns:
             New PeakList containing only unassigned peaks
         """
-        filtered = [peak for peak in self._peaks
-                   if peak.assignments is None or all(a is None for a in peak.assignments)]
+        filtered = [
+            peak
+            for peak in self._peaks
+            if peak.assignments is None or all(a is None for a in peak.assignments)
+        ]
         return PeakList(filtered, name=f"{self.name}_unassigned" if self.name else None)
 
     def filter_by_shift_range(
-        self,
-        dimension: int,
-        min_ppm: float,
-        max_ppm: float
-    ) -> 'PeakList':
+        self, dimension: int, min_ppm: float, max_ppm: float
+    ) -> "PeakList":
         """
         Filter peaks by chemical shift range in a specific dimension.
 
@@ -251,10 +265,8 @@ class PeakList:
         return PeakList(filtered, name=f"{self.name}_range" if self.name else None)
 
     def filter_by_intensity(
-        self,
-        min_intensity: Optional[float] = None,
-        max_intensity: Optional[float] = None
-    ) -> 'PeakList':
+        self, min_intensity: Optional[float] = None, max_intensity: Optional[float] = None
+    ) -> "PeakList":
         """
         Filter peaks by intensity range.
 
@@ -277,9 +289,11 @@ class PeakList:
 
             filtered.append(peak)
 
-        return PeakList(filtered, name=f"{self.name}_intensity_filtered" if self.name else None)
+        return PeakList(
+            filtered, name=f"{self.name}_intensity_filtered" if self.name else None
+        )
 
-    def filter(self, predicate: Callable[[NmrPeak], bool]) -> 'PeakList':
+    def filter(self, predicate: Callable[[NmrPeak], bool]) -> "PeakList":
         """
         Filter peaks using a custom predicate function.
 
@@ -300,7 +314,7 @@ class PeakList:
         self,
         position: List[float],
         max_distance: Optional[float] = None,
-        weights: Optional[List[float]] = None
+        weights: Optional[List[float]] = None,
     ) -> Optional[Tuple[NmrPeak, float]]:
         """
         Find the closest peak to a given position.
@@ -322,7 +336,7 @@ class PeakList:
         # Create a temporary peak at the target position
         target_peak = NmrPeak(position)
 
-        min_distance = float('inf')
+        min_distance = float("inf")
         closest_peak = None
 
         for peak in self._peaks:
@@ -346,10 +360,8 @@ class PeakList:
         return closest_peak, min_distance
 
     def find_within_tolerance(
-        self,
-        position: List[float],
-        tolerances: Union[float, List[float]]
-    ) -> 'PeakList':
+        self, position: List[float], tolerances: Union[float, List[float]]
+    ) -> "PeakList":
         """
         Find all peaks within tolerance of a given position.
 
@@ -376,11 +388,8 @@ class PeakList:
         return PeakList(matches, name=f"{self.name}_matches" if self.name else None)
 
     def sort_by_shift(
-        self,
-        dimension: int,
-        reverse: bool = False,
-        inplace: bool = True
-    ) -> Optional['PeakList']:
+        self, dimension: int, reverse: bool = False, inplace: bool = True
+    ) -> Optional["PeakList"]:
         """
         Sort peaks by chemical shift in a specific dimension.
 
@@ -392,10 +401,11 @@ class PeakList:
         Returns:
             None if inplace=True, otherwise new sorted PeakList
         """
+
         def get_shift(peak: NmrPeak) -> float:
             if dimension < peak.ndim:
                 return peak.get_chemical_shift(dimension).ppm
-            return float('inf')  # Put peaks without this dimension at the end
+            return float("inf")  # Put peaks without this dimension at the end
 
         if inplace:
             self._peaks.sort(key=get_shift, reverse=reverse)
@@ -404,7 +414,9 @@ class PeakList:
             sorted_peaks = sorted(self._peaks, key=get_shift, reverse=reverse)
             return PeakList(sorted_peaks, name=self.name)
 
-    def sort_by_intensity(self, reverse: bool = True, inplace: bool = True) -> Optional['PeakList']:
+    def sort_by_intensity(
+        self, reverse: bool = True, inplace: bool = True
+    ) -> Optional["PeakList"]:
         """
         Sort peaks by intensity.
 
@@ -415,8 +427,9 @@ class PeakList:
         Returns:
             None if inplace=True, otherwise new sorted PeakList
         """
+
         def get_intensity(peak: NmrPeak) -> float:
-            return peak.intensity if peak.intensity is not None else float('-inf')
+            return peak.intensity if peak.intensity is not None else float("-inf")
 
         if inplace:
             self._peaks.sort(key=get_intensity, reverse=reverse)
@@ -426,11 +439,8 @@ class PeakList:
             return PeakList(sorted_peaks, name=self.name)
 
     def sort_by_assignment(
-        self,
-        dimension: int = 0,
-        reverse: bool = False,
-        inplace: bool = True
-    ) -> Optional['PeakList']:
+        self, dimension: int = 0, reverse: bool = False, inplace: bool = True
+    ) -> Optional["PeakList"]:
         """
         Sort peaks by assignment label.
 
@@ -442,6 +452,7 @@ class PeakList:
         Returns:
             None if inplace=True, otherwise new sorted PeakList
         """
+
         def get_assignment(peak: NmrPeak) -> str:
             assignment = peak.get_assignment(dimension)
             return assignment if assignment is not None else ""
@@ -453,7 +464,7 @@ class PeakList:
             sorted_peaks = sorted(self._peaks, key=get_assignment, reverse=reverse)
             return PeakList(sorted_peaks, name=self.name)
 
-    def group_by_assignment(self, dimension: int = 0) -> dict[str, 'PeakList']:
+    def group_by_assignment(self, dimension: int = 0) -> dict[str, "PeakList"]:
         """
         Group peaks by assignment in a specific dimension.
 
@@ -470,8 +481,10 @@ class PeakList:
             key = assignment if assignment is not None else "unassigned"
             groups[key].append(peak)
 
-        return {key: PeakList(peaks, name=f"{self.name}_{key}" if self.name else key)
-                for key, peaks in groups.items()}
+        return {
+            key: PeakList(peaks, name=f"{self.name}_{key}" if self.name else key)
+            for key, peaks in groups.items()
+        }
 
     def statistics(self) -> dict:
         """
@@ -482,15 +495,18 @@ class PeakList:
         """
         if not self._peaks:
             return {
-                'count': 0,
-                'dimensions': None,
-                'assigned_count': 0,
-                'intensities': None
+                "count": 0,
+                "dimensions": None,
+                "assigned_count": 0,
+                "intensities": None,
             }
 
         intensities = [p.intensity for p in self._peaks if p.intensity is not None]
-        assigned_count = sum(1 for p in self._peaks
-                           if p.assignments and any(a is not None for a in p.assignments))
+        assigned_count = sum(
+            1
+            for p in self._peaks
+            if p.assignments and any(a is not None for a in p.assignments)
+        )
 
         # Count peaks by dimension
         dim_counts = defaultdict(int)
@@ -498,19 +514,19 @@ class PeakList:
             dim_counts[peak.ndim] += 1
 
         stats = {
-            'count': len(self._peaks),
-            'dimensions': dict(dim_counts),
-            'assigned_count': assigned_count,
-            'unassigned_count': len(self._peaks) - assigned_count,
+            "count": len(self._peaks),
+            "dimensions": dict(dim_counts),
+            "assigned_count": assigned_count,
+            "unassigned_count": len(self._peaks) - assigned_count,
         }
 
         if intensities:
-            stats['intensities'] = {
-                'min': min(intensities),
-                'max': max(intensities),
-                'mean': np.mean(intensities),
-                'median': np.median(intensities),
-                'std': np.std(intensities)
+            stats["intensities"] = {
+                "min": min(intensities),
+                "max": max(intensities),
+                "mean": np.mean(intensities),
+                "median": np.median(intensities),
+                "std": np.std(intensities),
             }
 
         return stats
@@ -523,14 +539,14 @@ class PeakList:
             Dictionary containing peak list data
         """
         return {
-            'name': self.name,
-            'count': len(self._peaks),
-            'peaks': [peak.to_dict() for peak in self._peaks],
-            'metadata': self._metadata,
+            "name": self.name,
+            "count": len(self._peaks),
+            "peaks": [peak.to_dict() for peak in self._peaks],
+            "metadata": self._metadata,
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'PeakList':
+    def from_dict(cls, data: dict) -> "PeakList":
         """
         Create PeakList from dictionary representation.
 
@@ -540,8 +556,8 @@ class PeakList:
         Returns:
             PeakList object
         """
-        peaks = [NmrPeak.from_dict(peak_data) for peak_data in data['peaks']]
-        return cls(peaks, name=data.get('name'), metadata=data.get('metadata'))
+        peaks = [NmrPeak.from_dict(peak_data) for peak_data in data["peaks"]]
+        return cls(peaks, name=data.get("name"), metadata=data.get("metadata"))
 
     def save(self, file_path: Union[str, Path], indent: int = 2) -> None:
         """
@@ -560,11 +576,11 @@ class PeakList:
         # Ensure parent directory exists
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(self.to_dict(), f, indent=indent)
 
     @classmethod
-    def load(cls, file_path: Union[str, Path]) -> 'PeakList':
+    def load(cls, file_path: Union[str, Path]) -> "PeakList":
         """
         Load peak list from a JSON file.
 
@@ -587,7 +603,7 @@ class PeakList:
         if not file_path.exists():
             raise FileNotFoundError(f"Peak list file not found: {file_path}")
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = json.load(f)
 
         return cls.from_dict(data)
@@ -596,7 +612,7 @@ class PeakList:
         """Return number of peaks in the list."""
         return len(self._peaks)
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[NmrPeak, 'PeakList']:
+    def __getitem__(self, index: Union[int, slice]) -> Union[NmrPeak, "PeakList"]:
         """
         Get peak(s) by index or slice.
 
@@ -639,7 +655,9 @@ class PeakList:
             dim_counts[peak.ndim] += 1  # Increment count for each ndim
 
         # Generate the formatted output (this part sorts the ndim counts)
-        dim_info = ", ".join(f"{dim}D: {count}" for dim, count in sorted(dim_counts.items()))
+        dim_info = ", ".join(
+            f"{dim}D: {count}" for dim, count in sorted(dim_counts.items())
+        )
 
         name_str = f"'{self.name}', " if self.name else ""
         return f"PeakList({name_str}{len(self._peaks)} peaks, {dim_info})"

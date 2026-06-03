@@ -44,8 +44,11 @@ def init_unit_converters(self) -> None:
             car_hz = car_ppm * self._frequencies[dim]
 
             self._unit_converters[dim] = unit_conversion(
-                self._data.shape[dim], True, sw_hz,
-                self._frequencies[dim], car_hz,
+                self._data.shape[dim],
+                True,
+                sw_hz,
+                self._frequencies[dim],
+                car_hz,
             )
 
 
@@ -67,7 +70,9 @@ def get_ppm_scale(self, dimension: int) -> np.ndarray:
     return get_ppm_axis(self, dimension)
 
 
-def ppm_to_index(self, dimension: int, ppm_value: Union[float, int, str, TimeValue]) -> int:
+def ppm_to_index(
+    self, dimension: int, ppm_value: Union[float, int, str, TimeValue]
+) -> int:
     if dimension < 0 or dimension >= self._ndim:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
@@ -114,7 +119,7 @@ def get_label_text(self, dimension: int) -> str:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
     if self._nuclei is None:
-        return f'δ (dim {dimension}) [ppm]'
+        return f"δ (dim {dimension}) [ppm]"
 
     nucleus = self._nuclei[dimension]
     match = re.match(r"(\d+)([A-Za-z]+)", nucleus)

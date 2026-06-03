@@ -5,8 +5,8 @@ from .peak_list_collection import PeakListCollection
 
 
 __all__ = [
-    'NmrPeak',
-    'SyntheticPeak',
-    'PeakList',
-    'PeakListCollection',
+    "NmrPeak",
+    "SyntheticPeak",
+    "PeakList",
+    "PeakListCollection",
 ]

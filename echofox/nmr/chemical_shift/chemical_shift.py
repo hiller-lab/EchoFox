@@ -5,7 +5,7 @@ from ..config import config
 from .exceptions import (
     InvalidChemicalShiftFormat,
     UnsupportedChemicalShiftType,
-    ChemicalShiftRangeError
+    ChemicalShiftRangeError,
 )
 
 
@@ -36,11 +36,15 @@ class ChemicalShift:
         val: Union[int, float, str],
         validate_range: bool = None,
         min_ppm: float = None,
-        max_ppm: float = None
+        max_ppm: float = None,
     ):
         self._min_ppm = min_ppm if min_ppm is not None else config.chemical_shift_min
         self._max_ppm = max_ppm if max_ppm is not None else config.chemical_shift_max
-        self._validate_range = validate_range if validate_range is not None else config.validate_chemical_shifts
+        self._validate_range = (
+            validate_range
+            if validate_range is not None
+            else config.validate_chemical_shifts
+        )
         self._ppm = self._convert_to_float(val)
 
     @property
@@ -99,11 +103,13 @@ class ChemicalShift:
         value = value.strip()
 
         # If no 'ppm' suffix, add it for parsing
-        if not re.search(r'ppm$', value, re.IGNORECASE):
-            value = value + ' ppm'
+        if not re.search(r"ppm$", value, re.IGNORECASE):
+            value = value + " ppm"
 
         # Match strings like "3.5 ppm", "3.5ppm", "-0.5 PPM"
-        match = re.match(r"^([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*ppm$", value, re.IGNORECASE)
+        match = re.match(
+            r"^([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*ppm$", value, re.IGNORECASE
+        )
         if match:
             return float(match.group(1))
         else:

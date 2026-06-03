@@ -20,10 +20,7 @@ def get_intensity_at(self, *ppm_values: float) -> float:
     if len(ppm_values) != self._ndim:
         raise DimensionMismatchError("ppm_values", self._ndim, len(ppm_values))
 
-    indices = tuple(
-        self.ppm_to_index(dim, ppm)
-        for dim, ppm in enumerate(ppm_values)
-    )
+    indices = tuple(self.ppm_to_index(dim, ppm) for dim, ppm in enumerate(ppm_values))
     return float(self._data[indices])
 
 

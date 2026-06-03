@@ -3,6 +3,7 @@
 
 class Spectrum2DError(Exception):
     """Base exception for 2D spectrum plotting errors."""
+
     pass
 
 
