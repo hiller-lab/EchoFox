@@ -1,23 +1,22 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Union
-
 import numpy as np
 
+from echofox.core.time import TimeRange
 from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
-from echofox.core.time import TimeRange, TimeValue
+
 from ..config import config
 from . import axes
 from .exceptions import (
     DimensionMismatchError,
-    InvalidDimensionIndexError,
     InvalidDimensionalityError,
+    InvalidDimensionIndexError,
     InvalidPpmRangeError,
     InvalidSliceError,
 )
 
 
-def get_row(self, idx: Union[int, str, float, ChemicalShift]) -> np.ndarray:
+def get_row(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
     if self._ndim != 2:
         raise InvalidDimensionalityError(self._ndim, expected=2)
 
@@ -37,16 +36,14 @@ def get_row(self, idx: Union[int, str, float, ChemicalShift]) -> np.ndarray:
     return self._data[row_index]
 
 
-def get_column(self, idx: Union[int, str, float, ChemicalShift]) -> np.ndarray:
+def get_column(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
     if self._ndim != 2:
         raise InvalidDimensionalityError(self._ndim, expected=2)
 
     if isinstance(idx, int):
         if 0 <= idx < len(self._data[0]):
             return self._data[:, idx]
-        raise InvalidSliceError(
-            f"Column index {idx} out of range [0, {len(self._data[0])})"
-        )
+        raise InvalidSliceError(f"Column index {idx} out of range [0, {len(self._data[0])})")
 
     if isinstance(idx, (str, float)):
         chemical_shift = ChemicalShift(idx)
@@ -124,11 +121,9 @@ def extract_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0):
 def extract_subspectrum(
     self,
     dimension_positions: dict,
-    tolerance: Optional[float] = None,
+    tolerance: float | None = None,
 ):
-    sub_data, slice_indices, slice_ppm_actual = get_subspectrum(
-        self, dimension_positions, tolerance
-    )
+    sub_data, slice_indices, slice_ppm_actual = get_subspectrum(self, dimension_positions, tolerance)
 
     remaining_dims = [d for d in range(self._ndim) if d not in dimension_positions]
 
@@ -143,7 +138,7 @@ def extract_subspectrum(
         frequencies = [self._frequencies[d] for d in remaining_dims]
 
     sub_name = self._name or "spectrum"
-    position_strs: List[str] = []
+    position_strs: list[str] = []
     for dim in sorted(dimension_positions.keys()):
         dim_nucleus = self._nuclei[dim] if self._nuclei else f"dim{dim}"
         position_strs.append(f"{dim_nucleus}={dimension_positions[dim]:.2f}")
@@ -174,7 +169,7 @@ def extract_subspectrum(
 def extract_trace(
     self,
     trace_dimension: int,
-    dimension_positions: Union[float, List[float], dict],
+    dimension_positions: float | list[float] | dict,
 ):
     if self._ndim == 1:
         raise InvalidDimensionalityError(self._ndim, expected="2D or higher")
@@ -200,9 +195,7 @@ def extract_trace(
                 len(dims_to_slice),
                 len(dimension_positions),
             )
-        dimension_dict = {
-            dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions)
-        }
+        dimension_dict = {dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions, strict=True)}
 
     elif isinstance(dimension_positions, dict):
         dimension_dict = {int(k): float(v) for k, v in dimension_positions.items()}
@@ -214,9 +207,7 @@ def extract_trace(
                 len(dimension_dict),
             )
     else:
-        raise InvalidSliceError(
-            f"Invalid dimension_positions type: {type(dimension_positions)}"
-        )
+        raise InvalidSliceError(f"Invalid dimension_positions type: {type(dimension_positions)}")
 
     trace_data, slice_indices, slice_ppm_actual = get_subspectrum(self, dimension_dict)
 
@@ -228,7 +219,7 @@ def extract_trace(
     frequency = self._frequencies[trace_dimension] if self._frequencies else None
 
     trace_name = self._name or "spectrum"
-    position_strs: List[str] = []
+    position_strs: list[str] = []
     for dim in sorted(dimension_dict.keys()):
         dim_nucleus = self._nuclei[dim] if self._nuclei else f"dim{dim}"
         position_strs.append(f"{dim_nucleus}={dimension_dict[dim]:.2f}")
@@ -257,8 +248,8 @@ def extract_trace(
 def get_subspectrum(
     self,
     dimension_positions: dict,
-    tolerance: Optional[float] = None,
-) -> Tuple[np.ndarray, dict, dict]:
+    tolerance: float | None = None,
+) -> tuple[np.ndarray, dict, dict]:
     if not dimension_positions:
         raise DimensionMismatchError("dimension_positions", "at least 1", 0)
 

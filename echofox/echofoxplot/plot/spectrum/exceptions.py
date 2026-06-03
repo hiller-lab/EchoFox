@@ -3,6 +3,7 @@
 
 class Spectrum2DError(Exception):
     """Base exception for 2D spectrum plotting errors."""
+
     pass
 
 
@@ -43,6 +44,9 @@ class InvalidInsetError(Spectrum2DError):
     """Raised when inset specification is invalid."""
 
     def __init__(self, inset):
-        message = f"Invalid inset specification: {inset}. Expected (excerpt, position, size) or (excerpt, position, size, kwargs)"
+        message = (
+            f"Invalid inset specification: {inset}. Expected (excerpt, position, size) or (excerpt, position, size, "
+            f"kwargs)"
+        )
         super().__init__(message)
         self.inset = inset

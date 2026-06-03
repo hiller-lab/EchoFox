@@ -3,42 +3,38 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
-from matplotlib.axes import Axes
-
-# Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
-rcParams['pdf.fonttype'] = 42
-rcParams['ps.fonttype'] = 42
-rcParams['figure.constrained_layout.use'] = True
 
 # Import echofox.core components
-from echofox.utils.units import convert_to_inches
-from echofox.core.typing import Number
 from echofox.core.colors import Color
+from echofox.core.typing import Number
+
+# Import echofoxplot axes
+from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
+from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
+
+# Import plotting functions from echofoxplot
+from echofox.echofoxplot.plot.spectrum.spectrum2d import plot2d as _plot2d
+from echofox.utils.units import convert_to_inches
 
 # Import echofoxplot config
 from .config import config
 
-# Expose utils
-from echofox.echofoxplot.plot.utils import configure_font
-
-# Import echofoxplot axes
-from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
-
-# Import plotting functions from echofoxplot
-from echofox.echofoxplot.plot.spectrum.spectrum2d import plot2d as _plot2d
-from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
-
+# Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
+rcParams["pdf.fonttype"] = 42
+rcParams["ps.fonttype"] = 42
+rcParams["figure.constrained_layout.use"] = True
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Helper function to determine and return the current figure and axis to plot on
 #
 
+
 def _get_context(
     current_figure: Figure | None = None,
     current_ax: SpectrumAxes | None = None,
     figure_size: tuple[Number, Number] | tuple[str, str] = None,
-    spectrum_axes: bool = True
-) -> tuple[Figure, SpectrumAxes]:
+    spectrum_axes: bool = True,
+):
     """
     Returns a figure and axis object to plot on. If none exist, they are created.
     This function supports both standard and SpectrumAxes (a specialized axis class).
@@ -63,7 +59,7 @@ def _get_context(
     if current_ax is None:
         if figure.get_axes() == []:
             if spectrum_axes:
-                ax = figure.add_subplot(111, projection='SpectrumAxes')  # Custom projection
+                ax = figure.add_subplot(111, projection="SpectrumAxes")  # Custom projection
             else:
                 ax = figure.add_subplot(111)
         else:
@@ -74,23 +70,23 @@ def _get_context(
     return figure, ax
 
 
-def _create_new_context(spectrum_axes: bool = True) -> tuple[Figure, SpectrumAxes]:
+def _create_new_context(spectrum_axes: bool = True):
     """
     Returns a figure and axis object to plot on.
     This function supports both standard and SpectrumAxes (a specialized axis class).
     """
     figure = Figure()
     if spectrum_axes:
-        ax = figure.add_subplot(111, projection='SpectrumAxes')  # Custom projection
+        ax = figure.add_subplot(111, projection="SpectrumAxes")  # Custom projection
     else:
         ax = figure.add_subplot(111)
     return figure, ax
 
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # High-level MiraPlot plotting functions
 #
+
 
 def plot2d(
     *args,
@@ -98,14 +94,14 @@ def plot2d(
     current_ax: SpectrumAxes | None = None,
     dpi: Number = None,
     figure_size: tuple[Number, Number] | tuple[str, str] = None,
-    **kwargs
-) -> tuple[Figure, SpectrumAxes]:
+    **kwargs,
+):
     """
     Wrapper for 2D spectrum plotting using MiraPlot.
     """
     figure, ax = _get_context(current_figure, current_ax, figure_size)
     figure.set_dpi(dpi if dpi is not None else config.figure_dpi)
-    return _plot2d(current_ax=ax, current_figure=figure, *args, **kwargs)
+    return _plot2d(*args, current_ax=ax, current_figure=figure, **kwargs)
 
 
 def plot1d(
@@ -114,14 +110,14 @@ def plot1d(
     current_ax: SpectrumAxes | None = None,
     dpi: Number = None,
     figure_size: tuple[Number, Number] | tuple[str, str] = None,
-    **kwargs
-) -> tuple[Figure, SpectrumAxes]:
+    **kwargs,
+):
     """
     Wrapper for 1D spectrum plotting using MiraPlot.
     """
     figure, ax = _get_context(current_figure, current_ax, figure_size)
     figure.set_dpi(dpi if dpi is not None else config.figure_dpi)
-    return _plot1d(current_ax=ax, current_figure=figure, *args, **kwargs)
+    return _plot1d(*args, current_ax=ax, current_figure=figure, **kwargs)
 
 
 def plot_empty(
@@ -130,15 +126,15 @@ def plot_empty(
     current_ax: SpectrumAxes | None = None,
     dpi: Number = None,
     figure_size: tuple[Number, Number] | tuple[str, str] = None,
-    **kwargs
-) -> tuple[Figure, SpectrumAxes]:
+    **kwargs,
+):
     """
     Wrapper for empty 2D spectrum plotting using MiraPlot.
     """
     figure, ax = _get_context(current_figure, current_ax, figure_size)
     figure.set_dpi(dpi if dpi is not None else config.figure_dpi)
 
-    plt.text(0.4,0.5,"No spectrum available.")
+    plt.text(0.4, 0.5, "No spectrum available.")
     return figure, ax
 
 
@@ -146,12 +142,13 @@ def plot_empty(
 # Utility functions to set background colors
 #
 
+
 def set_figure_background(
-    color: str = 'white',
+    color: str = "white",
     current_figure: Figure | None = None,
     current_ax: SpectrumAxes | None = None,
-    **kwargs
-) -> None:
+    **kwargs,
+):
     """
     Set the background color of the figure canvas.
     """
@@ -160,11 +157,11 @@ def set_figure_background(
 
 
 def set_axes_background(
-    color: str | list[str] = 'white',
+    color: str | list[str] = "white",
     current_figure: Figure | None = None,
     current_ax: SpectrumAxes | None = None,
-    **kwargs
-) -> None:
+    **kwargs,
+):
     """
     Set the background color for each axis in the figure. Accepts a list for multiple axes.
     """
@@ -175,14 +172,24 @@ def set_axes_background(
     axes = figure.get_axes()
 
     for i, ax in enumerate(axes):
-        ax.add_patch(Rectangle((0, 0), 1, 1, transform=ax.transAxes,
-                                   color=Color(color[i % len(color)]).hex, zorder=-1))  # Ensure it's behind content
+        ax.add_patch(
+            Rectangle(
+                (0, 0),
+                1,
+                1,
+                transform=ax.transAxes,
+                color=Color(color[i % len(color)]).hex,
+                zorder=-1,
+            )
+        )  # Ensure it's behind content
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Wrapper functions for matplotlib
 #
 
-def figure(*args,**kwargs) -> Figure:
+
+def figure(*args, **kwargs):
     """Create a new matplotlib figure."""
     return plt.figure(*args, **kwargs)
 
@@ -205,5 +212,6 @@ def savefig(*args, **kwargs) -> None:
 def close(*args, **kwargs) -> None:
     """Close the current figure."""
     plt.close(*args, **kwargs)
+
 
 # ----------------------------------------------------------------------------------------------------------------------

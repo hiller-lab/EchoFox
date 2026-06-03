@@ -1,27 +1,26 @@
 """Aminoacids database schema configuration"""
 
+import logging
 import os
+from typing import Any
+
 import yaml
 
-import logging
-from typing import Dict, List, Any, Optional
-
 from .exceptions import (
-    SchemaFileNotFoundError,
-    SchemaParseError,
-    SchemaMissingFieldError,
+    AminoAcidNotFoundError,
     SchemaError,
-    AminoAcidNotFoundError
+    SchemaFileNotFoundError,
+    SchemaMissingFieldError,
+    SchemaParseError,
 )
 
-
-
 log = logging.getLogger(__name__)
+
 
 class AminoAcidsDatabase:
     """Load and manage amino acids schema from YAML configuration"""
 
-    def __init__(self, schema_path: Optional[str] = None):
+    def __init__(self, schema_path: str | None = None):
         """
         Initialize schema loader
 
@@ -33,7 +32,7 @@ class AminoAcidsDatabase:
         if schema_path is None:
             # Default to amino_acids.yaml in the same directory
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            schema_path = os.path.join(current_dir, 'aminoacids.yaml')
+            schema_path = os.path.join(current_dir, "aminoacids.yaml")
 
         self.schema_path = schema_path
         self.amino_acids = []
@@ -44,23 +43,17 @@ class AminoAcidsDatabase:
     def _load_schema(self):
         """Load schema from the YAML file"""
         try:
-            with open(self.schema_path, 'r', encoding='utf-8') as f:
+            with open(self.schema_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
-            if 'amino_acids' not in data:
+            if "amino_acids" not in data:
                 raise SchemaMissingFieldError("Schema file missing 'amino_acids' section")
 
-            self.amino_acids = data['amino_acids']
+            self.amino_acids = data["amino_acids"]
 
             # Build amino acid maps for quick lookup
-            self._aa_map = {
-                aa['one_letter']: aa
-                for aa in self.amino_acids
-            }
-            self._three_letter_map = {
-                aa['three_letters']: aa
-                for aa in self.amino_acids
-            }
+            self._aa_map = {aa["one_letter"]: aa for aa in self.amino_acids}
+            self._three_letter_map = {aa["three_letters"]: aa for aa in self.amino_acids}
 
             log.info(f"Loaded {len(self.amino_acids)} amino acid definitions from {self.schema_path}")
 
@@ -76,7 +69,7 @@ class AminoAcidsDatabase:
             log.error(f"Error loading schema: {e}")
             raise SchemaError(f"Error loading schema: {e}") from e
 
-    def get_aa_codes(self) -> List[str]:
+    def get_aa_codes(self) -> list[str]:
         """
         Get the list of amino acids in one-letter code in order
 
@@ -85,9 +78,9 @@ class AminoAcidsDatabase:
         list of str
             One-letter code for all amino acids
         """
-        return [aa['one_letter'] for aa in self.amino_acids]
+        return [aa["one_letter"] for aa in self.amino_acids]
 
-    def get_aa_by_code(self, one_letter: str, strict: bool = True) -> Optional[Dict[str, Any]]:
+    def get_aa_by_code(self, one_letter: str, strict: bool = True) -> dict[str, Any] | None:
         """
         Get amino acid from a one-letter code
 
@@ -114,7 +107,7 @@ class AminoAcidsDatabase:
             raise AminoAcidNotFoundError(one_letter, search_type="code")
         return aa
 
-    def get_aa_by_full_name(self, full_name: str, strict: bool = True) -> Optional[Dict[str, Any]]:
+    def get_aa_by_full_name(self, full_name: str, strict: bool = True) -> dict[str, Any] | None:
         """
         Get amino acid from the full name
 
@@ -137,7 +130,7 @@ class AminoAcidsDatabase:
             If amino acid is not found and strict=True
         """
         for aa in self.amino_acids:
-            if aa['name'] == full_name:
+            if aa["name"] == full_name:
                 return aa
         if strict:
             raise AminoAcidNotFoundError(full_name, search_type="name")
@@ -168,7 +161,7 @@ class AminoAcidsDatabase:
         aa = self._aa_map.get(one_letter)
         if aa is None and strict:
             raise AminoAcidNotFoundError(one_letter, search_type="code")
-        return aa['name'] if aa else one_letter
+        return aa["name"] if aa else one_letter
 
     def get_code(self, full_name: str, strict: bool = True) -> str:
         """
@@ -193,7 +186,7 @@ class AminoAcidsDatabase:
             If amino acid is not found and strict=True
         """
         aa = self.get_aa_by_full_name(full_name, strict=strict)
-        return aa['one_letter'] if aa else full_name
+        return aa["one_letter"] if aa else full_name
 
     def get_three_letter_code(self, one_letter: str, strict: bool = True) -> str:
         """
@@ -220,7 +213,7 @@ class AminoAcidsDatabase:
         aa = self._aa_map.get(one_letter)
         if aa is None and strict:
             raise AminoAcidNotFoundError(one_letter, search_type="code")
-        return aa['three_letters'] if aa else one_letter
+        return aa["three_letters"] if aa else one_letter
 
     def get_one_letter_code(self, three_letters: str, strict: bool = True) -> str:
         """
@@ -247,7 +240,8 @@ class AminoAcidsDatabase:
         aa = self._three_letter_map.get(three_letters)
         if aa is None and strict:
             raise AminoAcidNotFoundError(three_letters, search_type="three_letter_code")
-        return aa['one_letter'] if aa else three_letters
+        return aa["one_letter"] if aa else three_letters
+
 
 # Global instance (singleton pattern)
 AA_DATABASE = AminoAcidsDatabase()

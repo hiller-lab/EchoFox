@@ -2,6 +2,7 @@
 Custom exceptions for TimeRange operations.
 """
 
+
 class TimeRangeError(Exception):
     """Base class for time range-related exceptions."""
 

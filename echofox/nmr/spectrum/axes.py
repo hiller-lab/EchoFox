@@ -1,25 +1,25 @@
 from __future__ import annotations
 
 import re
-from typing import Optional, Tuple, Union
 
 import numpy as np
 from nmrglue.fileio.fileiobase import unit_conversion
 
-from echofox.nmr.chemical_shift import PpmRange
 from echofox.core.time import TimeRange, TimeValue
+from echofox.nmr.chemical_shift import PpmRange
+
 from .exceptions import InvalidDimensionIndexError, InvalidPpmRangeError
 
 
-def range_bounds(range_obj: Union[PpmRange, TimeRange]) -> Tuple[float, float]:
+def range_bounds(range_obj: PpmRange | TimeRange) -> tuple[float, float]:
     if isinstance(range_obj, TimeRange):
         return range_obj.low_seconds, range_obj.high_seconds
     return range_obj.low_ppm, range_obj.high_ppm
 
 
 def coerce_range_value(
-    range_obj: Union[PpmRange, TimeRange],
-    value: Union[float, int, str, TimeValue],
+    range_obj: PpmRange | TimeRange,
+    value: float | int | str | TimeValue,
 ) -> float:
     if isinstance(range_obj, TimeRange):
         if isinstance(value, TimeValue):
@@ -44,8 +44,11 @@ def init_unit_converters(self) -> None:
             car_hz = car_ppm * self._frequencies[dim]
 
             self._unit_converters[dim] = unit_conversion(
-                self._data.shape[dim], True, sw_hz,
-                self._frequencies[dim], car_hz,
+                self._data.shape[dim],
+                True,
+                sw_hz,
+                self._frequencies[dim],
+                car_hz,
             )
 
 
@@ -67,7 +70,7 @@ def get_ppm_scale(self, dimension: int) -> np.ndarray:
     return get_ppm_axis(self, dimension)
 
 
-def ppm_to_index(self, dimension: int, ppm_value: Union[float, int, str, TimeValue]) -> int:
+def ppm_to_index(self, dimension: int, ppm_value: float | int | str | TimeValue) -> int:
     if dimension < 0 or dimension >= self._ndim:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
@@ -95,14 +98,14 @@ def index_to_ppm(self, dimension: int, index: int) -> float:
     return float(ppm_axis[index])
 
 
-def get_nucleus(self, dimension: int) -> Optional[str]:
+def get_nucleus(self, dimension: int) -> str | None:
     if dimension < 0 or dimension >= self._ndim:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
     return self._nuclei[dimension] if self._nuclei else None
 
 
-def get_frequency(self, dimension: int) -> Optional[float]:
+def get_frequency(self, dimension: int) -> float | None:
     if dimension < 0 or dimension >= self._ndim:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
@@ -114,7 +117,7 @@ def get_label_text(self, dimension: int) -> str:
         raise InvalidDimensionIndexError(dimension, self._ndim)
 
     if self._nuclei is None:
-        return f'δ (dim {dimension}) [ppm]'
+        return f"δ (dim {dimension}) [ppm]"
 
     nucleus = self._nuclei[dimension]
     match = re.match(r"(\d+)([A-Za-z]+)", nucleus)

@@ -3,16 +3,16 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Union
 
 import nmrglue as ng
 import numpy as np
 from nmrglue.fileio.fileiobase import unit_conversion
 
+from echofox.core.time import TimeRange, TimeValue
 from echofox.core.time.exceptions import InvalidTimeValueError
 from echofox.core.typing import Number
-from echofox.core.time import TimeRange, TimeValue
 from echofox.nmr.config import config
+
 from .exceptions import (
     CouldNotReadSpectrumError,
     DimensionMismatchError,
@@ -22,12 +22,11 @@ from .exceptions import (
 from .types import SpectrumFormat
 
 
-
 def from_file(
     cls,
     path: str,
     spectrum_format: SpectrumFormat = None,
-    name: Optional[str] = None,
+    name: str | None = None,
 ):
     """
     Create NmrSpectrum from a file.
@@ -38,14 +37,14 @@ def from_file(
     if spectrum_format not in cls.SUPPORTED_FORMATS:
         raise InvalidSpectrumFormatError(spectrum_format, cls.SUPPORTED_FORMATS)
 
-    if spectrum_format == 'bruker':
+    if spectrum_format == "bruker":
         return _from_bruker(cls, path, name)
-    if spectrum_format == 'pipe':
+    if spectrum_format == "pipe":
         return _from_pipe(cls, path, name)
     raise InvalidSpectrumFormatError(spectrum_format, cls.SUPPORTED_FORMATS)
 
 
-def _from_bruker(cls, path: str, name: Optional[str] = None):
+def _from_bruker(cls, path: str, name: str | None = None):
     """Create spectrum from Bruker format."""
     if not os.path.isdir(path):
         raise SpectrumFileNotFoundError(path, "directory")
@@ -54,12 +53,12 @@ def _from_bruker(cls, path: str, name: Optional[str] = None):
         dic, data = ng.bruker.read_pdata(path)
         udic = ng.bruker.guess_udic(dic, data)
     except Exception as exc:
-        raise CouldNotReadSpectrumError(path, str(exc))
+        raise CouldNotReadSpectrumError(path, str(exc)) from exc
 
-    return _from_udic(cls, data, dic, udic, name, path, 'bruker')
+    return _from_udic(cls, data, dic, udic, name, path, "bruker")
 
 
-def _from_pipe(cls, path: str, name: Optional[str] = None):
+def _from_pipe(cls, path: str, name: str | None = None):
     """Create spectrum from NMRPipe format."""
     if not os.path.isfile(path):
         raise SpectrumFileNotFoundError(path, "file")
@@ -68,20 +67,20 @@ def _from_pipe(cls, path: str, name: Optional[str] = None):
         dic, data = ng.pipe.read(path)
         udic = ng.pipe.guess_udic(dic, data)
     except Exception as exc:
-        raise CouldNotReadSpectrumError(path, str(exc))
+        raise CouldNotReadSpectrumError(path, str(exc)) from exc
 
-    return _from_udic(cls, data, dic, udic, name, path, 'pipe')
+    return _from_udic(cls, data, dic, udic, name, path, "pipe")
 
 
 def from_pseudo_nd(
     cls,
-    path: Union[str, List[str]],
-    spectrum_format: SpectrumFormat = 'pipe',
-    name: Optional[str] = None,
+    path: str | list[str],
+    spectrum_format: SpectrumFormat = "pipe",
+    name: str | None = None,
     file_pattern: str = "*.ft*",
-    pseudo_axis_values: Optional[List[Number | str]] = None,
-    pseudo_axis_label: str = 'pseudo',
-    pseudo_axis_unit: Optional[str] = None,
+    pseudo_axis_values: list[Number | str] | None = None,
+    pseudo_axis_label: str = "pseudo",
+    pseudo_axis_unit: str | None = None,
 ):
     """
     Load pseudo-(N+1)D spectrum from multiple ND spectra.
@@ -114,7 +113,7 @@ def from_pseudo_nd(
             spec = cls.from_file(str(f), spectrum_format)
             spectra.append(spec)
         except Exception as exc:
-            raise CouldNotReadSpectrumError(str(f), str(exc))
+            raise CouldNotReadSpectrumError(str(f), str(exc)) from exc
 
     if not spectra:
         raise SpectrumFileNotFoundError(str(path), "readable spectra")
@@ -123,20 +122,16 @@ def from_pseudo_nd(
     base_ndim = spectra[0].ndim
     for i, spec in enumerate(spectra[1:], 1):
         if spec.shape != base_shape:
-            raise DimensionMismatchError(
-                f"spectrum[{i}] shape", base_shape, spec.shape
-            )
+            raise DimensionMismatchError(f"spectrum[{i}] shape", base_shape, spec.shape)
 
     if pseudo_axis_values is not None:
         if len(pseudo_axis_values) != len(spectra):
-            raise DimensionMismatchError(
-                "pseudo_axis_values", len(spectra), len(pseudo_axis_values)
-            )
+            raise DimensionMismatchError("pseudo_axis_values", len(spectra), len(pseudo_axis_values))
 
     stacked_data = np.stack([s.data for s in spectra], axis=0)
 
-    def _coerce_to_float(values: List[Number | str]) -> Optional[List[float]]:
-        numeric_values: List[float] = []
+    def _coerce_to_float(values: list[Number | str]) -> list[float] | None:
+        numeric_values: list[float] = []
         for value in values:
             try:
                 numeric_values.append(float(value))
@@ -144,8 +139,8 @@ def from_pseudo_nd(
                 return None
         return numeric_values
 
-    def _coerce_to_seconds(values: List[Number | str]) -> Optional[List[float]]:
-        seconds_values: List[float] = []
+    def _coerce_to_seconds(values: list[Number | str]) -> list[float] | None:
+        seconds_values: list[float] = []
         for value in values:
             try:
                 if pseudo_axis_unit and isinstance(value, (int, float)):
@@ -161,14 +156,13 @@ def from_pseudo_nd(
                 return None
         return seconds_values
 
-    pseudo_axis_numeric: Optional[List[float]] = None
-    pseudo_axis_seconds: Optional[List[float]] = None
+    pseudo_axis_numeric: list[float] | None = None
+    pseudo_axis_seconds: list[float] | None = None
 
     if pseudo_axis_values is not None:
         label_is_time = bool(pseudo_axis_label) and "time" in pseudo_axis_label.lower()
         values_have_units = any(
-            isinstance(value, str) and re.search(r"[a-zA-Z]", value)
-            for value in pseudo_axis_values
+            isinstance(value, str) and re.search(r"[a-zA-Z]", value) for value in pseudo_axis_values
         )
         if pseudo_axis_unit or label_is_time or values_have_units:
             pseudo_axis_seconds = _coerce_to_seconds(pseudo_axis_values)
@@ -193,7 +187,7 @@ def from_pseudo_nd(
     if base_nuclei:
         nuclei = [pseudo_axis_label] + base_nuclei
     else:
-        nuclei = [pseudo_axis_label] + ['unknown'] * base_ndim
+        nuclei = [pseudo_axis_label] + ["unknown"] * base_ndim
 
     base_freqs = spectra[0].frequencies
     if base_freqs:
@@ -231,7 +225,7 @@ def _from_udic(
     data: np.ndarray,
     dic: dict,
     udic: dict,
-    name: Optional[str],
+    name: str | None,
     path: str,
     spectrum_format: str,
 ):
@@ -244,27 +238,30 @@ def _from_udic(
     unit_converters = []
 
     for dim in range(ndim):
-        if spectrum_format == 'bruker':
+        if spectrum_format == "bruker":
             if ndim == 1:
-                procs_key = 'procs'
+                procs_key = "procs"
             else:
-                procs_key = f'proc{ndim - dim}s' if dim < ndim - 1 else 'procs'
+                procs_key = f"proc{ndim - dim}s" if dim < ndim - 1 else "procs"
                 if procs_key not in dic:
-                    procs_key = 'procs' if dim == ndim - 1 else f'proc{ndim - dim}s'
+                    procs_key = "procs" if dim == ndim - 1 else f"proc{ndim - dim}s"
 
             if procs_key in dic:
                 uc = unit_conversion(
-                    data.shape[dim], True,
-                    dic[procs_key]['SW_p'],
-                    dic[procs_key]['SF'],
-                    (dic[procs_key]['OFFSET'] -
-                     (dic[procs_key]['SW_p'] / dic[procs_key]['SF']) / 2) *
-                    dic[procs_key]['SF'],
+                    data.shape[dim],
+                    True,
+                    dic[procs_key]["SW_p"],
+                    dic[procs_key]["SF"],
+                    (dic[procs_key]["OFFSET"] - (dic[procs_key]["SW_p"] / dic[procs_key]["SF"]) / 2)
+                    * dic[procs_key]["SF"],
                 )
             else:
                 uc = unit_conversion(
-                    data.shape[dim], True,
-                    udic[dim]['sw'], udic[dim]['obs'], udic[dim]['car'],
+                    data.shape[dim],
+                    True,
+                    udic[dim]["sw"],
+                    udic[dim]["obs"],
+                    udic[dim]["car"],
                 )
         else:
             uc = ng.pipe.make_uc(dic, data, dim=dim)
@@ -274,12 +271,12 @@ def _from_udic(
         ppm_max, ppm_min = uc.ppm_limits()
         dimension_ranges.append((ppm_min, ppm_max))
 
-        label = udic[dim]['label']
-        if label == 'HN':
-            label = '1H'
+        label = udic[dim]["label"]
+        if label == "HN":
+            label = "1H"
         nuclei.append(label)
 
-        frequencies.append(udic[dim]['obs'])
+        frequencies.append(udic[dim]["obs"])
 
     spectrum = cls(
         data=data,

@@ -1,6 +1,6 @@
 # typing
-from typing import TypeAlias, Literal
-from typing import get_origin, get_args
+from typing import Literal, TypeAlias, get_args, get_origin
+
 from echofox.core.colors import Color
 
 Colors: TypeAlias = list[Color]
@@ -8,6 +8,7 @@ Number: TypeAlias = int | float
 
 
 # functions to check types
+
 
 def is_newtype_instance(value: object, newtype: type) -> bool:
     """Function to check if a variable follows a NewType or a Union of NewTypes."""
@@ -24,7 +25,6 @@ def is_newtype_instance(value: object, newtype: type) -> bool:
     return isinstance(value, newtype)
 
 
-
 def is_typealias_instance(value, expected_type) -> bool:
     """Check if a value follows the expected TypeAlias structure."""
 
@@ -33,15 +33,15 @@ def is_typealias_instance(value, expected_type) -> bool:
 
     if origin is tuple:
         return (
-            isinstance(value, tuple) and  # Must be a tuple
-            len(value) == len(args) and  # Must have the same number of elements
-            all(is_typealias_instance(v, t) for v, t in zip(value, args))  # Element-wise validation
+            isinstance(value, tuple)  # Must be a tuple
+            and len(value) == len(args)  # Must have the same number of elements
+            and all(is_typealias_instance(v, t) for v, t in zip(value, args, strict=True))  # Element-wise validation
         )
 
     elif origin is list:
         return (
-            isinstance(value, list) and  # Must be a list
-            all(is_typealias_instance(item, args[0]) for item in value)  # Recursively check each item
+            isinstance(value, list)  # Must be a list
+            and all(is_typealias_instance(item, args[0]) for item in value)  # Recursively check each item
         )
 
     elif origin is Literal:
@@ -49,4 +49,3 @@ def is_typealias_instance(value, expected_type) -> bool:
 
     # Otherwise, fallback to normal isinstance check
     return isinstance(value, expected_type)
-

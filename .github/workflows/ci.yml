@@ -1,9 +1,9 @@
 name: CI
 
 on:
-  workflow_dispatch: # Manual trigger
-  pull_request: # On PR
-  release: # Full release
+  workflow_dispatch:
+  pull_request:
+  release:
     types: [published]
 
 jobs:
@@ -28,6 +28,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Check formatting
+        run: ruff format --check .
 
       - name: Run tests
         run: pytest
