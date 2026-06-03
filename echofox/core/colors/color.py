@@ -32,9 +32,13 @@ class Color:
     Color("rgba(0 128 255 / 50%)")
     Color("hsl(120, 50%, 50%)")
     Color("hsla(240, 100%, 50%, 0.25)")
+    Color("hsv(120, 50%, 50%)")
+    Color("hsva(240, 100%, 50%, 0.25)")
     Color("blue")
     Color("transparent")
 
+    Color.from_hsv(120, 0.5, 0.5)
+    Color.from_hsva(240, 1.0, 0.5, 0.25)
     """
 
     _r: int = field(init=False, repr=False)
@@ -46,6 +50,7 @@ class Color:
     HEX_SHORT = re.compile(r"^#?([0-9A-Fa-f]{3})([0-9A-Fa-f]{1})?$")
     RGB_FUNC = re.compile(r"^rgba?\s*\((.+)\)$", re.IGNORECASE)
     HSL_FUNC = re.compile(r"^hsla?\s*\((.+)\)$", re.IGNORECASE)
+    HSV_FUNC = re.compile(r"^hsva?\s*\((.+)\)$", re.IGNORECASE)
 
     NAMED = mcolors.CSS4_COLORS
     if "transparent" not in NAMED:
@@ -55,9 +60,12 @@ class Color:
         """
         Accepts:
           - Color("#RGB" | "#RGBA" | "#RRGGBB" | "#RRGGBBAA")
-          - Color("rgb(...)" | "rgba(...)" | "hsl(...)" | "hsla(...)")
+          - Color("rgb(...)" | "rgba(...)" | "hsl(...)" | "hsla(...)" | "hsv(...)" | "hsva(...)")
           - Color(r, g, b)
           - Color(r, g, b, a)
+
+        For numeric HSV input, use ``Color.from_hsv(h, s, v)`` or
+        ``Color.from_hsva(h, s, v, a)`` to avoid ambiguity with RGB(A).
         """
         if len(args) == 1 and isinstance(args[0], str):
             self._init_from_string(args[0].strip())
@@ -68,6 +76,19 @@ class Color:
         else:
             raise InvalidColorInput(args)
 
+    # ------------ alternate constructors ------------
+    @classmethod
+    def from_hsv(cls, hue: float, saturation: float, value: float) -> "Color":
+        obj = cls.__new__(cls)
+        obj._init_from_hsv(hue, saturation, value)
+        return obj
+
+    @classmethod
+    def from_hsva(cls, hue: float, saturation: float, value: float, a: float) -> "Color":
+        obj = cls.__new__(cls)
+        obj._init_from_hsva(hue, saturation, value, a)
+        return obj
+
     # ------------ init helpers ------------
     def _init_from_rgb(self, r: int, g: int, b: int):
         self._check_rgb(r, g, b)
@@ -77,6 +98,16 @@ class Color:
         self._check_rgb(r, g, b)
         self._check_a(a)
         self._r, self._g, self._b, self._a = int(r), int(g), int(b), float(a)
+
+    def _init_from_hsv(self, hue: float, saturation: float, value: float):
+        self._init_from_hsva(hue, saturation, value, 1.0)
+
+    def _init_from_hsva(self, hue: float, saturation: float, value: float, a: float):
+        self._check_unit_interval("saturation", saturation)
+        self._check_unit_interval("value", value)
+        self._check_a(a)
+        r, g, b = self._hsv_to_rgb(float(hue) % 360.0, float(saturation), float(value))
+        self._init_from_rgba(r, g, b, a)
 
     def _init_from_hex(self, s: str):
         m = self.HEX_LONG.match(s)
@@ -162,6 +193,17 @@ class Color:
         r, g, b = self._hsl_to_rgb(hue, saturation, lightness)
         self._init_from_rgba(r, g, b, a)
 
+    def _init_from_hsv_func(self, inner: str):
+        parts = self._split_args(inner)
+        if len(parts) not in (3, 4):
+            raise InvalidColorComponent("hsv/hsva", inner, "3 or 4 components")
+        hue = self._parse_hue(parts[0])
+        saturation = self._parse_percent(parts[1])  # 0..1
+        value = self._parse_percent(parts[2])  # 0..1
+        a = 1.0 if len(parts) == 3 else self._parse_alpha(parts[3])
+        r, g, b = self._hsv_to_rgb(hue, saturation, value)
+        self._init_from_rgba(r, g, b, a)
+
     # ------------ parsers & converters ------------
     @staticmethod
     def _parse_rgb_component(tok: str) -> int:
@@ -233,6 +275,52 @@ class Color:
         b = int(round((b1 + m) * 255))
         return max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b))
 
+    @staticmethod
+    def _hsv_to_rgb(hue_deg: float, saturation: float, value: float) -> tuple[int, int, int]:
+        c = value * saturation
+        h = (hue_deg / 60.0) % 6
+        x = c * (1 - abs(h % 2 - 1))
+        if 0 <= h < 1:
+            r1, g1, b1 = c, x, 0
+        elif 1 <= h < 2:
+            r1, g1, b1 = x, c, 0
+        elif 2 <= h < 3:
+            r1, g1, b1 = 0, c, x
+        elif 3 <= h < 4:
+            r1, g1, b1 = 0, x, c
+        elif 4 <= h < 5:
+            r1, g1, b1 = x, 0, c
+        else:
+            r1, g1, b1 = c, 0, x
+        m = value - c
+        r = int(round((r1 + m) * 255))
+        g = int(round((g1 + m) * 255))
+        b = int(round((b1 + m) * 255))
+        return max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b))
+
+    @staticmethod
+    def _rgb_to_hsv(r: int, g: int, b: int) -> tuple[float, float, float]:
+        r_float = r / 255.0
+        g_float = g / 255.0
+        b_float = b / 255.0
+
+        max_component = max(r_float, g_float, b_float)
+        min_component = min(r_float, g_float, b_float)
+        delta = max_component - min_component
+
+        if delta == 0:
+            hue = 0.0
+        elif max_component == r_float:
+            hue = 60.0 * (((g_float - b_float) / delta) % 6)
+        elif max_component == g_float:
+            hue = 60.0 * (((b_float - r_float) / delta) + 2)
+        else:
+            hue = 60.0 * (((r_float - g_float) / delta) + 4)
+
+        saturation = 0.0 if max_component == 0 else delta / max_component
+        value = max_component
+        return hue % 360.0, saturation, value
+
     # ------------ validation ------------
     @staticmethod
     def _check_rgb(r, g, b):
@@ -245,6 +333,11 @@ class Color:
         if not (isinstance(a, (int, float)) and 0.0 <= float(a) <= 1.0):
             raise InvalidColorComponent("alpha", a, "0.0..1.0")
 
+    @staticmethod
+    def _check_unit_interval(component_name: str, value):
+        if not (isinstance(value, (int, float)) and 0.0 <= float(value) <= 1.0):
+            raise InvalidColorComponent(component_name, value, "0.0..1.0")
+
     # ------------ properties ------------
     @property
     def rgb(self) -> tuple[int, int, int]:
@@ -255,6 +348,15 @@ class Color:
         return (self._r, self._g, self._b, self._a)
 
     @property
+    def hsv(self) -> tuple[float, float, float]:
+        return self._rgb_to_hsv(self._r, self._g, self._b)
+
+    @property
+    def hsva(self) -> tuple[float, float, float, float]:
+        h, s, v = self.hsv
+        return h, s, v, self._a
+
+    @property
     def hex(self) -> str:
         if self._a < 1.0:
             return f"#{self._r:02X}{self._g:02X}{self._b:02X}{round(self._a * 255):02X}"
@@ -262,6 +364,10 @@ class Color:
 
     def to_css_rgba(self) -> str:
         return f"rgba({self._r}, {self._g}, {self._b}, {self._a:.3f})"
+
+    def to_css_hsva(self) -> str:
+        h, s, v, a = self.hsva
+        return f"hsva({h:.1f}, {s * 100:.1f}%, {v * 100:.1f}%, {a:.3f})"
 
     def __str__(self):
         return f"Color(rgb={self.rgb}, a={self._a:.2f}, hex='{self.hex}')"
