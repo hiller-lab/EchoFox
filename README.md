@@ -1,10 +1,18 @@
 <h1 align="center">
   <br>
-  <img src="logo_placeholder.jpg" width="220">
+  <img src="https://raw.githubusercontent.com/hiller-lab/EchoFox/main/logo_placeholder.jpg" width="220">
   <br>
   <b>EchoFox</b>
   <br>
 </h1>
+
+<p align="center">
+  <a href="https://pypi.org/project/echofox/"><img src="https://img.shields.io/pypi/pyversions/echofox" alt="Supported Python Versions"></a>
+  <a href="https://pypi.org/project/echofox/"><img src="https://badge.fury.io/py/echofox.svg" alt="PyPI version"></a>
+  <a href="https://www.biozentrum.unibas.ch/research/research-groups/research-groups-a-z/overview/unit/research-group-sebastian-hiller"><img src="https://img.shields.io/badge/Hiller%20Lab%20Homepage-8A2BE2" alt="The Hiller Lab Homepage"></a>
+</p>
+
+---
 
 ## General Information
 
@@ -19,13 +27,7 @@ In addition to NMR-related functionality, EchoFox also includes scripts and util
 The latest main release of EchoFox can be installed using pip:
 
 ```bash
-pip install echofox
-```
-
-The latest (potentially unstable) version can be installed by cloning the repository and installing it so:
-
-```bash
-[build instructions]
+python -m pip install echofox
 ```
 
 ## Short examples
