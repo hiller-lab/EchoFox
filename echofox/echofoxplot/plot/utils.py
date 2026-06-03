@@ -13,7 +13,7 @@ def _add_label(ax, label_list, label_kwargs_list) -> None:
 
         # add default kwargs for label to label_kwargs
         label_kwargs.setdefault("transform", ax.transAxes)
-        label_kwargs.setdefault("fontsize", 12)
+        label_kwargs.setdefault("fontsize", plt.rcParams["axes.labelsize"])
         label_kwargs.setdefault("verticalalignment", "top")
         label_kwargs.setdefault("horizontalalignment", "left")
         label_kwargs.setdefault("label_position", (0.02, 0.98))
