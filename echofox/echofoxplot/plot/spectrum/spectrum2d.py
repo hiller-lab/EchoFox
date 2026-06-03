@@ -2,54 +2,49 @@ import numpy as np
 
 # matplotlib
 from matplotlib import rcParams
-from matplotlib.ticker import StrMethodFormatter
-from matplotlib.patches import Rectangle
 from matplotlib.figure import Figure
-
+from matplotlib.patches import Rectangle
+from matplotlib.ticker import StrMethodFormatter
 
 # matplotlib.use('TkAgg')
 rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
 rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
 
-from typing import Union, List, Tuple, TypeAlias, Literal
+from typing import Literal, TypeAlias
 
 # echofox imports
-
 from echofox.core.typing import Number
-from echofox.nmr.spectrum import NmrSpectrum
-from echofox.nmr.spectrum import read_spectra
-from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
-from echofox.echofoxplot.config import config
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
-from echofox.echofoxplot.plot.utils import _add_label
-from echofox.echofoxplot.plot.utils import _add_legend
+from echofox.echofoxplot.config import config
 from echofox.echofoxplot.plot.spectrum.exceptions import (
-    InvalidSpectrumIndexError,
     InvalidAxisError,
-    LabelMismatchError,
     InvalidInsetError,
+    InvalidSpectrumIndexError,
+    LabelMismatchError,
 )
+from echofox.echofoxplot.plot.utils import _add_label, _add_legend
+from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
+from echofox.nmr.spectrum import NmrSpectrum, read_spectra
 
-
-Spectra: TypeAlias = Union[NmrSpectrum, List[NmrSpectrum]]
+Spectra: TypeAlias = NmrSpectrum | list[NmrSpectrum]
 TraceType2D: TypeAlias = list[
     ChemicalShift | Number,
     Literal["f1", "f2"],
-    Union[int, List[int]] | Literal["all"],
+    int | list[int] | Literal["all"],
     dict,
 ]
 ProjectionType2D: TypeAlias = list[
-    Literal["f1", "f2"], Union[int, List[int]] | Literal["all"], bool, dict
+    Literal["f1", "f2"], int | list[int] | Literal["all"], bool, dict
 ]
 
 
-class Trace2D(object):
+class Trace2D:
     def __init__(
         self,
         spectra: Spectra,
         chemical_shift: ChemicalShift | Number | str,
         axis: Literal["f1", "f2"],
-        spectrum_index: Union[int, List[int]] = 0,
+        spectrum_index: int | list[int] = 0,
         trace_kwargs: dict = None,
     ):
 
@@ -118,12 +113,12 @@ class Trace2D(object):
             raise InvalidAxisError(val)
 
 
-class Projection2D(object):
+class Projection2D:
     def __init__(
         self,
         spectra: Spectra,
         axis: Literal["f1", "f2"],
-        spectrum_index: Union[int, List[int]] = 0,
+        spectrum_index: int | list[int] = 0,
         is_external: bool = True,
         projection_kwargs: dict = None,
     ):
@@ -199,9 +194,9 @@ class Projection2D(object):
 
 def plot2d(
     spec,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
     tick_spacing: list[
         list[Number, Number] | None, list[Number, Number] | None
@@ -229,8 +224,8 @@ def plot2d(
     markers_f1_kwargs: dict | None = None,
     markers_f2=None,
     markers_f2_kwargs: dict | None = None,
-    projections: Union[ProjectionType2D, list[ProjectionType2D]] | None = None,
-    traces: Union[TraceType2D, list[TraceType2D]] | None = None,
+    projections: ProjectionType2D | list[ProjectionType2D] | None = None,
+    traces: TraceType2D | list[TraceType2D] | None = None,
     insets=None,
     legend: bool = False,
     legend_kwargs: dict | None = None,
@@ -494,9 +489,9 @@ def plot2d(
             else:
                 marker_kwargs = {}
 
-            if not "color" in marker_kwargs.keys():
+            if "color" not in marker_kwargs.keys():
                 marker_kwargs["color"] = (0.7, 0.7, 0.7, 0.7)
-            if not "linestyle" in marker_kwargs.keys():
+            if "linestyle" not in marker_kwargs.keys():
                 marker_kwargs["linestyle"] = (0, (5, 1))
 
             ax.plot((ax_x_min, ax_x_max), (marker, marker), **marker_kwargs)
@@ -511,9 +506,9 @@ def plot2d(
             else:
                 marker_kwargs = {}
 
-            if not "color" in marker_kwargs.keys():
+            if "color" not in marker_kwargs.keys():
                 marker_kwargs["color"] = (0.7, 0.7, 0.7, 0.7)
-            if not "linestyle" in marker_kwargs.keys():
+            if "linestyle" not in marker_kwargs.keys():
                 marker_kwargs["linestyle"] = (0, (5, 1))
 
             ax.plot((marker, marker), (ax_y_min, ax_y_max), **marker_kwargs)
@@ -650,7 +645,7 @@ def _pick_peak(spectrum, ppm_range, pick_peaks_kwargs):
 def _draw_peaks_from_list(
     peaks, ax, group
 ):  # for usage in GUI without a need for new picking
-    if not peaks is None and len(peaks) > 0:
+    if peaks is not None and len(peaks) > 0:
         if len(peaks[0]) < 8:
             x_val, y_val, marker_size_f1_ppm, marker_size_f2_ppm = zip(
                 *[(a[1], a[0], 0.1, 0.1) for a in peaks]

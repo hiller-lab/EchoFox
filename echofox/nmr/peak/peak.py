@@ -1,14 +1,11 @@
-import json
-from typing import Union, List, Optional, Tuple
 import numpy as np
 
 from echofox.nmr.chemical_shift import ChemicalShift
 
-
 from .exceptions import (
+    DimensionMismatchError,
     InvalidPeakDimensionError,
     InvalidPeakIntensityError,
-    DimensionMismatchError,
     NucleusMismatchError,
     PeakError,
 )
@@ -38,15 +35,15 @@ class NmrPeak:
 
     def __init__(
         self,
-        chemical_shifts: List[Union[float, int, str, ChemicalShift]],
-        nuclei: Optional[List[str]] = None,
-        frequencies: Optional[List[float]] = None,
-        intensity: Optional[float] = None,
-        volume: Optional[float] = None,
-        linewidths: Optional[List[float]] = None,
-        assignments: Optional[List[str]] = None,
-        gaussian_sigmas: Optional[List[float]] = None,
-        lorentzian_gammas: Optional[List[float]] = None,
+        chemical_shifts: list[float | int | str | ChemicalShift],
+        nuclei: list[str] | None = None,
+        frequencies: list[float] | None = None,
+        intensity: float | None = None,
+        volume: float | None = None,
+        linewidths: list[float] | None = None,
+        assignments: list[str] | None = None,
+        gaussian_sigmas: list[float] | None = None,
+        lorentzian_gammas: list[float] | None = None,
         **kwargs,
     ):
         if not chemical_shifts:
@@ -159,12 +156,12 @@ class NmrPeak:
         return property(getter, setter)
 
     @property
-    def chemical_shifts(self) -> List[ChemicalShift]:
+    def chemical_shifts(self) -> list[ChemicalShift]:
         """Returns list of ChemicalShift objects for each dimension."""
         return self._chemical_shifts.copy()
 
     @property
-    def ppm_values(self) -> List[float]:
+    def ppm_values(self) -> list[float]:
         """Returns list of chemical shift values in ppm."""
         return [cs.ppm for cs in self._chemical_shifts]
 
@@ -174,12 +171,12 @@ class NmrPeak:
         return self._ndim
 
     @property
-    def nuclei(self) -> Optional[List[str]]:
+    def nuclei(self) -> list[str] | None:
         """Returns the nucleus labels for each dimension."""
         return self._nuclei.copy() if self._nuclei is not None else None
 
     @nuclei.setter
-    def nuclei(self, value: Optional[List[str]]) -> None:
+    def nuclei(self, value: list[str] | None) -> None:
         """Sets the nucleus labels for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -191,12 +188,12 @@ class NmrPeak:
             self._nuclei = None
 
     @property
-    def frequencies(self) -> Optional[List[float]]:
+    def frequencies(self) -> list[float] | None:
         """Returns the spectrometer frequencies in MHz for each dimension."""
         return self._frequencies.copy() if self._frequencies is not None else None
 
     @frequencies.setter
-    def frequencies(self, value: Optional[List[float]]) -> None:
+    def frequencies(self, value: list[float] | None) -> None:
         """Sets the spectrometer frequencies in MHz for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -208,36 +205,36 @@ class NmrPeak:
             self._frequencies = None
 
     @property
-    def intensity(self) -> Optional[float]:
+    def intensity(self) -> float | None:
         """Returns the peak intensity."""
         return self._intensity
 
     @intensity.setter
-    def intensity(self, value: Optional[float]) -> None:
+    def intensity(self, value: float | None) -> None:
         """Sets the peak intensity."""
         if value is not None and not isinstance(value, (int, float)):
             raise InvalidPeakIntensityError(value)
         self._intensity = float(value) if value is not None else None
 
     @property
-    def volume(self) -> Optional[float]:
+    def volume(self) -> float | None:
         """Returns the peak volume."""
         return self._volume
 
     @volume.setter
-    def volume(self, value: Optional[float]) -> None:
+    def volume(self, value: float | None) -> None:
         """Sets the peak volume."""
         if value is not None and not isinstance(value, (int, float)):
             raise InvalidPeakIntensityError(value)
         self._volume = float(value) if value is not None else None
 
     @property
-    def linewidths(self) -> Optional[List[float]]:
+    def linewidths(self) -> list[float] | None:
         """Returns the linewidths for each dimension."""
         return self._linewidths.copy() if self._linewidths is not None else None
 
     @linewidths.setter
-    def linewidths(self, value: Optional[List[float]]) -> None:
+    def linewidths(self, value: list[float] | None) -> None:
         """Sets the linewidths for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -249,12 +246,12 @@ class NmrPeak:
             self._linewidths = None
 
     @property
-    def assignments(self) -> Optional[List[str]]:
+    def assignments(self) -> list[str] | None:
         """Returns the assignment labels for each dimension."""
         return self._assignments.copy() if self._assignments is not None else None
 
     @assignments.setter
-    def assignments(self, value: Optional[List[str]]) -> None:
+    def assignments(self, value: list[str] | None) -> None:
         """Sets the assignment labels for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -266,12 +263,12 @@ class NmrPeak:
             self._assignments = None
 
     @property
-    def gaussian_sigmas(self) -> Optional[List[float]]:
+    def gaussian_sigmas(self) -> list[float] | None:
         """Returns Gaussian width (sigma) values for each dimension."""
         return self._gaussian_sigmas.copy() if self._gaussian_sigmas is not None else None
 
     @gaussian_sigmas.setter
-    def gaussian_sigmas(self, value: Optional[List[float]]) -> None:
+    def gaussian_sigmas(self, value: list[float] | None) -> None:
         """Sets Gaussian width (sigma) values for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -283,7 +280,7 @@ class NmrPeak:
             self._gaussian_sigmas = None
 
     @property
-    def lorentzian_gammas(self) -> Optional[List[float]]:
+    def lorentzian_gammas(self) -> list[float] | None:
         """Returns Lorentzian width (gamma) values for each dimension."""
         return (
             self._lorentzian_gammas.copy()
@@ -292,7 +289,7 @@ class NmrPeak:
         )
 
     @lorentzian_gammas.setter
-    def lorentzian_gammas(self, value: Optional[List[float]]) -> None:
+    def lorentzian_gammas(self, value: list[float] | None) -> None:
         """Sets Lorentzian width (gamma) values for each dimension."""
         if value is not None:
             if len(value) != self._ndim:
@@ -323,7 +320,7 @@ class NmrPeak:
         return self._chemical_shifts[dimension]
 
     def set_chemical_shift(
-        self, dimension: int, value: Union[float, int, str, ChemicalShift]
+        self, dimension: int, value: float | int | str | ChemicalShift
     ) -> None:
         """
         Sets the chemical shift for a specific dimension.
@@ -345,7 +342,7 @@ class NmrPeak:
         else:
             self._chemical_shifts[dimension] = ChemicalShift(value)
 
-    def get_nucleus(self, dimension: int) -> Optional[str]:
+    def get_nucleus(self, dimension: int) -> str | None:
         """
         Returns the nucleus label for a specific dimension.
 
@@ -385,7 +382,7 @@ class NmrPeak:
 
         self._nuclei[dimension] = str(value)
 
-    def get_frequency(self, dimension: int) -> Optional[float]:
+    def get_frequency(self, dimension: int) -> float | None:
         """
         Returns the spectrometer frequency for a specific dimension.
 
@@ -425,7 +422,7 @@ class NmrPeak:
 
         self._frequencies[dimension] = float(value)
 
-    def get_assignment(self, dimension: int) -> Optional[str]:
+    def get_assignment(self, dimension: int) -> str | None:
         """
         Returns the assignment label for a specific dimension.
 
@@ -444,7 +441,7 @@ class NmrPeak:
             )
         return self._assignments[dimension] if self._assignments is not None else None
 
-    def set_assignment(self, dimension: int, value: Optional[str]) -> None:
+    def set_assignment(self, dimension: int, value: str | None) -> None:
         """
         Sets the assignment label for a specific dimension.
 
@@ -465,9 +462,7 @@ class NmrPeak:
 
         self._assignments[dimension] = str(value) if value is not None else None
 
-    def distance_to(
-        self, other: "NmrPeak", weights: Optional[List[float]] = None
-    ) -> float:
+    def distance_to(self, other: "NmrPeak", weights: list[float] | None = None) -> float:
         """
         Calculates the Euclidean distance to another peak in chemical shift space.
 
@@ -505,7 +500,7 @@ class NmrPeak:
         return np.sqrt(squared_diff)
 
     def is_within_tolerance(
-        self, other: "NmrPeak", tolerances: Union[float, List[float]]
+        self, other: "NmrPeak", tolerances: float | list[float]
     ) -> bool:
         """
         Checks if another peak is within specified tolerance(s) in each dimension.
@@ -623,7 +618,7 @@ class NmrPeak:
         return self.get_chemical_shift(dimension)
 
     def __setitem__(
-        self, dimension: int, value: Union[float, int, str, ChemicalShift]
+        self, dimension: int, value: float | int | str | ChemicalShift
     ) -> None:
         """
         Allows indexing to set chemical shift for a dimension.

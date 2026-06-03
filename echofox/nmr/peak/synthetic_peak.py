@@ -1,12 +1,12 @@
 """Synthetic peak class for generating n-dimensional Voigt profiles"""
 
-from typing import Union, List, Optional, Tuple
 import numpy as np
 from scipy.special import wofz
 
-from .peak import NmrPeak
 from echofox.nmr.chemical_shift import ChemicalShift
+
 from .exceptions import InvalidPeakDimensionError, InvalidPeakIntensityError
+from .peak import NmrPeak
 
 
 class SyntheticPeak(NmrPeak):
@@ -54,13 +54,13 @@ class SyntheticPeak(NmrPeak):
 
     def __init__(
         self,
-        chemical_shifts: List[Union[float, int, str, ChemicalShift]],
+        chemical_shifts: list[float | int | str | ChemicalShift],
         amplitude: float,
-        gaussian_widths: List[float],
-        lorentzian_widths: List[float],
-        nuclei: Optional[List[str]] = None,
-        frequencies: Optional[List[float]] = None,
-        assignments: Optional[List[str]] = None,
+        gaussian_widths: list[float],
+        lorentzian_widths: list[float],
+        nuclei: list[str] | None = None,
+        frequencies: list[float] | None = None,
+        assignments: list[str] | None = None,
         **kwargs,
     ):
         # Initialize the base Peak class
@@ -109,12 +109,12 @@ class SyntheticPeak(NmrPeak):
         self._intensity = float(value)
 
     @property
-    def gaussian_widths(self) -> List[float]:
+    def gaussian_widths(self) -> list[float]:
         """Returns the Gaussian width parameters (sigma) for each dimension."""
         return self._gaussian_widths.copy()
 
     @gaussian_widths.setter
-    def gaussian_widths(self, value: List[float]) -> None:
+    def gaussian_widths(self, value: list[float]) -> None:
         """Sets the Gaussian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
@@ -124,12 +124,12 @@ class SyntheticPeak(NmrPeak):
         self._gaussian_widths = [float(sigma) for sigma in value]
 
     @property
-    def lorentzian_widths(self) -> List[float]:
+    def lorentzian_widths(self) -> list[float]:
         """Returns the Lorentzian width parameters (gamma) for each dimension."""
         return self._lorentzian_widths.copy()
 
     @lorentzian_widths.setter
-    def lorentzian_widths(self, value: List[float]) -> None:
+    def lorentzian_widths(self, value: list[float]) -> None:
         """Sets the Lorentzian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
@@ -161,7 +161,7 @@ class SyntheticPeak(NmrPeak):
         # Return the real part of the Faddeeva function
         return np.real(wofz(z))
 
-    def evaluate(self, coordinates: Union[List[np.ndarray], np.ndarray]) -> np.ndarray:
+    def evaluate(self, coordinates: list[np.ndarray] | np.ndarray) -> np.ndarray:
         """
         Evaluate the n-dimensional Voigt profile at given coordinates.
 
@@ -386,9 +386,9 @@ class SyntheticPeak(NmrPeak):
     def from_peak(
         cls,
         peak: NmrPeak,
-        amplitude: Optional[float] = None,
-        gaussian_widths: Optional[List[float]] = None,
-        lorentzian_widths: Optional[List[float]] = None,
+        amplitude: float | None = None,
+        gaussian_widths: list[float] | None = None,
+        lorentzian_widths: list[float] | None = None,
     ) -> "SyntheticPeak":
         """
         Create a SyntheticPeak from an existing Peak object.

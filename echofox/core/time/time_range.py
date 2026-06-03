@@ -7,17 +7,14 @@ Time range representation for relaxation time points.
 
 import math
 import re
-from typing import Iterator, Tuple, Union
+from collections.abc import Iterator
 
 from .exceptions import (
-    InvalidTimeValueError,
-    InvalidTimeRangeError,
-    TimeRangeValueError,
-    TimeRangeOverlapError,
     EmptyTimeRangeError,
+    InvalidTimeValueError,
     TimeRangeIndexError,
+    TimeRangeOverlapError,
 )
-
 
 _TIME_VALUE_RE = re.compile(
     r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*([a-zA-Z]+)?\s*$"
@@ -60,7 +57,7 @@ class TimeValue:
     Accepts numeric seconds or strings with units (e.g., "100 ms", "1.5s").
     """
 
-    def __init__(self, value: Union[float, int, str, "TimeValue"]):
+    def __init__(self, value: float | int | str | TimeValue):
         if isinstance(value, TimeValue):
             seconds = value.seconds
         elif isinstance(value, (int, float)):
@@ -127,8 +124,8 @@ class TimeRange:
 
     def __init__(
         self,
-        low: Union[float, int, str, TimeValue],
-        high: Union[float, int, str, TimeValue],
+        low: float | int | str | TimeValue,
+        high: float | int | str | TimeValue,
     ):
         if isinstance(low, TimeValue):
             self._low = low
@@ -176,7 +173,7 @@ class TimeRange:
         """Returns center of range in seconds."""
         return (self._high.seconds + self._low.seconds) / 2.0
 
-    def contains(self, value: Union[float, int, str, TimeValue]) -> bool:
+    def contains(self, value: float | int | str | TimeValue) -> bool:
         """
         Check if a value is within this range.
 
@@ -195,7 +192,7 @@ class TimeRange:
 
         return self._low.seconds <= seconds <= self._high.seconds
 
-    def overlaps(self, other: "TimeRange") -> bool:
+    def overlaps(self, other: TimeRange) -> bool:
         """
         Check if this range overlaps with another.
 
@@ -210,7 +207,7 @@ class TimeRange:
             or self._low.seconds > other.high_seconds
         )
 
-    def intersection(self, other: "TimeRange") -> "TimeRange":
+    def intersection(self, other: TimeRange) -> TimeRange:
         """
         Get intersection with another range.
 
@@ -231,7 +228,7 @@ class TimeRange:
 
         return TimeRange(new_low, new_high)
 
-    def expand(self, margin: float) -> "TimeRange":
+    def expand(self, margin: float) -> TimeRange:
         """
         Create new range expanded by margin on both sides.
 
@@ -246,7 +243,7 @@ class TimeRange:
             self._high.seconds + margin,
         )
 
-    def to_tuple(self) -> Tuple[float, float]:
+    def to_tuple(self) -> tuple[float, float]:
         """Returns range as (low, high) tuple in seconds."""
         return (self._low.seconds, self._high.seconds)
 

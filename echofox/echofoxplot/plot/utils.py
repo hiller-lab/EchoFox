@@ -91,11 +91,11 @@ def _add_legend(ax, legend_kwargs):
         )
         custom_labels.append(name)
 
-    if not "loc" in legend_kwargs.keys():
+    if "loc" not in legend_kwargs.keys():
         legend_kwargs["loc"] = "upper left"
-    if not "frameon" in legend_kwargs.keys():
+    if "frameon" not in legend_kwargs.keys():
         legend_kwargs["frameon"] = False
-    if not "handlelength" in legend_kwargs.keys():
+    if "handlelength" not in legend_kwargs.keys():
         legend_kwargs["handlelength"] = 1
 
     legend = ax.legend(custom_lines, custom_labels, **legend_kwargs)

@@ -5,8 +5,8 @@ from typing import Literal
 import numpy as np
 
 from .exceptions import (
-    InvalidDimensionIndexError,
     InvalidDimensionalityError,
+    InvalidDimensionIndexError,
     SpectrumProcessingError,
 )
 

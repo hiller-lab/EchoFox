@@ -4,7 +4,6 @@ Package-wide configuration and default values for echofox-plot.
 
 import os
 from dataclasses import dataclass, field
-from typing import List, Tuple
 
 
 @dataclass
@@ -43,7 +42,7 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     # Default figure size [width, height] in inches
-    figure_size: List[float] = field(default_factory=lambda: [5.83, 4.13])
+    figure_size: list[float] = field(default_factory=lambda: [5.83, 4.13])
 
     # DPI for figure output
     figure_dpi: int = 150
@@ -56,10 +55,10 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     # Tick spacing for 2D plots [[major_f1, minor_f1], [major_f2, minor_f2]]
-    tick_spacing_2d: List[List[float]] = field(default_factory=lambda: [[5, 1], [1, 0.2]])
+    tick_spacing_2d: list[list[float]] = field(default_factory=lambda: [[5, 1], [1, 0.2]])
 
     # Tick spacing for 1D plots [major, minor]
-    tick_spacing_1d: List[float] = field(default_factory=lambda: [1, 0.2])
+    tick_spacing_1d: list[float] = field(default_factory=lambda: [1, 0.2])
 
     # -------------------------------------------------------------------------
     # Projection settings
@@ -145,7 +144,7 @@ class PlotConfig:
     # Background color
     background_color: str = "white"
 
-    color1D: List = field(
+    color1D: list = field(
         default_factory=lambda: [
             "#0C5DA5",
             "#00B945",
@@ -157,7 +156,7 @@ class PlotConfig:
         ]
     )
 
-    color2D: List = field(
+    color2D: list = field(
         default_factory=lambda: [
             "#0C5DA5",
             "#00B945",

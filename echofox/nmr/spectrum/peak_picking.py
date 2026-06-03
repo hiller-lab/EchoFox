@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Literal, Tuple, Union
+from typing import Literal
 
 import nmrglue as ng
 import numpy as np
 
 from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
 from echofox.nmr.peak import NmrPeak, PeakList
+
 from .exceptions import InvalidDimensionalityError
 from .models import _PeakCandidate
 
@@ -14,9 +15,9 @@ from .models import _PeakCandidate
 def prepare_pick_2d_parameters(
     self,
     sino: int | float | None,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ],
 ) -> tuple[float, list[PpmRange]]:
     if self.ndim != 2:
@@ -27,8 +28,8 @@ def prepare_pick_2d_parameters(
 
     if self.is_pseudo_nd:
         raise InvalidDimensionalityError(
-            f"pick_2d() cannot be used on pseudo-nD spectra. "
-            f"Use pick_pseudo_nd() to pick peaks from all planes."
+            "pick_2d() cannot be used on pseudo-nD spectra. "
+            "Use pick_pseudo_nd() to pick peaks from all planes."
         )
 
     if sino is None:
@@ -443,9 +444,9 @@ def pick_2d(
     sino: int | float | None = None,
     msep=(1, 1),
     edge=0,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
     peaklist_name: str | None = None,
     fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
@@ -504,9 +505,9 @@ def pick_pseudo_nd(
     sino: int | float | None = None,
     msep=(1, 1),
     edge=0,
-    ppm_range: Tuple[
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
-        Union[PpmRange, Tuple[float | str | ChemicalShift, float | str | ChemicalShift]],
+    ppm_range: tuple[
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
+        PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
     time_param: str = "delay_time",
     fit_method: Literal["gaussian", "lorentzian"] = "gaussian",

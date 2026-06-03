@@ -2,16 +2,14 @@
 PPM Range representation for NMR spectral regions.
 """
 
-from typing import Union, Tuple, Iterator
+from collections.abc import Iterator
 
 from ..config import config
 from .chemical_shift import ChemicalShift
 from .exceptions import (
-    InvalidPpmRangeError,
-    PpmRangeValueError,
-    PpmRangeOverlapError,
     EmptyPpmRangeError,
     PpmRangeIndexError,
+    PpmRangeOverlapError,
 )
 
 
@@ -29,8 +27,8 @@ class PpmRange:
 
     def __init__(
         self,
-        low: Union[float, int, str, ChemicalShift],
-        high: Union[float, int, str, ChemicalShift],
+        low: float | int | str | ChemicalShift,
+        high: float | int | str | ChemicalShift,
         validate_range: bool = None,
     ):
         if validate_range is None:
@@ -84,7 +82,7 @@ class PpmRange:
         """Returns center of range in ppm."""
         return (self._high.ppm + self._low.ppm) / 2
 
-    def contains(self, value: Union[float, int, str, ChemicalShift]) -> bool:
+    def contains(self, value: float | int | str | ChemicalShift) -> bool:
         """
         Check if a value is within this range.
 
@@ -150,7 +148,7 @@ class PpmRange:
             self._low.ppm - margin, self._high.ppm + margin, validate_range=False
         )
 
-    def to_tuple(self) -> Tuple[float, float]:
+    def to_tuple(self) -> tuple[float, float]:
         """Returns range as (low, high) tuple."""
         return (self._low.ppm, self._high.ppm)
 

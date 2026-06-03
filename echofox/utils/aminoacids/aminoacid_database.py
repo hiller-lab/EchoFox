@@ -1,19 +1,18 @@
 """Aminoacids database schema configuration"""
 
+import logging
 import os
+from typing import Any
+
 import yaml
 
-import logging
-from typing import Dict, List, Any, Optional
-
 from .exceptions import (
-    SchemaFileNotFoundError,
-    SchemaParseError,
-    SchemaMissingFieldError,
-    SchemaError,
     AminoAcidNotFoundError,
+    SchemaError,
+    SchemaFileNotFoundError,
+    SchemaMissingFieldError,
+    SchemaParseError,
 )
-
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ log = logging.getLogger(__name__)
 class AminoAcidsDatabase:
     """Load and manage amino acids schema from YAML configuration"""
 
-    def __init__(self, schema_path: Optional[str] = None):
+    def __init__(self, schema_path: str | None = None):
         """
         Initialize schema loader
 
@@ -44,7 +43,7 @@ class AminoAcidsDatabase:
     def _load_schema(self):
         """Load schema from the YAML file"""
         try:
-            with open(self.schema_path, "r", encoding="utf-8") as f:
+            with open(self.schema_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
             if "amino_acids" not in data:
@@ -74,7 +73,7 @@ class AminoAcidsDatabase:
             log.error(f"Error loading schema: {e}")
             raise SchemaError(f"Error loading schema: {e}") from e
 
-    def get_aa_codes(self) -> List[str]:
+    def get_aa_codes(self) -> list[str]:
         """
         Get the list of amino acids in one-letter code in order
 
@@ -87,7 +86,7 @@ class AminoAcidsDatabase:
 
     def get_aa_by_code(
         self, one_letter: str, strict: bool = True
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Get amino acid from a one-letter code
 
@@ -116,7 +115,7 @@ class AminoAcidsDatabase:
 
     def get_aa_by_full_name(
         self, full_name: str, strict: bool = True
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Get amino acid from the full name
 

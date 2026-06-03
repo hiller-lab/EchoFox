@@ -1,13 +1,13 @@
-from dataclasses import dataclass, field
-from typing import Tuple
-import re
 import math
+import re
+from dataclasses import dataclass, field
+
 from matplotlib import colors as mcolors
 
 from .exceptions import (
-    InvalidHexError,
-    InvalidColorInput,
     InvalidColorComponent,
+    InvalidColorInput,
+    InvalidHexError,
     UnsupportedColorFormat,
 )
 
@@ -213,7 +213,7 @@ class Color:
         return v % 360.0
 
     @staticmethod
-    def _hsl_to_rgb(h_deg: float, s: float, l: float) -> Tuple[int, int, int]:
+    def _hsl_to_rgb(h_deg: float, s: float, l: float) -> tuple[int, int, int]:
         c = (1 - abs(2 * l - 1)) * s
         h = (h_deg / 60.0) % 6
         x = c * (1 - abs(h % 2 - 1))
@@ -249,20 +249,18 @@ class Color:
 
     # ------------ properties ------------
     @property
-    def rgb(self) -> Tuple[int, int, int]:
+    def rgb(self) -> tuple[int, int, int]:
         return (self._r, self._g, self._b)
 
     @property
-    def rgba(self) -> Tuple[int, int, int, float]:
+    def rgba(self) -> tuple[int, int, int, float]:
         return (self._r, self._g, self._b, self._a)
 
     @property
     def hex(self) -> str:
         if self._a < 1.0:
-            return "#{:02X}{:02X}{:02X}{:02X}".format(
-                self._r, self._g, self._b, round(self._a * 255)
-            )
-        return "#{:02X}{:02X}{:02X}".format(self._r, self._g, self._b)
+            return f"#{self._r:02X}{self._g:02X}{self._b:02X}{round(self._a * 255):02X}"
+        return f"#{self._r:02X}{self._g:02X}{self._b:02X}"
 
     def to_css_rgba(self) -> str:
         return f"rgba({self._r}, {self._g}, {self._b}, {self._a:.3f})"

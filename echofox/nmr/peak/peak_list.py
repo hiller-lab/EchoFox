@@ -1,8 +1,10 @@
-from typing import List, Optional, Union, Callable, Iterator, Tuple
-import numpy as np
-from collections import defaultdict
 import json
+from collections import defaultdict
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import Optional, Union
+
+import numpy as np
 
 from .peak import NmrPeak
 
@@ -48,21 +50,21 @@ class PeakList:
 
     def __init__(
         self,
-        peaks: Optional[List[NmrPeak]] = None,
-        name: Optional[str] = None,
-        metadata: Optional[dict] = None,
+        peaks: list[NmrPeak] | None = None,
+        name: str | None = None,
+        metadata: dict | None = None,
     ):
-        self._peaks: List[NmrPeak] = []
+        self._peaks: list[NmrPeak] = []
         self.name = name
         self._metadata = metadata or {}
-        self._experiment_id: Optional[int] = None
+        self._experiment_id: int | None = None
 
         if peaks is not None:
             for peak in peaks:
                 self.add(peak)
 
     @property
-    def peaks(self) -> List[NmrPeak]:
+    def peaks(self) -> list[NmrPeak]:
         """Returns a copy of the peak list."""
         return self._peaks.copy()
 
@@ -111,7 +113,7 @@ class PeakList:
         """Remove all peaks from the list."""
         self._peaks.clear()
 
-    def extend(self, peaks: Union["PeakList", List[NmrPeak]]) -> None:
+    def extend(self, peaks: Union["PeakList", list[NmrPeak]]) -> None:
         """
         Add multiple peaks to the list.
 
@@ -136,9 +138,7 @@ class PeakList:
         filtered = [peak for peak in self._peaks if peak.ndim == ndim]
         return PeakList(filtered, name=f"{self.name}_dim{ndim}" if self.name else None)
 
-    def filter_by_nucleus(
-        self, nucleus: str, dimension: Optional[int] = None
-    ) -> "PeakList":
+    def filter_by_nucleus(self, nucleus: str, dimension: int | None = None) -> "PeakList":
         """
         Filter peaks by nucleus type.
 
@@ -166,7 +166,7 @@ class PeakList:
         return PeakList(filtered, name=f"{self.name}_{nucleus}" if self.name else None)
 
     def filter_by_assignment(
-        self, assignment_pattern: str, dimension: Optional[int] = None
+        self, assignment_pattern: str, dimension: int | None = None
     ) -> "PeakList":
         """
         Filter peaks by assignment pattern.
@@ -201,7 +201,7 @@ class PeakList:
             filtered, name=f"{self.name}_{assignment_pattern}" if self.name else None
         )
 
-    def filter_assigned(self, dimension: Optional[int] = None) -> "PeakList":
+    def filter_assigned(self, dimension: int | None = None) -> "PeakList":
         """
         Filter peaks that have assignments.
 
@@ -265,7 +265,7 @@ class PeakList:
         return PeakList(filtered, name=f"{self.name}_range" if self.name else None)
 
     def filter_by_intensity(
-        self, min_intensity: Optional[float] = None, max_intensity: Optional[float] = None
+        self, min_intensity: float | None = None, max_intensity: float | None = None
     ) -> "PeakList":
         """
         Filter peaks by intensity range.
@@ -312,10 +312,10 @@ class PeakList:
 
     def find_closest(
         self,
-        position: List[float],
-        max_distance: Optional[float] = None,
-        weights: Optional[List[float]] = None,
-    ) -> Optional[Tuple[NmrPeak, float]]:
+        position: list[float],
+        max_distance: float | None = None,
+        weights: list[float] | None = None,
+    ) -> tuple[NmrPeak, float] | None:
         """
         Find the closest peak to a given position.
 
@@ -360,7 +360,7 @@ class PeakList:
         return closest_peak, min_distance
 
     def find_within_tolerance(
-        self, position: List[float], tolerances: Union[float, List[float]]
+        self, position: list[float], tolerances: float | list[float]
     ) -> "PeakList":
         """
         Find all peaks within tolerance of a given position.
@@ -559,7 +559,7 @@ class PeakList:
         peaks = [NmrPeak.from_dict(peak_data) for peak_data in data["peaks"]]
         return cls(peaks, name=data.get("name"), metadata=data.get("metadata"))
 
-    def save(self, file_path: Union[str, Path], indent: int = 2) -> None:
+    def save(self, file_path: str | Path, indent: int = 2) -> None:
         """
         Save peak list to a JSON file.
 
@@ -580,7 +580,7 @@ class PeakList:
             json.dump(self.to_dict(), f, indent=indent)
 
     @classmethod
-    def load(cls, file_path: Union[str, Path]) -> "PeakList":
+    def load(cls, file_path: str | Path) -> "PeakList":
         """
         Load peak list from a JSON file.
 
@@ -603,7 +603,7 @@ class PeakList:
         if not file_path.exists():
             raise FileNotFoundError(f"Peak list file not found: {file_path}")
 
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         return cls.from_dict(data)
@@ -612,7 +612,7 @@ class PeakList:
         """Return number of peaks in the list."""
         return len(self._peaks)
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[NmrPeak, "PeakList"]:
+    def __getitem__(self, index: int | slice) -> Union[NmrPeak, "PeakList"]:
         """
         Get peak(s) by index or slice.
 

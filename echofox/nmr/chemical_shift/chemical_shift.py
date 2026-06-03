@@ -1,11 +1,10 @@
-from typing import Union
 import re
 
 from ..config import config
 from .exceptions import (
+    ChemicalShiftRangeError,
     InvalidChemicalShiftFormat,
     UnsupportedChemicalShiftType,
-    ChemicalShiftRangeError,
 )
 
 
@@ -33,7 +32,7 @@ class ChemicalShift:
 
     def __init__(
         self,
-        val: Union[int, float, str],
+        val: int | float | str,
         validate_range: bool = None,
         min_ppm: float = None,
         max_ppm: float = None,
@@ -53,11 +52,11 @@ class ChemicalShift:
         return self._ppm
 
     @ppm.setter
-    def ppm(self, val: Union[int, float, str]) -> None:
+    def ppm(self, val: int | float | str) -> None:
         """Sets the chemical shift value from int, float, or string."""
         self._ppm = self._convert_to_float(val)
 
-    def _convert_to_float(self, value: Union[int, float, str]) -> float:
+    def _convert_to_float(self, value: int | float | str) -> float:
         """
         Converts various input formats to a float representing ppm.
 

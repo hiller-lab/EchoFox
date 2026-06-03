@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
-from matplotlib.axes import Axes
 
 # Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
 rcParams["pdf.fonttype"] = 42
@@ -11,21 +10,19 @@ rcParams["ps.fonttype"] = 42
 rcParams["figure.constrained_layout.use"] = True
 
 # Import echofox.core components
-from echofox.utils.units import convert_to_inches
-from echofox.core.typing import Number
 from echofox.core.colors import Color
-
-# Import echofoxplot config
-from .config import config
-
+from echofox.core.typing import Number
 
 # Import echofoxplot axes
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
+from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
 
 # Import plotting functions from echofoxplot
 from echofox.echofoxplot.plot.spectrum.spectrum2d import plot2d as _plot2d
-from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
+from echofox.utils.units import convert_to_inches
 
+# Import echofoxplot config
+from .config import config
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Helper function to determine and return the current figure and axis to plot on

@@ -1,26 +1,25 @@
 import re
 
+# typing
+from typing import Literal
+
+import matplotlib.patches as patches
+import matplotlib.projections as proj
+import matplotlib.pyplot as plt
+
 # numpy, scipy
 import numpy as np
 
 # matplotlib
 from matplotlib.axes import Axes
-import matplotlib.pyplot as plt
 from matplotlib.figure import SubFigure
-import matplotlib.projections as proj
-from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
-import matplotlib.patches as patches
-
-# typing
-from typing import Literal, Union
+from matplotlib.patches import Rectangle
 
 from echofox.core.colors import Color
 
 # Import echofoxplot config
 from echofox.echofoxplot.config import config
-
-
 from echofox.nmr.chemical_shift import ChemicalShift
 from echofox.nmr.spectrum import NmrSpectrum
 
@@ -48,9 +47,10 @@ class SpectrumAxes(Axes):
     def plot1d(
         self,
         spectrum: NmrSpectrum,
-        spectrum_color: Union[
-            str, tuple[float, float, float], tuple[float, float, float, float], None
-        ] = None,
+        spectrum_color: str
+        | tuple[float, float, float]
+        | tuple[float, float, float, float]
+        | None = None,
         f1_offset: float = 0,
         intensity_offset: float = 0,
         intensity_scale: float = 1,
@@ -113,15 +113,17 @@ class SpectrumAxes(Axes):
         self,
         spectrum: NmrSpectrum,
         *args,
-        min_sino: Union[int, float, None] = None,
-        contour_start_positive: Union[int, float, None] = None,
-        contour_start_negative: Union[int, float, None] = None,
-        contour_color_positive: Union[
-            str, tuple[float, float, float], tuple[float, float, float, float], None
-        ] = None,
-        contour_color_negative: Union[
-            str, tuple[float, float, float], tuple[float, float, float, float], None
-        ] = None,
+        min_sino: int | float | None = None,
+        contour_start_positive: int | float | None = None,
+        contour_start_negative: int | float | None = None,
+        contour_color_positive: str
+        | tuple[float, float, float]
+        | tuple[float, float, float, float]
+        | None = None,
+        contour_color_negative: str
+        | tuple[float, float, float]
+        | tuple[float, float, float, float]
+        | None = None,
         contour_num: int = config.default_contour_levels,
         contour_factor: float = config.contour_level_factor,
         show: Literal["positive", "negative", "both"] = "both",
@@ -197,9 +199,9 @@ class SpectrumAxes(Axes):
         trace_ppm: str,
         *args,
         axis: Literal["f1", "f2"] = "f2",
-        rel_scale: Union[float, None] = None,
-        abs_scale: Union[float, None] = None,
-        ppm_range: Union[tuple[float, float], str] = "full",
+        rel_scale: float | None = None,
+        abs_scale: float | None = None,
+        ppm_range: tuple[float, float] | str = "full",
         offset: float = 0,
         shift_to_edge: bool = False,
         **kwargs,
@@ -310,7 +312,7 @@ class SpectrumAxes(Axes):
                 )
 
         # get color that has been used for the 2d plot of that spectrum
-        if not "color" in kwargs.keys():
+        if "color" not in kwargs.keys():
             axes = self.figure.get_axes()
             for ax in axes:
                 plotted_spectrum = [
@@ -326,7 +328,7 @@ class SpectrumAxes(Axes):
 
         # default settings
 
-        if not "linewidth" in kwargs.keys():
+        if "linewidth" not in kwargs.keys():
             kwargs["linewidth"] = 0.5
 
         # plot trace

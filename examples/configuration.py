@@ -1,7 +1,6 @@
 from echofox.echofoxplot.config import config as plot_config
 from echofox.nmr.config import config as nmr_config
 
-
 print(plot_config)
 print(nmr_config)
 

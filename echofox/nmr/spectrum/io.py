@@ -3,16 +3,16 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Union
 
 import nmrglue as ng
 import numpy as np
 from nmrglue.fileio.fileiobase import unit_conversion
 
+from echofox.core.time import TimeRange, TimeValue
 from echofox.core.time.exceptions import InvalidTimeValueError
 from echofox.core.typing import Number
-from echofox.core.time import TimeRange, TimeValue
 from echofox.nmr.config import config
+
 from .exceptions import (
     CouldNotReadSpectrumError,
     DimensionMismatchError,
@@ -26,7 +26,7 @@ def from_file(
     cls,
     path: str,
     spectrum_format: SpectrumFormat = None,
-    name: Optional[str] = None,
+    name: str | None = None,
 ):
     """
     Create NmrSpectrum from a file.
@@ -44,7 +44,7 @@ def from_file(
     raise InvalidSpectrumFormatError(spectrum_format, cls.SUPPORTED_FORMATS)
 
 
-def _from_bruker(cls, path: str, name: Optional[str] = None):
+def _from_bruker(cls, path: str, name: str | None = None):
     """Create spectrum from Bruker format."""
     if not os.path.isdir(path):
         raise SpectrumFileNotFoundError(path, "directory")
@@ -58,7 +58,7 @@ def _from_bruker(cls, path: str, name: Optional[str] = None):
     return _from_udic(cls, data, dic, udic, name, path, "bruker")
 
 
-def _from_pipe(cls, path: str, name: Optional[str] = None):
+def _from_pipe(cls, path: str, name: str | None = None):
     """Create spectrum from NMRPipe format."""
     if not os.path.isfile(path):
         raise SpectrumFileNotFoundError(path, "file")
@@ -74,13 +74,13 @@ def _from_pipe(cls, path: str, name: Optional[str] = None):
 
 def from_pseudo_nd(
     cls,
-    path: Union[str, List[str]],
+    path: str | list[str],
     spectrum_format: SpectrumFormat = "pipe",
-    name: Optional[str] = None,
+    name: str | None = None,
     file_pattern: str = "*.ft*",
-    pseudo_axis_values: Optional[List[Number | str]] = None,
+    pseudo_axis_values: list[Number | str] | None = None,
     pseudo_axis_label: str = "pseudo",
-    pseudo_axis_unit: Optional[str] = None,
+    pseudo_axis_unit: str | None = None,
 ):
     """
     Load pseudo-(N+1)D spectrum from multiple ND spectra.
@@ -132,8 +132,8 @@ def from_pseudo_nd(
 
     stacked_data = np.stack([s.data for s in spectra], axis=0)
 
-    def _coerce_to_float(values: List[Number | str]) -> Optional[List[float]]:
-        numeric_values: List[float] = []
+    def _coerce_to_float(values: list[Number | str]) -> list[float] | None:
+        numeric_values: list[float] = []
         for value in values:
             try:
                 numeric_values.append(float(value))
@@ -141,8 +141,8 @@ def from_pseudo_nd(
                 return None
         return numeric_values
 
-    def _coerce_to_seconds(values: List[Number | str]) -> Optional[List[float]]:
-        seconds_values: List[float] = []
+    def _coerce_to_seconds(values: list[Number | str]) -> list[float] | None:
+        seconds_values: list[float] = []
         for value in values:
             try:
                 if pseudo_axis_unit and isinstance(value, (int, float)):
@@ -166,8 +166,8 @@ def from_pseudo_nd(
                 return None
         return seconds_values
 
-    pseudo_axis_numeric: Optional[List[float]] = None
-    pseudo_axis_seconds: Optional[List[float]] = None
+    pseudo_axis_numeric: list[float] | None = None
+    pseudo_axis_seconds: list[float] | None = None
 
     if pseudo_axis_values is not None:
         label_is_time = bool(pseudo_axis_label) and "time" in pseudo_axis_label.lower()
@@ -236,7 +236,7 @@ def _from_udic(
     data: np.ndarray,
     dic: dict,
     udic: dict,
-    name: Optional[str],
+    name: str | None,
     path: str,
     spectrum_format: str,
 ):

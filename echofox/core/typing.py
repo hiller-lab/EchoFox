@@ -1,6 +1,6 @@
 # typing
-from typing import TypeAlias, Literal
-from typing import get_origin, get_args
+from typing import Literal, TypeAlias, get_args, get_origin
+
 from echofox.core.colors import Color
 
 Colors: TypeAlias = list[Color]

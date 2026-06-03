@@ -10,17 +10,14 @@ rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
 
 import numpy as np
 
+from echofox.core.typing import Number
+
 # MiraPlot
 from echofox.echofoxplot.axes.spectrum_axes import SpectrumAxes
-from echofox.core.typing import Number
-from echofox.nmr.chemical_shift import ChemicalShift, PpmRange
-from echofox.nmr.spectrum import NmrSpectrum
-from echofox.nmr.spectrum import read_spectra
 from echofox.echofoxplot.config import config
-
-from echofox.echofoxplot.plot.utils import _add_label
-from echofox.echofoxplot.plot.utils import _add_legend
-
+from echofox.echofoxplot.plot.utils import _add_label, _add_legend
+from echofox.nmr.chemical_shift import PpmRange
+from echofox.nmr.spectrum import read_spectra
 
 # typing
 
@@ -75,12 +72,9 @@ def plot1d(
         spectra.reverse()
 
     if (
-        not (
-            len({x.ndim for x in spectra} & {1, 2}) == 1
-            and {x.ndim for x in spectra} <= {1, 2}
-        )
-        is True
-    ):
+        len({x.ndim for x in spectra} & {1, 2}) == 1
+        and {x.ndim for x in spectra} <= {1, 2}
+    ) is not True:
         raise Exception("Must be either 1D or 2D spectra.")
 
     # set current ax and figure
