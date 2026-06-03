@@ -101,7 +101,7 @@ files = ["echofox"]
 exclude = ["build", "dist", ".eggs", "*.egg-info"]
 
 [tool.ruff]
-line-length = 90
+line-length = 120
 indent-width = 4
 target-version = "py310"
 
