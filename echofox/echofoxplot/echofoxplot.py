@@ -28,6 +28,7 @@ rcParams["figure.constrained_layout.use"] = True
 # Helper function to determine and return the current figure and axis to plot on
 #
 
+
 def _get_context(
     current_figure: Figure | None = None,
     current_ax: SpectrumAxes | None = None,
@@ -85,6 +86,7 @@ def _create_new_context(spectrum_axes: bool = True):
 # ----------------------------------------------------------------------------------------------------------------------
 # High-level MiraPlot plotting functions
 #
+
 
 def plot2d(
     *args,

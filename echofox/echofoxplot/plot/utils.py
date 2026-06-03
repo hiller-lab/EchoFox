@@ -1,17 +1,13 @@
-from typing import (Literal, Tuple)
+from typing import Literal
 
-from matplotlib import rcParams
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from matplotlib.lines import Line2D
 
 from echofox.nmr.spectrum import NmrSpectrum
 
 
-def _add_label(
-    ax,
-    label_list,
-    label_kwargs_list
-) -> None:
+def _add_label(ax, label_list, label_kwargs_list) -> None:
     for i, label in enumerate(label_list):
         label_kwargs = label_kwargs_list[i]
 
@@ -60,10 +56,7 @@ def _add_label(
         ax.text(text_x, text_y, label, **label_kwargs)
 
 
-def _add_legend(
-    ax,
-    legend_kwargs
-) -> None:
+def _add_legend(ax, legend_kwargs) -> None:
     custom_lines = []
     custom_labels = []
     for i, spectrum in enumerate(ax.spectra):
@@ -115,7 +108,7 @@ def _add_legend(
 def configure_font(
     font: str = "Helvetica",
     family: Literal["serif", "sans-serif"] = "sans-serif",
-    sizes: Tuple[int, int, int] = (8, 10, 12),
+    sizes: tuple[int, int, int] = (8, 10, 12),
 ) -> None:
     """
     Configure Matplotlib font settings for editable PDF/PS output.
@@ -131,20 +124,20 @@ def configure_font(
         and figure title size.
     """
     small, medium, large = sizes
-    
-    rcParams['pdf.fonttype'] = 42  # TrueType fonts
-    rcParams['ps.fonttype'] = 42   # PostScript compatibility
-    
+
+    rcParams["pdf.fonttype"] = 42  # TrueType fonts
+    rcParams["ps.fonttype"] = 42  # PostScript compatibility
+
     rcParams["font.family"] = family
-    
+
     if family == "serif":
         rcParams["font.serif"] = [font, "Times New Roman", "DejaVu Serif"]
     else:
         rcParams["font.sans-serif"] = [font, "Helvetica", "Arial", "DejaVu Sans"]
-    
-    plt.rc("font", size=small)                          # controls default text sizes
+
+    plt.rc("font", size=small)  # controls default text sizes
     plt.rc("axes", titlesize=medium, labelsize=medium)  # axes title and axis label sizes
-    plt.rc("xtick", labelsize=small)                    # fontsize of the tick labels
-    plt.rc("ytick", labelsize=small)                    # fontsize of the tick labels
-    plt.rc("legend", fontsize=small)                    # legend fontsize
-    plt.rc("figure", titlesize=large)                   # fontsize of the figure title
+    plt.rc("xtick", labelsize=small)  # fontsize of the tick labels
+    plt.rc("ytick", labelsize=small)  # fontsize of the tick labels
+    plt.rc("legend", fontsize=small)  # legend fontsize
+    plt.rc("figure", titlesize=large)  # fontsize of the figure title

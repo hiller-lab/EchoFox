@@ -511,13 +511,7 @@ def plot2d(
     return figure, ax
 
 
-def _add_projections(
-    spectra,
-    projections,
-    ax,
-    f1_proj_ax,
-    f2_proj_ax
-) -> None:
+def _add_projections(spectra, projections, ax, f1_proj_ax, f2_proj_ax) -> None:
     for projection in projections:
         if projection.is_external is True:
             trace_ppm = "projection_external"
@@ -560,11 +554,7 @@ def _add_projections(
                 )
 
 
-def _add_traces(
-    spectra,
-    traces,
-    ax
-) -> None:
+def _add_traces(spectra, traces, ax) -> None:
     for trace in traces:
         trace_ppm = trace.chemical_shift.ppm
         axis = trace.axis
@@ -584,11 +574,7 @@ def _add_traces(
                 )
 
 
-def _mark_peaks(
-    spectrum,
-    ax,
-    mark_peaks_kwargs
-) -> None:
+def _mark_peaks(spectrum, ax, mark_peaks_kwargs) -> None:
 
     if spectrum.peaklist is None or len(spectrum.peaklist) == 0:
         print("No peaks found in spectrum. Skipping marking of peaks.")
