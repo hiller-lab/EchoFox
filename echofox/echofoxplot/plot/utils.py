@@ -1,9 +1,13 @@
-from typing import Literal
+from collections.abc import Sequence
+from typing import Literal, TypedDict
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from matplotlib.axes import Axes
+from matplotlib.legend import Legend
 from matplotlib.lines import Line2D
 
+from echofox.core.colors import Color
 from echofox.nmr.spectrum import NmrSpectrum
 
 
@@ -141,3 +145,32 @@ def configure_font(
     plt.rc("ytick", labelsize=small)  # fontsize of the tick labels
     plt.rc("legend", fontsize=small)  # legend fontsize
     plt.rc("figure", titlesize=large)  # fontsize of the figure title
+
+
+class LegendLabel(TypedDict):
+    """One legend entry: the text to show + the color to apply to that text."""
+
+    text: str
+    color: str | Color
+
+
+def fancy_legend(
+    ax: Axes, labels: Sequence[LegendLabel], loc: str = "upper left", frameon: bool = False, **kwargs
+) -> Legend:
+    # Create dummy artists per legend label
+    for _ in range(len(labels)):
+        ax.plot([], [], " ", label="")
+
+    legend = ax.legend(
+        [label["text"] for label in labels], loc=loc, frameon=frameon, handlelength=0, handletextpad=0, **kwargs
+    )
+    legend.set_zorder(9999)
+
+    # Color legend labels
+    for i, line in enumerate(labels):
+        plt.setp(legend.get_texts()[i], color=line["color"])
+
+    if legend is None:
+        raise ValueError("add_custom_legend() expected at least one Axes, got none.")
+
+    return legend
