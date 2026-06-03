@@ -15,9 +15,7 @@ from .exceptions import (
     TimeRangeOverlapError,
 )
 
-_TIME_VALUE_RE = re.compile(
-    r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*([a-zA-Z]+)?\s*$"
-)
+_TIME_VALUE_RE = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*([a-zA-Z]+)?\s*$")
 
 _TIME_UNIT_MULTIPLIERS = {
     "s": 1.0,
@@ -67,9 +65,7 @@ class TimeValue:
             raise InvalidTimeValueError(value, type(value))
 
         if not math.isfinite(seconds):
-            raise InvalidTimeValueError(
-                value, type(value), reason="non-finite time value"
-            )
+            raise InvalidTimeValueError(value, type(value), reason="non-finite time value")
 
         self._seconds = seconds
 
@@ -83,9 +79,7 @@ class TimeValue:
         try:
             number = float(number_text)
         except ValueError as exc:
-            raise InvalidTimeValueError(
-                value, str, reason="invalid numeric value"
-            ) from exc
+            raise InvalidTimeValueError(value, str, reason="invalid numeric value") from exc
 
         if not unit_text:
             return number
@@ -201,10 +195,7 @@ class TimeRange:
         Returns:
             True if ranges overlap
         """
-        return not (
-            self._high.seconds < other.low_seconds
-            or self._low.seconds > other.high_seconds
-        )
+        return not (self._high.seconds < other.low_seconds or self._low.seconds > other.high_seconds)
 
     def intersection(self, other: TimeRange) -> TimeRange:
         """
@@ -270,10 +261,7 @@ class TimeRange:
                 and abs(self._high.seconds - other.high_seconds) < 1e-9
             )
         if isinstance(other, tuple) and len(other) == 2:
-            return (
-                abs(self._low.seconds - other[0]) < 1e-9
-                and abs(self._high.seconds - other[1]) < 1e-9
-            )
+            return abs(self._low.seconds - other[0]) < 1e-9 and abs(self._high.seconds - other[1]) < 1e-9
         return False
 
     def __hash__(self) -> int:

@@ -31,8 +31,7 @@ def prepare_pick_2d_parameters(
 
     if self.is_pseudo_nd:
         raise InvalidDimensionalityError(
-            "pick_2d() cannot be used on pseudo-nD spectra. "
-            "Use pick_pseudo_nd() to pick peaks from all planes."
+            "pick_2d() cannot be used on pseudo-nD spectra. Use pick_pseudo_nd() to pick peaks from all planes."
         )
 
     if sino is None:
@@ -133,15 +132,9 @@ def fit_gaussian_multipoint(
             current_params = (offset, fitted_intensity, fwhm)
 
             if prev_params is not None:
-                rel_offset_change = abs(current_params[0] - prev_params[0]) / (
-                    abs(prev_params[0]) + 1e-6
-                )
-                rel_intensity_change = abs(current_params[1] - prev_params[1]) / (
-                    prev_params[1] + 1e-6
-                )
-                rel_fwhm_change = abs(current_params[2] - prev_params[2]) / (
-                    prev_params[2] + 1e-6
-                )
+                rel_offset_change = abs(current_params[0] - prev_params[0]) / (abs(prev_params[0]) + 1e-6)
+                rel_intensity_change = abs(current_params[1] - prev_params[1]) / (prev_params[1] + 1e-6)
+                rel_fwhm_change = abs(current_params[2] - prev_params[2]) / (prev_params[2] + 1e-6)
 
                 max_change = max(rel_offset_change, rel_intensity_change, rel_fwhm_change)
 
@@ -240,19 +233,10 @@ def fit_lorentzian_multipoint(
 
             current_params = (offset, fitted_intensity, fwhm)
             if prev_params is not None:
-                rel_offset_change = abs(current_params[0] - prev_params[0]) / (
-                    abs(prev_params[0]) + 1e-6
-                )
-                rel_intensity_change = abs(current_params[1] - prev_params[1]) / (
-                    prev_params[1] + 1e-6
-                )
-                rel_fwhm_change = abs(current_params[2] - prev_params[2]) / (
-                    prev_params[2] + 1e-6
-                )
-                if (
-                    max(rel_offset_change, rel_intensity_change, rel_fwhm_change)
-                    > consistency_threshold
-                ):
+                rel_offset_change = abs(current_params[0] - prev_params[0]) / (abs(prev_params[0]) + 1e-6)
+                rel_intensity_change = abs(current_params[1] - prev_params[1]) / (prev_params[1] + 1e-6)
+                rel_fwhm_change = abs(current_params[2] - prev_params[2]) / (prev_params[2] + 1e-6)
+                if max(rel_offset_change, rel_intensity_change, rel_fwhm_change) > consistency_threshold:
                     break
 
             best_result = (
@@ -281,12 +265,8 @@ def build_peaklist_from_candidates(
 ) -> PeakList:
     data_shape_f1, data_shape_f2 = self.data.shape
 
-    resolution_f1_hz = (
-        self.dimension_ranges[0].width * self.frequencies[0] / self.shape[0]
-    )
-    resolution_f2_hz = (
-        self.dimension_ranges[1].width * self.frequencies[1] / self.shape[1]
-    )
+    resolution_f1_hz = self.dimension_ranges[0].width * self.frequencies[0] / self.shape[0]
+    resolution_f2_hz = self.dimension_ranges[1].width * self.frequencies[1] / self.shape[1]
 
     nuclei_f1 = self.nuclei[0] if self.nuclei else None
     nuclei_f2 = self.nuclei[1] if self.nuclei else None
@@ -298,17 +278,13 @@ def build_peaklist_from_candidates(
     fit_method = (fit_method or "gaussian").lower()
     if fit_method not in ("gaussian", "lorentzian"):
         raise ValueError(f"Unsupported fit_method '{fit_method}'")
-    fit_function = (
-        fit_gaussian_multipoint if fit_method == "gaussian" else fit_lorentzian_multipoint
-    )
+    fit_function = fit_gaussian_multipoint if fit_method == "gaussian" else fit_lorentzian_multipoint
 
     for candidate in candidates:
         center_f1_idx = int(candidate.center[0])
         center_f2_idx = int(candidate.center[1])
 
-        if not (
-            0 <= center_f1_idx < data_shape_f1 and 0 <= center_f2_idx < data_shape_f2
-        ):
+        if not (0 <= center_f1_idx < data_shape_f1 and 0 <= center_f2_idx < data_shape_f2):
             continue
 
         adjusted_f1_idx = float(center_f1_idx)
@@ -367,23 +343,13 @@ def build_peaklist_from_candidates(
                 f1_shape_param_pts * resolution_f1_hz,
                 f2_shape_param_pts * resolution_f2_hz,
             ]
-            volume_estimate = intensity * (
-                2.0 * np.pi * f1_shape_param_pts * f2_shape_param_pts
-            )
-        elif (
-            fit_method == "lorentzian"
-            and f1_shape_param_pts > 0
-            and f2_shape_param_pts > 0
-        ):
+            volume_estimate = intensity * (2.0 * np.pi * f1_shape_param_pts * f2_shape_param_pts)
+        elif fit_method == "lorentzian" and f1_shape_param_pts > 0 and f2_shape_param_pts > 0:
             lorentzian_gammas = [
                 f1_shape_param_pts * resolution_f1_hz,
                 f2_shape_param_pts * resolution_f2_hz,
             ]
-            volume_estimate = (
-                intensity
-                * (np.pi * f1_shape_param_pts / 2)
-                * (np.pi * f2_shape_param_pts / 2)
-            )
+            volume_estimate = intensity * (np.pi * f1_shape_param_pts / 2) * (np.pi * f2_shape_param_pts / 2)
         elif candidate.linewidth_pts is not None:
             f1_pts, f2_pts = candidate.linewidth_pts
             fitted_linewidths = [
@@ -417,9 +383,7 @@ def build_peaklist_from_candidates(
             adjusted_peak._extra_properties["fit_f2_n_points"] = f2_n_points
             adjusted_peak._extra_properties["fit_f1_quality"] = f1_quality
             adjusted_peak._extra_properties["fit_f2_quality"] = f2_quality
-            adjusted_peak._extra_properties["fit_quality_avg"] = (
-                f1_quality + f2_quality
-            ) / 2.0
+            adjusted_peak._extra_properties["fit_quality_avg"] = (f1_quality + f2_quality) / 2.0
 
         except Exception as exc:
             log.exception("Exception in NmrSpectrum")
@@ -516,9 +480,7 @@ def pick_pseudo_nd(
     fit_method: Literal["gaussian", "lorentzian"] = "gaussian",
 ) -> PeakList:
     if not self.is_pseudo_nd:
-        raise ValueError(
-            "Spectrum must be pseudo-nD. Use pick_2d() for regular 2D spectra."
-        )
+        raise ValueError("Spectrum must be pseudo-nD. Use pick_2d() for regular 2D spectra.")
 
     if self.ndim != 3:
         raise ValueError(
@@ -532,9 +494,7 @@ def pick_pseudo_nd(
     n_planes = self.shape[0]
 
     if len(self.pseudo_axis_values) != n_planes:
-        raise ValueError(
-            f"Mismatch: {n_planes} planes but {len(self.pseudo_axis_values)} pseudo_axis_values"
-        )
+        raise ValueError(f"Mismatch: {n_planes} planes but {len(self.pseudo_axis_values)} pseudo_axis_values")
 
     combined_peaklist = PeakList()
 
@@ -545,9 +505,7 @@ def pick_pseudo_nd(
             data=plane_data,
             dimension_ranges=[self._dimension_ranges[1], self._dimension_ranges[2]],
             nuclei=[self.nuclei[1], self.nuclei[2]] if self.nuclei else None,
-            frequencies=[self.frequencies[1], self.frequencies[2]]
-            if self.frequencies
-            else None,
+            frequencies=[self.frequencies[1], self.frequencies[2]] if self.frequencies else None,
             name=f"{self.name}_plane{plane_idx}" if self.name else None,
         )
 

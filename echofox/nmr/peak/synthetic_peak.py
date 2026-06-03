@@ -81,16 +81,14 @@ class SyntheticPeak(NmrPeak):
         # Validate and set Gaussian widths
         if len(gaussian_widths) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Gaussian widths ({len(gaussian_widths)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Gaussian widths ({len(gaussian_widths)}) must match number of dimensions ({self._ndim})"
             )
         self._gaussian_widths = [float(sigma) for sigma in gaussian_widths]
 
         # Validate and set Lorentzian widths
         if len(lorentzian_widths) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Lorentzian widths ({len(lorentzian_widths)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Lorentzian widths ({len(lorentzian_widths)}) must match number of dimensions ({self._ndim})"
             )
         self._lorentzian_widths = [float(gamma) for gamma in lorentzian_widths]
 
@@ -118,8 +116,7 @@ class SyntheticPeak(NmrPeak):
         """Sets the Gaussian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Gaussian widths ({len(value)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Gaussian widths ({len(value)}) must match number of dimensions ({self._ndim})"
             )
         self._gaussian_widths = [float(sigma) for sigma in value]
 
@@ -133,15 +130,12 @@ class SyntheticPeak(NmrPeak):
         """Sets the Lorentzian width parameters for each dimension."""
         if len(value) != self._ndim:
             raise InvalidPeakDimensionError(
-                f"Number of Lorentzian widths ({len(value)}) must match "
-                f"number of dimensions ({self._ndim})"
+                f"Number of Lorentzian widths ({len(value)}) must match number of dimensions ({self._ndim})"
             )
         self._lorentzian_widths = [float(gamma) for gamma in value]
 
     @staticmethod
-    def _voigt_profile_1d(
-        x: np.ndarray, center: float, sigma: float, gamma: float
-    ) -> np.ndarray:
+    def _voigt_profile_1d(x: np.ndarray, center: float, sigma: float, gamma: float) -> np.ndarray:
         """
         Calculate unnormalized 1D Voigt profile.
 
@@ -192,16 +186,13 @@ class SyntheticPeak(NmrPeak):
         # Handle single array input for 1D case
         if isinstance(coordinates, np.ndarray):
             if self._ndim != 1:
-                raise ValueError(
-                    f"For {self._ndim}D peak, provide a list of {self._ndim} coordinate arrays"
-                )
+                raise ValueError(f"For {self._ndim}D peak, provide a list of {self._ndim} coordinate arrays")
             coordinates = [coordinates]
 
         # Validate number of coordinate arrays
         if len(coordinates) != self._ndim:
             raise ValueError(
-                f"Number of coordinate arrays ({len(coordinates)}) must match "
-                f"peak dimensions ({self._ndim})"
+                f"Number of coordinate arrays ({len(coordinates)}) must match peak dimensions ({self._ndim})"
             )
 
         # Start with amplitude
@@ -241,10 +232,7 @@ class SyntheticPeak(NmrPeak):
             raise ValueError("Points must be a 2D array of shape (N, ndim)")
 
         if points.shape[1] != self._ndim:
-            raise ValueError(
-                f"Points must have {self._ndim} columns to match peak dimensions, "
-                f"got {points.shape[1]}"
-            )
+            raise ValueError(f"Points must have {self._ndim} columns to match peak dimensions, got {points.shape[1]}")
 
         # Start with amplitude
         result = np.full(points.shape[0], self._amplitude)
@@ -269,9 +257,7 @@ class SyntheticPeak(NmrPeak):
             Gaussian width (sigma) for the specified dimension
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._gaussian_widths[dimension]
 
     def set_gaussian_width(self, dimension: int, value: float) -> None:
@@ -283,9 +269,7 @@ class SyntheticPeak(NmrPeak):
             value: New Gaussian width (sigma) value
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         self._gaussian_widths[dimension] = float(value)
 
     def get_lorentzian_width(self, dimension: int) -> float:
@@ -299,9 +283,7 @@ class SyntheticPeak(NmrPeak):
             Lorentzian width (gamma) for the specified dimension
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._lorentzian_widths[dimension]
 
     def set_lorentzian_width(self, dimension: int, value: float) -> None:
@@ -313,9 +295,7 @@ class SyntheticPeak(NmrPeak):
             value: New Lorentzian width (gamma) value
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         self._lorentzian_widths[dimension] = float(value)
 
     def to_dict(self) -> dict:

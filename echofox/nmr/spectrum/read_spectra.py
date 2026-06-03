@@ -20,10 +20,7 @@ def read_spectra(
         return spec  # It's a list where all elements are NmrSpectrum
 
     # check if we are passed SpectrumParams or SpectrumParam
-    if (
-        is_typealias_instance(spec, SpectrumParams) is False
-        and is_typealias_instance(spec, SpectrumParam) is False
-    ):
+    if is_typealias_instance(spec, SpectrumParams) is False and is_typealias_instance(spec, SpectrumParam) is False:
         raise TypeError
 
     if is_typealias_instance(spec, SpectrumParam):

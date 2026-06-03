@@ -34,9 +34,7 @@ TraceType2D: TypeAlias = list[
     int | list[int] | Literal["all"],
     dict,
 ]
-ProjectionType2D: TypeAlias = list[
-    Literal["f1", "f2"], int | list[int] | Literal["all"], bool, dict
-]
+ProjectionType2D: TypeAlias = list[Literal["f1", "f2"], int | list[int] | Literal["all"], bool, dict]
 
 
 class Trace2D:
@@ -169,9 +167,7 @@ class Projection2D:
         return self._is_external
 
     @is_external.setter
-    def is_external(
-        self, val: Literal["projection_external", "projection_internal"] | bool
-    ) -> None:
+    def is_external(self, val: Literal["projection_external", "projection_internal"] | bool) -> None:
         if val == "projection_external":
             self._is_external = True
         elif val == "projection_internal":
@@ -199,9 +195,7 @@ def plot2d(
         PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
         PpmRange | tuple[float | str | ChemicalShift, float | str | ChemicalShift],
     ] = (None, None),
-    tick_spacing: list[
-        list[Number, Number] | None, list[Number, Number] | None
-    ] = config.tick_spacing_2d,
+    tick_spacing: list[list[Number, Number] | None, list[Number, Number] | None] = config.tick_spacing_2d,
     label: str | None = None,
     label_kwargs=None,
     pick_peaks: bool = False,
@@ -272,9 +266,7 @@ def plot2d(
         for key, value in kwargs.items():
             if isinstance(value, list):  # If the value is a list
                 if len(value) > 1:
-                    new_dict[key] = value[
-                        i % len(value)
-                    ]  # Get the element at index i (wrap around if needed)
+                    new_dict[key] = value[i % len(value)]  # Get the element at index i (wrap around if needed)
                 else:
                     new_dict[key] = value[0]  # If only one element, take it
             else:
@@ -293,12 +285,8 @@ def plot2d(
             raise LabelMismatchError("f2", f2_label_text, spectrum.get_label_text(1))
 
         # set spectrum limits to max
-        ax.set_xlim(
-            spectrum.dimension_ranges[1].high_ppm, spectrum.dimension_ranges[1].low_ppm
-        )
-        ax.set_ylim(
-            spectrum.dimension_ranges[0].high_ppm, spectrum.dimension_ranges[0].low_ppm
-        )
+        ax.set_xlim(spectrum.dimension_ranges[1].high_ppm, spectrum.dimension_ranges[1].low_ppm)
+        ax.set_ylim(spectrum.dimension_ranges[0].high_ppm, spectrum.dimension_ranges[0].low_ppm)
 
     if ppm_range != (None, None):
         ppm_range = [PpmRange(*range) for range in ppm_range]
@@ -391,9 +379,7 @@ def plot2d(
 
             if do_mark_peaks:
                 if "edgecolor" not in current_mark_peaks_kwargs.keys():
-                    edgecolor = ax.collections[
-                        len(ax.collections) - (i + 1)
-                    ].get_edgecolor()[0]
+                    edgecolor = ax.collections[len(ax.collections) - (i + 1)].get_edgecolor()[0]
                     current_mark_peaks_kwargs["edgecolor"] = edgecolor
 
                 _mark_peaks(spectrum, ax, current_mark_peaks_kwargs)
@@ -644,9 +630,7 @@ def _pick_peak(spectrum, ppm_range, pick_peaks_kwargs):
     spectrum.pick_2d(ppm_range=ppm_range, sino=pick_peaks_kwargs["pick_sino"])
 
 
-def _draw_peaks_from_list(
-    peaks, ax, group
-):  # for usage in GUI without a need for new picking
+def _draw_peaks_from_list(peaks, ax, group):  # for usage in GUI without a need for new picking
     if peaks is not None and len(peaks) > 0:
         if len(peaks[0]) < 8:
             x_val, y_val, marker_size_f1_ppm, marker_size_f2_ppm = zip(

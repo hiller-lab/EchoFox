@@ -35,17 +35,13 @@ def is_typealias_instance(value, expected_type) -> bool:
         return (
             isinstance(value, tuple)  # Must be a tuple
             and len(value) == len(args)  # Must have the same number of elements
-            and all(
-                is_typealias_instance(v, t) for v, t in zip(value, args, strict=True)
-            )  # Element-wise validation
+            and all(is_typealias_instance(v, t) for v, t in zip(value, args, strict=True))  # Element-wise validation
         )
 
     elif origin is list:
         return (
             isinstance(value, list)  # Must be a list
-            and all(
-                is_typealias_instance(item, args[0]) for item in value
-            )  # Recursively check each item
+            and all(is_typealias_instance(item, args[0]) for item in value)  # Recursively check each item
         )
 
     elif origin is Literal:

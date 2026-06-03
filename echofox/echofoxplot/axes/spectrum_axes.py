@@ -47,10 +47,7 @@ class SpectrumAxes(Axes):
     def plot1d(
         self,
         spectrum: NmrSpectrum,
-        spectrum_color: str
-        | tuple[float, float, float]
-        | tuple[float, float, float, float]
-        | None = None,
+        spectrum_color: str | tuple[float, float, float] | tuple[float, float, float, float] | None = None,
         f1_offset: float = 0,
         intensity_offset: float = 0,
         intensity_scale: float = 1,
@@ -116,14 +113,8 @@ class SpectrumAxes(Axes):
         min_sino: int | float | None = None,
         contour_start_positive: int | float | None = None,
         contour_start_negative: int | float | None = None,
-        contour_color_positive: str
-        | tuple[float, float, float]
-        | tuple[float, float, float, float]
-        | None = None,
-        contour_color_negative: str
-        | tuple[float, float, float]
-        | tuple[float, float, float, float]
-        | None = None,
+        contour_color_positive: str | tuple[float, float, float] | tuple[float, float, float, float] | None = None,
+        contour_color_negative: str | tuple[float, float, float] | tuple[float, float, float, float] | None = None,
         contour_num: int = config.default_contour_levels,
         contour_factor: float = config.contour_level_factor,
         show: Literal["positive", "negative", "both"] = "both",
@@ -159,14 +150,10 @@ class SpectrumAxes(Axes):
 
         # contour colors
         if contour_color_positive is None:
-            contour_color_positive = self.cmap_positive[
-                len(self.spectra) % len(self.cmap_positive)
-            ]
+            contour_color_positive = self.cmap_positive[len(self.spectra) % len(self.cmap_positive)]
 
         if contour_color_negative is None:
-            contour_color_negative = self.cmap_negative[
-                len(self.spectra) % len(self.cmap_negative)
-            ]
+            contour_color_negative = self.cmap_negative[len(self.spectra) % len(self.cmap_negative)]
 
         contour_color_positive = Color(contour_color_positive).hex
         contour_color_negative = Color(contour_color_negative).hex
@@ -216,16 +203,10 @@ class SpectrumAxes(Axes):
         # if scale is none --> calculate scale such that trace is 16% of the size of the whole spectrum
         if rel_scale is None and abs_scale is None:
             if axis == "f1":
-                rel_scale = (
-                    np.abs(spectrum.get_ppm_axis(0)[0] - spectrum.get_ppm_axis(0)[-1])
-                    * 0.16
-                )
+                rel_scale = np.abs(spectrum.get_ppm_axis(0)[0] - spectrum.get_ppm_axis(0)[-1]) * 0.16
 
             elif axis == "f2":
-                rel_scale = (
-                    np.abs(spectrum.get_ppm_axis(1)[0] - spectrum.get_ppm_axis(1)[-1])
-                    * 0.16
-                )
+                rel_scale = np.abs(spectrum.get_ppm_axis(1)[0] - spectrum.get_ppm_axis(1)[-1]) * 0.16
 
             if trace_ppm == "projection_external":
                 rel_scale = 1
@@ -233,25 +214,15 @@ class SpectrumAxes(Axes):
         # define ppm_range
         if isinstance(ppm_range, tuple):
             if not len(ppm_range) == 2:
-                raise Exception(
-                    "Input must be a tuple (min_ppm, max_ppm) or the string 'full'.", 105
-                )
+                raise Exception("Input must be a tuple (min_ppm, max_ppm) or the string 'full'.", 105)
 
             if axis == "f1":
-                end_index = np.argmin(
-                    np.abs(spectrum.get_ppm_axis(1) - np.min(ppm_range))
-                )
-                start_index = np.argmin(
-                    np.abs(spectrum.get_ppm_axis(1) - np.max(ppm_range))
-                )
+                end_index = np.argmin(np.abs(spectrum.get_ppm_axis(1) - np.min(ppm_range)))
+                start_index = np.argmin(np.abs(spectrum.get_ppm_axis(1) - np.max(ppm_range)))
 
             elif axis == "f2":
-                end_index = np.argmin(
-                    np.abs(spectrum.get_ppm_axis(0) - np.min(ppm_range))
-                )
-                start_index = np.argmin(
-                    np.abs(spectrum.get_ppm_axis(0) - np.max(ppm_range))
-                )
+                end_index = np.argmin(np.abs(spectrum.get_ppm_axis(0) - np.min(ppm_range)))
+                start_index = np.argmin(np.abs(spectrum.get_ppm_axis(0) - np.max(ppm_range)))
 
         elif ppm_range == "full":
             if axis == "f1":
@@ -263,37 +234,25 @@ class SpectrumAxes(Axes):
                 end_index = len(spectrum.get_ppm_axis(0))
 
         else:
-            raise Exception(
-                "Input must be a tuple (min_ppm, max_ppm) or the string 'full'.", 105
-            )
+            raise Exception("Input must be a tuple (min_ppm, max_ppm) or the string 'full'.", 105)
 
         if trace_ppm == "projection_internal":
             shift_to_edge = True
 
         if isinstance(trace_ppm, float) or isinstance(trace_ppm, int):
-            trace_ppm = str(
-                str(trace_ppm) + " ppm"
-            )  # ugly should deal with it differently
+            trace_ppm = str(str(trace_ppm) + " ppm")  # ugly should deal with it differently
 
         if shift_to_edge:
             if trace_ppm == "projection_internal":
                 if axis == "f1":
-                    offset = (
-                        max(self.get_ylim())
-                        - (max(self.get_ylim()) - min(self.get_ylim())) * 0.01
-                    )
+                    offset = max(self.get_ylim()) - (max(self.get_ylim()) - min(self.get_ylim())) * 0.01
                 elif axis == "f2":
-                    offset = (
-                        min(self.get_xlim())
-                        + (max(self.get_xlim()) - min(self.get_xlim())) * 0.01
-                    )
+                    offset = min(self.get_xlim()) + (max(self.get_xlim()) - min(self.get_xlim())) * 0.01
 
             elif trace_ppm == "projection_external":
                 pass
 
-            elif isinstance(trace_ppm, str) and re.fullmatch(
-                r"-?\d+(\.\d+)? ppm", trace_ppm
-            ):
+            elif isinstance(trace_ppm, str) and re.fullmatch(r"-?\d+(\.\d+)? ppm", trace_ppm):
                 if axis == "f1":
                     offset = (
                         float(trace_ppm.replace("ppm", "")) * -1
@@ -307,18 +266,14 @@ class SpectrumAxes(Axes):
                         + (max(self.get_xlim()) - min(self.get_xlim())) * 0.01
                     )
             else:
-                raise Exception(
-                    "Trace must be either 'projection' or chemical shift.", 106
-                )
+                raise Exception("Trace must be either 'projection' or chemical shift.", 106)
 
         # get color that has been used for the 2d plot of that spectrum
         if "color" not in kwargs.keys():
             axes = self.figure.get_axes()
             for ax in axes:
                 plotted_spectrum = [
-                    plotted_spectrum
-                    for plotted_spectrum in ax.spectra
-                    if plotted_spectrum[0] == spectrum
+                    plotted_spectrum for plotted_spectrum in ax.spectra if plotted_spectrum[0] == spectrum
                 ]
                 if plotted_spectrum:
                     for color in ["contour_color_positive", "contour_color_negative"]:
@@ -336,11 +291,7 @@ class SpectrumAxes(Axes):
         if axis == "f1":
             if trace_ppm == "projection_internal":
                 if rel_scale:
-                    trace = offset - (
-                        spectrum.projection_f1
-                        / np.max(spectrum.projection_f1)
-                        * rel_scale
-                    )
+                    trace = offset - (spectrum.projection_f1 / np.max(spectrum.projection_f1) * rel_scale)
                 else:
                     trace = offset - (spectrum.projection_f1 * abs_scale)
 
@@ -365,24 +316,15 @@ class SpectrumAxes(Axes):
                 else:
                     trace = trace * abs_scale + offset
 
-            elif isinstance(trace_ppm, str) and re.fullmatch(
-                r"-?\d+(\.\d+)? ppm", trace_ppm
-            ):
+            elif isinstance(trace_ppm, str) and re.fullmatch(r"-?\d+(\.\d+)? ppm", trace_ppm):
                 if rel_scale:
                     trace = (
                         float(trace_ppm.replace("ppm", ""))
                         + offset
-                        - (
-                            (spectrum.get_row(trace_ppm) / np.max(spectrum.data))
-                            * rel_scale
-                        )
+                        - ((spectrum.get_row(trace_ppm) / np.max(spectrum.data)) * rel_scale)
                     )
                 else:
-                    trace = (
-                        float(trace_ppm.replace("ppm", ""))
-                        + offset
-                        - ((spectrum.get_row(trace_ppm)) * abs_scale)
-                    )
+                    trace = float(trace_ppm.replace("ppm", "")) + offset - ((spectrum.get_row(trace_ppm)) * abs_scale)
 
             else:
                 raise Exception(
@@ -400,11 +342,7 @@ class SpectrumAxes(Axes):
         elif axis == "f2":
             if trace_ppm == "projection_internal":
                 if rel_scale:
-                    trace = (
-                        spectrum.projection_f2
-                        / np.max(spectrum.projection_f2)
-                        * rel_scale
-                    ) + offset
+                    trace = (spectrum.projection_f2 / np.max(spectrum.projection_f2) * rel_scale) + offset
                 else:
                     trace = (spectrum.projection_f2 * abs_scale) + offset
 
@@ -429,23 +367,16 @@ class SpectrumAxes(Axes):
                 else:
                     trace = trace * abs_scale + offset
 
-            elif isinstance(trace_ppm, str) and re.fullmatch(
-                r"-?\d+(\.\d+)? ppm", trace_ppm
-            ):
+            elif isinstance(trace_ppm, str) and re.fullmatch(r"-?\d+(\.\d+)? ppm", trace_ppm):
                 if rel_scale:
                     trace = (
-                        (
-                            (spectrum.get_column(trace_ppm) / np.max(spectrum.data))
-                            * rel_scale
-                        )
+                        ((spectrum.get_column(trace_ppm) / np.max(spectrum.data)) * rel_scale)
                         + float(trace_ppm.replace("ppm", ""))
                         + offset
                     )
                 else:
                     trace = (
-                        ((spectrum.get_column(trace_ppm)) * abs_scale)
-                        + float(trace_ppm.replace("ppm", ""))
-                        + offset
+                        ((spectrum.get_column(trace_ppm)) * abs_scale) + float(trace_ppm.replace("ppm", "")) + offset
                     )
             else:
                 raise Exception(
@@ -561,16 +492,16 @@ class SpectrumAxes(Axes):
         ticks = [t for t in self.get_yticklabels()]
         ticklabels = [item.get_text() for item in self.get_yticklabels()]
 
-        label_bbox = self.f1.label.get_window_extent(
-            self.figure.canvas.get_renderer()
-        ).transformed(self.figure.transFigure.inverted())
+        label_bbox = self.f1.label.get_window_extent(self.figure.canvas.get_renderer()).transformed(
+            self.figure.transFigure.inverted()
+        )
 
         # Check against tick labels
         for i, tick in enumerate(ticks):
             if tick.get_text():
-                tick_bbox = tick.get_window_extent(
-                    self.figure.canvas.get_renderer()
-                ).transformed(self.get_figure().transFigure.inverted())
+                tick_bbox = tick.get_window_extent(self.figure.canvas.get_renderer()).transformed(
+                    self.get_figure().transFigure.inverted()
+                )
                 if self._bbox_overlap(tick_bbox, label_bbox):
                     ticklabels[i] = ""
 
@@ -634,15 +565,9 @@ class SpectrumAxes(Axes):
         fig.patches.append(rect)
 
     def _get_figure_relative_coordinates(self, x, y):
-        return (
-            self.get_figure()
-            .transFigure.inverted()
-            .transform(self.transData.transform((x, y)))
-        )
+        return self.get_figure().transFigure.inverted().transform(self.transData.transform((x, y)))
 
-    def set_tick_spacing(
-        self, axis: Literal["f1", "f2"] = "f1", major: float = 5, minor: float = 1
-    ):
+    def set_tick_spacing(self, axis: Literal["f1", "f2"] = "f1", major: float = 5, minor: float = 1):
 
         if minor >= major:
             raise Exception("Minor spacing must be smaller than major spacing.", 101)
@@ -693,12 +618,8 @@ class SpectrumAxes(Axes):
             position_x1 = self.get_xlim()[1]
             position_y1 = self.get_ylim()[1] - sw_y * (1 - scale_factor_y)
 
-            inset_x0, inset_y0 = self._get_figure_relative_coordinates(
-                position_x0, position_y0
-            )
-            inset_x1, inset_y1 = self._get_figure_relative_coordinates(
-                position_x1, position_y1
-            )
+            inset_x0, inset_y0 = self._get_figure_relative_coordinates(position_x0, position_y0)
+            inset_x1, inset_y1 = self._get_figure_relative_coordinates(position_x1, position_y1)
 
             inset_ax = self.get_figure().add_axes(
                 [inset_x0, inset_y0, inset_x1 - inset_x0, inset_y1 - inset_y0],
@@ -727,12 +648,8 @@ class SpectrumAxes(Axes):
             position_x1 = self.get_xlim()[1] - sw_x * (1 - scale_factor_x)
             position_y1 = self.get_ylim()[1]
 
-            inset_x0, inset_y0 = self._get_figure_relative_coordinates(
-                position_x0, position_y0
-            )
-            inset_x1, inset_y1 = self._get_figure_relative_coordinates(
-                position_x1, position_y1
-            )
+            inset_x0, inset_y0 = self._get_figure_relative_coordinates(position_x0, position_y0)
+            inset_x1, inset_y1 = self._get_figure_relative_coordinates(position_x1, position_y1)
 
             inset_ax = self.get_figure().add_axes(
                 [inset_x0, inset_y0, inset_x1 - inset_x0, inset_y1 - inset_y0],
@@ -748,12 +665,8 @@ class SpectrumAxes(Axes):
         position_x0, position_y0 = position
         position_x1, position_y1 = position[0] - size[0], position[1] - size[1]
 
-        inset_x0, inset_y0 = self._get_figure_relative_coordinates(
-            position_x0, position_y0
-        )
-        inset_x1, inset_y1 = self._get_figure_relative_coordinates(
-            position_x1, position_y1
-        )
+        inset_x0, inset_y0 = self._get_figure_relative_coordinates(position_x0, position_y0)
+        inset_x1, inset_y1 = self._get_figure_relative_coordinates(position_x1, position_y1)
 
         inset_ax = self.get_figure().add_axes(
             [inset_x0, inset_y0, inset_x1 - inset_x0, inset_y1 - inset_y0],
@@ -828,38 +741,26 @@ class SpectrumAxes(Axes):
         if left is False and right is False and top is False and bottom is False:
             raise Exception("Inset position is overlapping with its own region.", 107)
 
-        fig_relative_coords = (
-            self.get_figure()
-            .transFigure.inverted()
-            .transform(inset_ax.transData.transform(p2))
-        )
+        fig_relative_coords = self.get_figure().transFigure.inverted().transform(inset_ax.transData.transform(p2))
         display_coords = inset_ax.get_figure().transFigure.transform(fig_relative_coords)
         data_coords = self.transData.inverted().transform(display_coords)
 
         (xx2, yy2) = data_coords
 
         # Create a Line2D object
-        line = Line2D(
-            [p1[0], xx2], [p1[1], yy2], color="black", linewidth=0.5, linestyle="-"
-        )
+        line = Line2D([p1[0], xx2], [p1[1], yy2], color="black", linewidth=0.5, linestyle="-")
 
         # Add the line to the axes
         self.add_line(line)
 
-        fig_relative_coords = (
-            inset_ax.get_figure()
-            .transFigure.inverted()
-            .transform(inset_ax.transData.transform(p4))
-        )
+        fig_relative_coords = inset_ax.get_figure().transFigure.inverted().transform(inset_ax.transData.transform(p4))
         display_coords = self.get_figure().transFigure.transform(fig_relative_coords)
         data_coords = self.transData.inverted().transform(display_coords)
 
         (xx2, yy2) = data_coords
 
         # Create a Line2D object
-        line = Line2D(
-            [p3[0], xx2], [p3[1], yy2], color="black", linewidth=0.5, linestyle="-"
-        )
+        line = Line2D([p3[0], xx2], [p3[1], yy2], color="black", linewidth=0.5, linestyle="-")
 
         # Add the line to the axes
         self.add_line(line)

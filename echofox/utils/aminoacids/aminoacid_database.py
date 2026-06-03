@@ -55,15 +55,11 @@ class AminoAcidsDatabase:
             self._aa_map = {aa["one_letter"]: aa for aa in self.amino_acids}
             self._three_letter_map = {aa["three_letters"]: aa for aa in self.amino_acids}
 
-            log.info(
-                f"Loaded {len(self.amino_acids)} amino acid definitions from {self.schema_path}"
-            )
+            log.info(f"Loaded {len(self.amino_acids)} amino acid definitions from {self.schema_path}")
 
         except FileNotFoundError as e:
             log.error(f"Schema file not found: {self.schema_path}")
-            raise SchemaFileNotFoundError(
-                f"Schema file not found: {self.schema_path}"
-            ) from e
+            raise SchemaFileNotFoundError(f"Schema file not found: {self.schema_path}") from e
         except yaml.YAMLError as e:
             log.error(f"Error parsing schema YAML: {e}")
             raise SchemaParseError(f"Error parsing schema YAML: {e}") from e
@@ -84,9 +80,7 @@ class AminoAcidsDatabase:
         """
         return [aa["one_letter"] for aa in self.amino_acids]
 
-    def get_aa_by_code(
-        self, one_letter: str, strict: bool = True
-    ) -> dict[str, Any] | None:
+    def get_aa_by_code(self, one_letter: str, strict: bool = True) -> dict[str, Any] | None:
         """
         Get amino acid from a one-letter code
 
@@ -113,9 +107,7 @@ class AminoAcidsDatabase:
             raise AminoAcidNotFoundError(one_letter, search_type="code")
         return aa
 
-    def get_aa_by_full_name(
-        self, full_name: str, strict: bool = True
-    ) -> dict[str, Any] | None:
+    def get_aa_by_full_name(self, full_name: str, strict: bool = True) -> dict[str, Any] | None:
         """
         Get amino acid from the full name
 

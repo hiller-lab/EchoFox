@@ -137,10 +137,6 @@ class PeakListCollection:
 
     def __str__(self) -> str:
         if not self._peaklists:
-            return (
-                f"PeakListCollection('{self.name}' - empty)"
-                if self.name
-                else "PeakListCollection(empty)"
-            )
+            return f"PeakListCollection('{self.name}' - empty)" if self.name else "PeakListCollection(empty)"
         name_str = f"'{self.name}' - " if self.name else ""
         return f"PeakListCollection({name_str}{len(self._peaklists)} peaklists)"

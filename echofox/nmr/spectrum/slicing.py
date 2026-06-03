@@ -43,9 +43,7 @@ def get_column(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
     if isinstance(idx, int):
         if 0 <= idx < len(self._data[0]):
             return self._data[:, idx]
-        raise InvalidSliceError(
-            f"Column index {idx} out of range [0, {len(self._data[0])})"
-        )
+        raise InvalidSliceError(f"Column index {idx} out of range [0, {len(self._data[0])})")
 
     if isinstance(idx, (str, float)):
         chemical_shift = ChemicalShift(idx)
@@ -125,9 +123,7 @@ def extract_subspectrum(
     dimension_positions: dict,
     tolerance: float | None = None,
 ):
-    sub_data, slice_indices, slice_ppm_actual = get_subspectrum(
-        self, dimension_positions, tolerance
-    )
+    sub_data, slice_indices, slice_ppm_actual = get_subspectrum(self, dimension_positions, tolerance)
 
     remaining_dims = [d for d in range(self._ndim) if d not in dimension_positions]
 
@@ -199,9 +195,7 @@ def extract_trace(
                 len(dims_to_slice),
                 len(dimension_positions),
             )
-        dimension_dict = {
-            dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions, strict=True)
-        }
+        dimension_dict = {dim: float(ppm) for dim, ppm in zip(dims_to_slice, dimension_positions, strict=True)}
 
     elif isinstance(dimension_positions, dict):
         dimension_dict = {int(k): float(v) for k, v in dimension_positions.items()}
@@ -213,9 +207,7 @@ def extract_trace(
                 len(dimension_dict),
             )
     else:
-        raise InvalidSliceError(
-            f"Invalid dimension_positions type: {type(dimension_positions)}"
-        )
+        raise InvalidSliceError(f"Invalid dimension_positions type: {type(dimension_positions)}")
 
     trace_data, slice_indices, slice_ppm_actual = get_subspectrum(self, dimension_dict)
 

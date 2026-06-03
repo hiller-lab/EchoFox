@@ -32,9 +32,7 @@ class PlotConfig:
     # -------------------------------------------------------------------------
 
     file_path = os.path.dirname(os.path.abspath(__file__))
-    ECHOFOX_MAIN_DIR = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
+    ECHOFOX_MAIN_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     ECHOFOX_EXAMPLE_DATA_DIR = os.path.join(ECHOFOX_MAIN_DIR, "examples", "example_data")
 
     # -------------------------------------------------------------------------

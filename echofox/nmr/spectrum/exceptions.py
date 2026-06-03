@@ -24,8 +24,7 @@ class InvalidSpectrumFormatError(SpectrumError):
     def __init__(self, format_name, supported_formats=None):
         if supported_formats:
             message = (
-                f"Spectrum format '{format_name}' is not supported. Supported formats: "
-                f"{', '.join(supported_formats)}"
+                f"Spectrum format '{format_name}' is not supported. Supported formats: {', '.join(supported_formats)}"
             )
         else:
             message = f"Spectrum format '{format_name}' is not supported."

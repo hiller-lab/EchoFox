@@ -47,9 +47,7 @@ class AminoAcidNotFoundError(AminoAcidError):
         """
         self.identifier = identifier
         self.search_type = search_type
-        super().__init__(
-            f"Amino acid not found: {identifier} (searched by {search_type})"
-        )
+        super().__init__(f"Amino acid not found: {identifier} (searched by {search_type})")
 
 
 class InvalidAminoAcidCodeError(AminoAcidError):

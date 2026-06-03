@@ -165,9 +165,7 @@ class PeakList:
 
         return PeakList(filtered, name=f"{self.name}_{nucleus}" if self.name else None)
 
-    def filter_by_assignment(
-        self, assignment_pattern: str, dimension: int | None = None
-    ) -> "PeakList":
+    def filter_by_assignment(self, assignment_pattern: str, dimension: int | None = None) -> "PeakList":
         """
         Filter peaks by assignment pattern.
 
@@ -197,9 +195,7 @@ class PeakList:
                 ):
                     filtered.append(peak)
 
-        return PeakList(
-            filtered, name=f"{self.name}_{assignment_pattern}" if self.name else None
-        )
+        return PeakList(filtered, name=f"{self.name}_{assignment_pattern}" if self.name else None)
 
     def filter_assigned(self, dimension: int | None = None) -> "PeakList":
         """
@@ -235,15 +231,11 @@ class PeakList:
             New PeakList containing only unassigned peaks
         """
         filtered = [
-            peak
-            for peak in self._peaks
-            if peak.assignments is None or all(a is None for a in peak.assignments)
+            peak for peak in self._peaks if peak.assignments is None or all(a is None for a in peak.assignments)
         ]
         return PeakList(filtered, name=f"{self.name}_unassigned" if self.name else None)
 
-    def filter_by_shift_range(
-        self, dimension: int, min_ppm: float, max_ppm: float
-    ) -> "PeakList":
+    def filter_by_shift_range(self, dimension: int, min_ppm: float, max_ppm: float) -> "PeakList":
         """
         Filter peaks by chemical shift range in a specific dimension.
 
@@ -264,9 +256,7 @@ class PeakList:
 
         return PeakList(filtered, name=f"{self.name}_range" if self.name else None)
 
-    def filter_by_intensity(
-        self, min_intensity: float | None = None, max_intensity: float | None = None
-    ) -> "PeakList":
+    def filter_by_intensity(self, min_intensity: float | None = None, max_intensity: float | None = None) -> "PeakList":
         """
         Filter peaks by intensity range.
 
@@ -289,9 +279,7 @@ class PeakList:
 
             filtered.append(peak)
 
-        return PeakList(
-            filtered, name=f"{self.name}_intensity_filtered" if self.name else None
-        )
+        return PeakList(filtered, name=f"{self.name}_intensity_filtered" if self.name else None)
 
     def filter(self, predicate: Callable[[NmrPeak], bool]) -> "PeakList":
         """
@@ -359,9 +347,7 @@ class PeakList:
 
         return closest_peak, min_distance
 
-    def find_within_tolerance(
-        self, position: list[float], tolerances: float | list[float]
-    ) -> "PeakList":
+    def find_within_tolerance(self, position: list[float], tolerances: float | list[float]) -> "PeakList":
         """
         Find all peaks within tolerance of a given position.
 
@@ -387,9 +373,7 @@ class PeakList:
 
         return PeakList(matches, name=f"{self.name}_matches" if self.name else None)
 
-    def sort_by_shift(
-        self, dimension: int, reverse: bool = False, inplace: bool = True
-    ) -> Optional["PeakList"]:
+    def sort_by_shift(self, dimension: int, reverse: bool = False, inplace: bool = True) -> Optional["PeakList"]:
         """
         Sort peaks by chemical shift in a specific dimension.
 
@@ -414,9 +398,7 @@ class PeakList:
             sorted_peaks = sorted(self._peaks, key=get_shift, reverse=reverse)
             return PeakList(sorted_peaks, name=self.name)
 
-    def sort_by_intensity(
-        self, reverse: bool = True, inplace: bool = True
-    ) -> Optional["PeakList"]:
+    def sort_by_intensity(self, reverse: bool = True, inplace: bool = True) -> Optional["PeakList"]:
         """
         Sort peaks by intensity.
 
@@ -481,10 +463,7 @@ class PeakList:
             key = assignment if assignment is not None else "unassigned"
             groups[key].append(peak)
 
-        return {
-            key: PeakList(peaks, name=f"{self.name}_{key}" if self.name else key)
-            for key, peaks in groups.items()
-        }
+        return {key: PeakList(peaks, name=f"{self.name}_{key}" if self.name else key) for key, peaks in groups.items()}
 
     def statistics(self) -> dict:
         """
@@ -502,11 +481,7 @@ class PeakList:
             }
 
         intensities = [p.intensity for p in self._peaks if p.intensity is not None]
-        assigned_count = sum(
-            1
-            for p in self._peaks
-            if p.assignments and any(a is not None for a in p.assignments)
-        )
+        assigned_count = sum(1 for p in self._peaks if p.assignments and any(a is not None for a in p.assignments))
 
         # Count peaks by dimension
         dim_counts = defaultdict(int)
@@ -655,9 +630,7 @@ class PeakList:
             dim_counts[peak.ndim] += 1  # Increment count for each ndim
 
         # Generate the formatted output (this part sorts the ndim counts)
-        dim_info = ", ".join(
-            f"{dim}D: {count}" for dim, count in sorted(dim_counts.items())
-        )
+        dim_info = ", ".join(f"{dim}D: {count}" for dim, count in sorted(dim_counts.items()))
 
         name_str = f"'{self.name}', " if self.name else ""
         return f"PeakList({name_str}{len(self._peaks)} peaks, {dim_info})"

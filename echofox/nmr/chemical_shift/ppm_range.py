@@ -144,9 +144,7 @@ class PpmRange:
         Returns:
             New expanded PpmRange
         """
-        return PpmRange(
-            self._low.ppm - margin, self._high.ppm + margin, validate_range=False
-        )
+        return PpmRange(self._low.ppm - margin, self._high.ppm + margin, validate_range=False)
 
     def to_tuple(self) -> tuple[float, float]:
         """Returns range as (low, high) tuple."""
@@ -172,15 +170,9 @@ class PpmRange:
     def __eq__(self, other) -> bool:
         """Check equality with another PpmRange or tuple."""
         if isinstance(other, PpmRange):
-            return (
-                abs(self._low.ppm - other.low_ppm) < 1e-9
-                and abs(self._high.ppm - other.high_ppm) < 1e-9
-            )
+            return abs(self._low.ppm - other.low_ppm) < 1e-9 and abs(self._high.ppm - other.high_ppm) < 1e-9
         elif isinstance(other, tuple) and len(other) == 2:
-            return (
-                abs(self._low.ppm - other[0]) < 1e-9
-                and abs(self._high.ppm - other[1]) < 1e-9
-            )
+            return abs(self._low.ppm - other[0]) < 1e-9 and abs(self._high.ppm - other[1]) < 1e-9
         return False
 
     def __hash__(self) -> int:

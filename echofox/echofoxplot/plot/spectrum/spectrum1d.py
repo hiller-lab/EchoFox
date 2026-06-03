@@ -15,6 +15,7 @@ from echofox.nmr.spectrum import read_spectra
 rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
 rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
 
+
 def plot1d(
     spec,
     ppm_range: tuple[Number, Number] | None = None,
@@ -64,10 +65,7 @@ def plot1d(
     if reverse_spectra:
         spectra.reverse()
 
-    if (
-        len({x.ndim for x in spectra} & {1, 2}) == 1
-        and {x.ndim for x in spectra} <= {1, 2}
-    ) is not True:
+    if (len({x.ndim for x in spectra} & {1, 2}) == 1 and {x.ndim for x in spectra} <= {1, 2}) is not True:
         raise Exception("Must be either 1D or 2D spectra.")
 
     # set current ax and figure
@@ -98,9 +96,7 @@ def plot1d(
                 min_value = min_val if min_val < min_value else min_value
 
     if normalize:
-        factor = 1 / (
-            abs(max_value) if abs(max_value) > abs(min_value) else abs(min_value)
-        )
+        factor = 1 / (abs(max_value) if abs(max_value) > abs(min_value) else abs(min_value))
     else:
         factor = 1
 
@@ -111,18 +107,14 @@ def plot1d(
             if len(spectra) == 1:
                 kwargs["intensity_offset"] = [kwargs["intensity_offset"]]
             else:
-                kwargs["intensity_offset"] = [
-                    kwargs["intensity_offset"] * i for i in range(len(spectra))
-                ]
+                kwargs["intensity_offset"] = [kwargs["intensity_offset"] * i for i in range(len(spectra))]
 
     if "f1_offset" in kwargs.keys():
         if not isinstance(kwargs["f1_offset"], list):
             if len(spectra) == 1:
                 kwargs["f1_offset"] = [kwargs["f1_offset"]]
             else:
-                kwargs["f1_offset"] = [
-                    kwargs["f1_offset"] * i for i in range(len(spectra))
-                ]
+                kwargs["f1_offset"] = [kwargs["f1_offset"] * i for i in range(len(spectra))]
 
     # plot spectrum and extract variables
     for i, spectrum in enumerate(spectra):
@@ -131,9 +123,7 @@ def plot1d(
             for key, value in kwargs.items():
                 if isinstance(value, list):  # If the value is a list
                     if len(value) > 1:
-                        new_dict[key] = value[
-                            i % len(value)
-                        ]  # Get the element at index i (wrap around if needed)
+                        new_dict[key] = value[i % len(value)]  # Get the element at index i (wrap around if needed)
                     else:
                         new_dict[key] = value[0]  # If only one element, take it
                 else:
@@ -156,9 +146,7 @@ def plot1d(
                 for key, value in kwargs.items():
                     if isinstance(value, list):  # If the value is a list
                         if len(value) > 1:
-                            new_dict[key] = value[
-                                i % len(value)
-                            ]  # Get the element at index i (wrap around if needed)
+                            new_dict[key] = value[i % len(value)]  # Get the element at index i (wrap around if needed)
                         else:
                             new_dict[key] = value[0]  # If only one element, take it
                     else:

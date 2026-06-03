@@ -126,9 +126,7 @@ def from_pseudo_nd(
 
     if pseudo_axis_values is not None:
         if len(pseudo_axis_values) != len(spectra):
-            raise DimensionMismatchError(
-                "pseudo_axis_values", len(spectra), len(pseudo_axis_values)
-            )
+            raise DimensionMismatchError("pseudo_axis_values", len(spectra), len(pseudo_axis_values))
 
     stacked_data = np.stack([s.data for s in spectra], axis=0)
 
@@ -146,17 +144,9 @@ def from_pseudo_nd(
         for value in values:
             try:
                 if pseudo_axis_unit and isinstance(value, (int, float)):
-                    seconds_values.append(
-                        TimeValue(f"{value} {pseudo_axis_unit}").seconds
-                    )
-                elif (
-                    pseudo_axis_unit
-                    and isinstance(value, str)
-                    and re.search(r"[a-zA-Z]", value) is None
-                ):
-                    seconds_values.append(
-                        TimeValue(f"{value} {pseudo_axis_unit}").seconds
-                    )
+                    seconds_values.append(TimeValue(f"{value} {pseudo_axis_unit}").seconds)
+                elif pseudo_axis_unit and isinstance(value, str) and re.search(r"[a-zA-Z]", value) is None:
+                    seconds_values.append(TimeValue(f"{value} {pseudo_axis_unit}").seconds)
                 else:
                     seconds_values.append(TimeValue(value).seconds)
             except InvalidTimeValueError:
@@ -172,8 +162,7 @@ def from_pseudo_nd(
     if pseudo_axis_values is not None:
         label_is_time = bool(pseudo_axis_label) and "time" in pseudo_axis_label.lower()
         values_have_units = any(
-            isinstance(value, str) and re.search(r"[a-zA-Z]", value)
-            for value in pseudo_axis_values
+            isinstance(value, str) and re.search(r"[a-zA-Z]", value) for value in pseudo_axis_values
         )
         if pseudo_axis_unit or label_is_time or values_have_units:
             pseudo_axis_seconds = _coerce_to_seconds(pseudo_axis_values)
@@ -263,10 +252,7 @@ def _from_udic(
                     True,
                     dic[procs_key]["SW_p"],
                     dic[procs_key]["SF"],
-                    (
-                        dic[procs_key]["OFFSET"]
-                        - (dic[procs_key]["SW_p"] / dic[procs_key]["SF"]) / 2
-                    )
+                    (dic[procs_key]["OFFSET"] - (dic[procs_key]["SW_p"] / dic[procs_key]["SF"]) / 2)
                     * dic[procs_key]["SF"],
                 )
             else:

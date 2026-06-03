@@ -14,9 +14,7 @@ class InvalidTimeValueError(TimeRangeError):
         if reason:
             message = f"Invalid time value: {value!r} - {reason}"
         else:
-            message = (
-                f"Invalid time value: {value!r}. Expected numeric or string with units"
-            )
+            message = f"Invalid time value: {value!r}. Expected numeric or string with units"
         super().__init__(message)
         self.value = value
         self.type_received = type_received

@@ -40,6 +40,4 @@ def convert_to_inches(value: str | Number):
         return number * conversion_factors[unit]  # Convert to inches
 
     # If input is invalid
-    raise ValueError(
-        f"Invalid input format: {value}. Expected format: '10mm', '5 cm', '2m', or '10'."
-    )
+    raise ValueError(f"Invalid input format: {value}. Expected format: '10mm', '5 cm', '2m', or '10'.")

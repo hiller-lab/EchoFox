@@ -283,11 +283,7 @@ class NmrPeak:
     @property
     def lorentzian_gammas(self) -> list[float] | None:
         """Returns Lorentzian width (gamma) values for each dimension."""
-        return (
-            self._lorentzian_gammas.copy()
-            if self._lorentzian_gammas is not None
-            else None
-        )
+        return self._lorentzian_gammas.copy() if self._lorentzian_gammas is not None else None
 
     @lorentzian_gammas.setter
     def lorentzian_gammas(self, value: list[float] | None) -> None:
@@ -315,14 +311,10 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._chemical_shifts[dimension]
 
-    def set_chemical_shift(
-        self, dimension: int, value: float | int | str | ChemicalShift
-    ) -> None:
+    def set_chemical_shift(self, dimension: int, value: float | int | str | ChemicalShift) -> None:
         """
         Sets the chemical shift for a specific dimension.
 
@@ -334,9 +326,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
 
         if isinstance(value, ChemicalShift):
             self._chemical_shifts[dimension] = value
@@ -357,9 +347,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._nuclei[dimension] if self._nuclei is not None else None
 
     def set_nucleus(self, dimension: int, value: str) -> None:
@@ -374,9 +362,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
 
         if self._nuclei is None:
             self._nuclei = [None] * self._ndim
@@ -397,9 +383,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._frequencies[dimension] if self._frequencies is not None else None
 
     def set_frequency(self, dimension: int, value: float) -> None:
@@ -414,9 +398,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
 
         if self._frequencies is None:
             self._frequencies = [None] * self._ndim
@@ -437,9 +419,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
         return self._assignments[dimension] if self._assignments is not None else None
 
     def set_assignment(self, dimension: int, value: str | None) -> None:
@@ -454,9 +434,7 @@ class NmrPeak:
             IndexError: If dimension is out of range
         """
         if dimension < 0 or dimension >= self._ndim:
-            raise IndexError(
-                f"Dimension {dimension} is out of range for {self._ndim}D peak"
-            )
+            raise IndexError(f"Dimension {dimension} is out of range for {self._ndim}D peak")
 
         if self._assignments is None:
             self._assignments = [None] * self._ndim
@@ -500,9 +478,7 @@ class NmrPeak:
         )
         return np.sqrt(squared_diff)
 
-    def is_within_tolerance(
-        self, other: "NmrPeak", tolerances: float | list[float]
-    ) -> bool:
+    def is_within_tolerance(self, other: "NmrPeak", tolerances: float | list[float]) -> bool:
         """
         Checks if another peak is within specified tolerance(s) in each dimension.
 
@@ -533,9 +509,7 @@ class NmrPeak:
                 f"Number of tolerances ({len(tolerances)}) must match number of dimensions ({self._ndim})"
             )
 
-        for cs1, cs2, tol in zip(
-            self._chemical_shifts, other._chemical_shifts, tolerances, strict=True
-        ):
+        for cs1, cs2, tol in zip(self._chemical_shifts, other._chemical_shifts, tolerances, strict=True):
             if abs(cs1.ppm - cs2.ppm) > tol:
                 return False
         return True
@@ -601,9 +575,7 @@ class NmrPeak:
         if self._ndim != other._ndim:
             return False
 
-        return all(
-            cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts, strict=True)
-        )
+        return all(cs1 == cs2 for cs1, cs2 in zip(self._chemical_shifts, other._chemical_shifts, strict=True))
 
     def __hash__(self) -> int:
         """Returns hash of the peak based on chemical shifts."""
@@ -618,9 +590,7 @@ class NmrPeak:
         """
         return self.get_chemical_shift(dimension)
 
-    def __setitem__(
-        self, dimension: int, value: float | int | str | ChemicalShift
-    ) -> None:
+    def __setitem__(self, dimension: int, value: float | int | str | ChemicalShift) -> None:
         """
         Allows indexing to set chemical shift for a dimension.
 

@@ -180,9 +180,7 @@ class Color:
     def _parse_percent(tok: str) -> float:
         tok = tok.strip()
         if not tok.endswith("%"):
-            raise InvalidColorComponent(
-                "percentage", tok, "value ending with '%' like '50%'"
-            )
+            raise InvalidColorComponent("percentage", tok, "value ending with '%' like '50%'")
         v = float(tok[:-1]) / 100.0
         if not (0.0 <= v <= 1.0):
             raise InvalidColorComponent("percentage", tok, "0%..100%")

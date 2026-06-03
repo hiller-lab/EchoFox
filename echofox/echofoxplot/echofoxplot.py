@@ -59,9 +59,7 @@ def _get_context(
     if current_ax is None:
         if figure.get_axes() == []:
             if spectrum_axes:
-                ax = figure.add_subplot(
-                    111, projection="SpectrumAxes"
-                )  # Custom projection
+                ax = figure.add_subplot(111, projection="SpectrumAxes")  # Custom projection
             else:
                 ax = figure.add_subplot(111)
         else:

@@ -76,10 +76,7 @@ def get_projection(
         elif method == "mean":
             self._projections[cache_key] = np.mean(self._data, axis=axis)
         else:
-            raise SpectrumProcessingError(
-                f"Unknown projection method: {method}. "
-                f"Use 'sum', 'max', 'min', or 'mean'."
-            )
+            raise SpectrumProcessingError(f"Unknown projection method: {method}. Use 'sum', 'max', 'min', or 'mean'.")
 
     return self._projections[cache_key]
 

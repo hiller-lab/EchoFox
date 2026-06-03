@@ -107,9 +107,7 @@ class NmrSpectrum:
         **kwargs,
     ):
         if not isinstance(data, np.ndarray):
-            raise InvalidSpectrumDataError(
-                f"Data must be numpy array, got {type(data).__name__}"
-            )
+            raise InvalidSpectrumDataError(f"Data must be numpy array, got {type(data).__name__}")
 
         self._data = data
         self._ndim = data.ndim
@@ -120,17 +118,13 @@ class NmrSpectrum:
         if peaklists is not None:
             self._peaklists = peaklists
         else:
-            self._peaklists = PeakListCollection(
-                name=f"{name}_peaklists" if name else None
-            )
+            self._peaklists = PeakListCollection(name=f"{name}_peaklists" if name else None)
         if peaklist is not None:
             self.peaklist = peaklist
 
         # Validate and convert dimension_ranges to range objects
         if len(dimension_ranges) != self._ndim:
-            raise DimensionMismatchError(
-                "dimension_ranges", self._ndim, len(dimension_ranges)
-            )
+            raise DimensionMismatchError("dimension_ranges", self._ndim, len(dimension_ranges))
 
         self._dimension_ranges: list[PpmRange | TimeRange] = []
         for r in dimension_ranges:
@@ -187,9 +181,7 @@ class NmrSpectrum:
     # -------------------------------------------------------------------------
 
     @classmethod
-    def from_file(
-        cls, path: str, spectrum_format: SpectrumFormat = None, name: str | None = None
-    ) -> NmrSpectrum:
+    def from_file(cls, path: str, spectrum_format: SpectrumFormat = None, name: str | None = None) -> NmrSpectrum:
         return spectrum_io.from_file(cls, path, spectrum_format, name)
 
     @classmethod
@@ -417,9 +409,7 @@ class NmrSpectrum:
         return spectrum_axes.range_bounds(range_obj)
 
     @staticmethod
-    def _coerce_range_value(
-        range_obj: PpmRange | TimeRange, value: float | int | str | TimeValue
-    ) -> float:
+    def _coerce_range_value(range_obj: PpmRange | TimeRange, value: float | int | str | TimeValue) -> float:
         return spectrum_axes.coerce_range_value(range_obj, value)
 
     def _init_unit_converters(self) -> None:
@@ -432,9 +422,7 @@ class NmrSpectrum:
         """Alias for get_ppm_axis."""
         return spectrum_axes.get_ppm_scale(self, dimension)
 
-    def ppm_to_index(
-        self, dimension: int, ppm_value: float | int | str | TimeValue
-    ) -> int:
+    def ppm_to_index(self, dimension: int, ppm_value: float | int | str | TimeValue) -> int:
         return spectrum_axes.ppm_to_index(self, dimension, ppm_value)
 
     def index_to_ppm(self, dimension: int, index: int) -> float:
@@ -463,38 +451,26 @@ class NmrSpectrum:
     def get_column(self, idx: int | str | float | ChemicalShift) -> np.ndarray:
         return spectrum_slicing.get_column(self, idx)
 
-    def get_segment(
-        self, min_ppm: float, max_ppm: float, dimension: int = 0
-    ) -> np.ndarray:
+    def get_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0) -> np.ndarray:
         return spectrum_slicing.get_segment(self, min_ppm, max_ppm, dimension)
 
-    def extract_segment(
-        self, min_ppm: float, max_ppm: float, dimension: int = 0
-    ) -> NmrSpectrum:
+    def extract_segment(self, min_ppm: float, max_ppm: float, dimension: int = 0) -> NmrSpectrum:
         return spectrum_slicing.extract_segment(self, min_ppm, max_ppm, dimension)
 
-    def extract_subspectrum(
-        self, dimension_positions: dict, tolerance: float | None = None
-    ) -> NmrSpectrum:
+    def extract_subspectrum(self, dimension_positions: dict, tolerance: float | None = None) -> NmrSpectrum:
         return spectrum_slicing.extract_subspectrum(self, dimension_positions, tolerance)
 
-    def extract_trace(
-        self, trace_dimension: int, dimension_positions: float | list[float] | dict
-    ) -> NmrSpectrum:
+    def extract_trace(self, trace_dimension: int, dimension_positions: float | list[float] | dict) -> NmrSpectrum:
         return spectrum_slicing.extract_trace(self, trace_dimension, dimension_positions)
 
-    def extract_projection(
-        self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum"
-    ) -> NmrSpectrum:
+    def extract_projection(self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum") -> NmrSpectrum:
         return spectrum_projections.extract_projection(self, axis, method)
 
     # -------------------------------------------------------------------------
     # Projection methods
     # -------------------------------------------------------------------------
 
-    def get_projection(
-        self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum"
-    ) -> np.ndarray:
+    def get_projection(self, axis: int, method: Literal["sum", "max", "min", "mean"] = "sum") -> np.ndarray:
         return spectrum_projections.get_projection(self, axis, method)
 
     @property
