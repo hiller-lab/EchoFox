@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Literal, TypeAlias
 
 from echofox.core.typing import Number, is_typealias_instance
-from echofox.nmr.spectrum import NmrSpectrum
+
+from .spectrum import NmrSpectrum
 
 SpectrumFormat: TypeAlias = Literal["bruker", "pipe"]
 SpectrumParam: TypeAlias = tuple[str | Number, str | Path, SpectrumFormat]
