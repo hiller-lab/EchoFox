@@ -14,10 +14,16 @@ from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
 
 # Import plotting functions from echofoxplot
 from echofox.echofoxplot.plot.spectrum.spectrum2d import plot2d as _plot2d
+from echofox.echofoxplot.plot.utils import configure_font, fancy_legend
 from echofox.utils.units import convert_to_inches
 
 # Import echofoxplot config
 from .config import config
+
+__all__ = [
+    "configure_font",
+    "fancy_legend",
+]
 
 # Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
 rcParams["pdf.fonttype"] = 42
@@ -194,22 +200,22 @@ def figure(*args, **kwargs):
     return plt.figure(*args, **kwargs)
 
 
-def show(*args, **kwargs):
+def show(*args, **kwargs) -> None:
     """Display the plot."""
     plt.show(*args, **kwargs)
 
 
-def tight_layout(*args, **kwargs):
+def tight_layout(*args, **kwargs) -> None:
     """Adjust subplot parameters to fit into figure area."""
     plt.tight_layout(*args, **kwargs)
 
 
-def savefig(*args, **kwargs):
+def savefig(*args, **kwargs) -> None:
     """Save the current figure to a file."""
     plt.savefig(*args, **kwargs)
 
 
-def close(*args, **kwargs):
+def close(*args, **kwargs) -> None:
     """Close the current figure."""
     plt.close(*args, **kwargs)
 
