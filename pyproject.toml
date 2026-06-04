@@ -108,5 +108,6 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = [
+    "B905", # zip-without-explicit-strict
     "E741", # ambiguous-variable-name
 ]
