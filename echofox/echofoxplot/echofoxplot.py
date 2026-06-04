@@ -15,6 +15,7 @@ from echofox.echofoxplot.plot.spectrum.spectrum1d import plot1d as _plot1d
 # Import plotting functions from echofoxplot
 from echofox.echofoxplot.plot.spectrum.spectrum2d import plot2d as _plot2d
 from echofox.echofoxplot.plot.utils import configure_font, fancy_legend
+from echofox.echofoxplot.secondary_structure import draw_secondary_structure, get_secondary_structure_map
 from echofox.utils.units import convert_to_inches
 
 # Import echofoxplot config
@@ -23,6 +24,8 @@ from .config import config
 __all__ = [
     "configure_font",
     "fancy_legend",
+    "get_secondary_structure_map",
+    "draw_secondary_structure",
 ]
 
 # Configure font types for PDF and PostScript output to ensure compatibility with Illustrator and others
