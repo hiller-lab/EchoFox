@@ -150,10 +150,9 @@ def test_draw_secondary_structure_with_user_defined_styles() -> None:
     sheet_patch = ax.patches[-1]
     helix_patches = ax.patches[1:-1]
 
-    assert baseline.get_height() == pytest.approx(0.1)
+    assert baseline.get_linewidth() == pytest.approx(0.1)
     assert baseline.get_facecolor() == to_rgba("lightgrey")
     assert baseline.get_edgecolor() == to_rgba("black")
-    assert baseline.get_linewidth() == pytest.approx(0.5)
 
     assert len(helix_patches) > 0
     assert any(patch.get_facecolor() == to_rgba("darkred") for patch in helix_patches)

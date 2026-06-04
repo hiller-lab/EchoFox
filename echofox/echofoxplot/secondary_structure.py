@@ -222,7 +222,6 @@ def _draw_rect(
     span: ResidueSpan,
     color: str,
     edgecolor: str | None = None,
-    linewidth: float = 0.0,
     zorder: int = 1,
 ) -> None:
     """Draw the unstructured baseline."""
@@ -233,12 +232,12 @@ def _draw_rect(
         return
 
     rect = mpatches.Rectangle(
-        (x_start, -girth / 2),
+        (x_start, 0),
         width,
-        girth,
+        0.0,
         facecolor=color,
         edgecolor=edgecolor if edgecolor is not None else color,
-        linewidth=linewidth,
+        linewidth=girth,
         clip_on=False,
         zorder=zorder,
     )
@@ -443,10 +442,9 @@ def _normalize_span(span: ResidueSpan) -> tuple[float, float]:
 
 
 DEFAULT_UNSTRUCTURED_STYLE = {
-    "girth": 0.05,
+    "girth": 1.5,
     "color": "#b3b3b3",
     "edgecolor": None,
-    "linewidth": 0.0,
     "zorder": 1,
 }
 
@@ -545,7 +543,6 @@ def draw_secondary_structure(
             "girth": float,
             "color": str,
             "edgecolor": str | None,
-            "linewidth": float,
             "zorder": int,
         }
 
@@ -632,7 +629,6 @@ def draw_secondary_structure(
             span=residue_range,
             color=unstructured["color"],
             edgecolor=unstructured["edgecolor"],
-            linewidth=unstructured["linewidth"],
             zorder=unstructured["zorder"],
         )
 
