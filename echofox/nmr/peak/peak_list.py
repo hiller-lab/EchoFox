@@ -2,7 +2,10 @@ import json
 from collections import defaultdict
 from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
+import inspect
+import re
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -67,6 +70,787 @@ class PeakList:
     def peaks(self) -> list[NmrPeak]:
         """Returns a copy of the peak list."""
         return self._peaks.copy()
+    
+    @property
+    def metadata(self) -> dict:
+        """Return a copy of peak-list metadata."""
+        return self._metadata.copy()
+
+    @classmethod
+    def from_file(
+        cls,
+        file_path: str | Path,
+        *,
+        name: str | None = None,
+        format: str | None = None,
+        **kwargs,
+    ) -> "PeakList":
+        """
+        Read a peak list from Excel, NEF, or JSON.
+        """
+        file_path = Path(file_path)
+
+        if format is None:
+            format = file_path.suffix.lower().lstrip(".")
+
+        if format in {"xlsx", "xls"}:
+            return cls.from_excel(file_path, name=name, **kwargs)
+
+        if format == "nef":
+            return cls.from_nef(file_path, name=name, **kwargs)
+
+        if format == "json":
+            return cls.load(file_path)
+
+        raise ValueError(f"Unsupported peak-list format: {format!r}")
+
+    @classmethod
+    def from_excel(
+        cls,
+        file_path: str | Path,
+        *,
+        name: str | None = None,
+        sheet_name: str | int = 0,
+        chemical_shift_columns: Sequence[str] | None = None,
+        nuclei: Sequence[str] | None = None,
+        nucleus_columns: Sequence[str] | None = None,
+        assignment_columns: Sequence[str] | None = None,
+        frequency_columns: Sequence[str] | None = None,
+        linewidth_columns: Sequence[str] | None = None,
+        gaussian_sigma_columns: Sequence[str] | None = None,
+        lorentzian_gamma_columns: Sequence[str] | None = None,
+        intensity_column: str | None = None,
+        volume_column: str | None = None,
+        metadata: dict | None = None,
+        **read_excel_kwargs,
+    ) -> "PeakList":
+        """
+        Create a PeakList from an Excel table.
+
+        Example:
+            peaks = PeakList.from_excel(
+                "peaks.xlsx",
+                chemical_shift_columns=["HN", "N"],
+                nuclei=["1H", "15N"],
+                assignment_columns=["H_assignment", "N_assignment"],
+                intensity_column="height",
+            )
+        """
+        file_path = Path(file_path)
+        df = pd.read_excel(file_path, sheet_name=sheet_name, **read_excel_kwargs)
+
+        return cls.from_dataframe(
+            df,
+            name=name or file_path.stem,
+            chemical_shift_columns=chemical_shift_columns,
+            nuclei=nuclei,
+            nucleus_columns=nucleus_columns,
+            assignment_columns=assignment_columns,
+            frequency_columns=frequency_columns,
+            linewidth_columns=linewidth_columns,
+            gaussian_sigma_columns=gaussian_sigma_columns,
+            lorentzian_gamma_columns=lorentzian_gamma_columns,
+            intensity_column=intensity_column,
+            volume_column=volume_column,
+            metadata={
+                "source": str(file_path),
+                "format": "excel",
+                "sheet_name": sheet_name,
+                **(metadata or {}),
+            },
+        )
+    
+    @classmethod
+    def from_dataframe(
+        cls,
+        df: pd.DataFrame,
+        *,
+        name: str | None = None,
+        chemical_shift_columns: Sequence[str] | None = None,
+        nuclei: Sequence[str] | None = None,
+        nucleus_columns: Sequence[str] | None = None,
+        assignment_columns: Sequence[str] | None = None,
+        frequency_columns: Sequence[str] | None = None,
+        linewidth_columns: Sequence[str] | None = None,
+        gaussian_sigma_columns: Sequence[str] | None = None,
+        lorentzian_gamma_columns: Sequence[str] | None = None,
+        intensity_column: str | None = None,
+        volume_column: str | None = None,
+        metadata: dict | None = None,
+        keep_extra_columns_as_peak_metadata: bool = True,
+    ) -> "PeakList":
+        """
+        Convert a pandas DataFrame into a PeakList.
+
+        Preferred canonical column names:
+            chemical_shift_1, chemical_shift_2, ...
+            nucleus_1, nucleus_2, ...
+            assignment_1, assignment_2, ...
+            frequency_1, frequency_2, ...
+            linewidth_1, linewidth_2, ...
+            gaussian_sigma_1, gaussian_sigma_2, ...
+            lorentzian_gamma_1, lorentzian_gamma_2, ...
+            intensity
+            volume
+
+        For messy Excel files, pass the column names explicitly.
+        """
+        if chemical_shift_columns is None:
+            chemical_shift_columns = cls._infer_dimension_columns(
+                df.columns,
+                prefixes=("chemical_shift", "shift", "ppm", "position"),
+            )
+
+        chemical_shift_columns = list(chemical_shift_columns or [])
+
+        if not chemical_shift_columns:
+            raise ValueError(
+                "Could not infer chemical-shift columns. "
+                "Pass chemical_shift_columns explicitly, e.g. "
+                "chemical_shift_columns=['HN', 'N']."
+            )
+
+        ndim = len(chemical_shift_columns)
+
+        if nuclei is not None:
+            nuclei = list(nuclei)
+            if len(nuclei) != ndim:
+                raise ValueError("nuclei must have the same length as chemical_shift_columns.")
+
+        nucleus_columns = cls._normalize_optional_dimension_columns(
+            nucleus_columns,
+            ndim=ndim,
+            argument_name="nucleus_columns",
+        )
+        assignment_columns = cls._normalize_optional_dimension_columns(
+            assignment_columns,
+            ndim=ndim,
+            argument_name="assignment_columns",
+            allow_single_shared_column=True,
+        )
+        frequency_columns = cls._normalize_optional_dimension_columns(
+            frequency_columns,
+            ndim=ndim,
+            argument_name="frequency_columns",
+        )
+        linewidth_columns = cls._normalize_optional_dimension_columns(
+            linewidth_columns,
+            ndim=ndim,
+            argument_name="linewidth_columns",
+        )
+        gaussian_sigma_columns = cls._normalize_optional_dimension_columns(
+            gaussian_sigma_columns,
+            ndim=ndim,
+            argument_name="gaussian_sigma_columns",
+        )
+        lorentzian_gamma_columns = cls._normalize_optional_dimension_columns(
+            lorentzian_gamma_columns,
+            ndim=ndim,
+            argument_name="lorentzian_gamma_columns",
+        )
+
+        if intensity_column is None:
+            intensity_column = cls._first_existing_column(
+                df.columns,
+                ["intensity", "height", "peak_height"],
+            )
+
+        if volume_column is None:
+            volume_column = cls._first_existing_column(
+                df.columns,
+                ["volume", "integral", "peak_volume"],
+            )
+
+        used_columns = set(chemical_shift_columns)
+        for columns in [
+            nucleus_columns,
+            assignment_columns,
+            frequency_columns,
+            linewidth_columns,
+            gaussian_sigma_columns,
+            lorentzian_gamma_columns,
+        ]:
+            if columns:
+                used_columns.update(columns)
+
+        if intensity_column:
+            used_columns.add(intensity_column)
+        if volume_column:
+            used_columns.add(volume_column)
+
+        peaks: list[NmrPeak] = []
+
+        for _, row in df.iterrows():
+            chemical_shifts = [cls._as_float(row[col]) for col in chemical_shift_columns]
+
+            # Skip empty or incomplete rows.
+            if any(value is None for value in chemical_shifts):
+                continue
+
+            peak_nuclei = cls._extract_nuclei(
+                row=row,
+                chemical_shift_columns=chemical_shift_columns,
+                nuclei=nuclei,
+                nucleus_columns=nucleus_columns,
+            )
+
+            assignments = cls._extract_assignments(
+                row=row,
+                ndim=ndim,
+                assignment_columns=assignment_columns,
+            )
+
+            frequencies = cls._extract_float_list(row, frequency_columns)
+            linewidths = cls._extract_float_list(row, linewidth_columns)
+            gaussian_sigmas = cls._extract_float_list(row, gaussian_sigma_columns)
+            lorentzian_gammas = cls._extract_float_list(row, lorentzian_gamma_columns)
+
+            intensity = cls._as_float(row[intensity_column]) if intensity_column else None
+            volume = cls._as_float(row[volume_column]) if volume_column else None
+
+            peak_metadata = {}
+            if keep_extra_columns_as_peak_metadata:
+                for col in df.columns:
+                    if col not in used_columns:
+                        value = cls._clean_value(row[col])
+                        if value is not None:
+                            peak_metadata[str(col)] = value
+
+            peak = NmrPeak(
+                chemical_shifts=chemical_shifts,
+                nuclei=peak_nuclei,
+                frequencies=frequencies,
+                intensity=intensity,
+                volume=volume,
+                linewidths=linewidths,
+                assignments=assignments,
+                gaussian_sigmas=gaussian_sigmas,
+                lorentzian_gammas=lorentzian_gammas,
+                metadata=peak_metadata if peak_metadata else None,
+            )
+
+            peaks.append(peak)
+
+        return cls(peaks, name=name, metadata=metadata)
+    
+    def to_dataframe(self, *, include_peak_metadata: bool = True) -> pd.DataFrame:
+        """
+        Convert the PeakList to a pandas DataFrame.
+        """
+        rows: list[dict[str, Any]] = []
+
+        for peak in self._peaks:
+            row: dict[str, Any] = {}
+
+            for dim, chemical_shift in enumerate(peak.chemical_shifts, start=1):
+                row[f"chemical_shift_{dim}"] = chemical_shift.ppm
+
+            if peak.nuclei is not None:
+                for dim, nucleus in enumerate(peak.nuclei, start=1):
+                    row[f"nucleus_{dim}"] = nucleus
+
+            if peak.assignments is not None:
+                for dim, assignment in enumerate(peak.assignments, start=1):
+                    row[f"assignment_{dim}"] = assignment
+
+            if peak.frequencies is not None:
+                for dim, frequency in enumerate(peak.frequencies, start=1):
+                    row[f"frequency_{dim}"] = frequency
+
+            if peak.linewidths is not None:
+                for dim, linewidth in enumerate(peak.linewidths, start=1):
+                    row[f"linewidth_{dim}"] = linewidth
+
+            if peak.gaussian_sigmas is not None:
+                for dim, sigma in enumerate(peak.gaussian_sigmas, start=1):
+                    row[f"gaussian_sigma_{dim}"] = sigma
+
+            if peak.lorentzian_gammas is not None:
+                for dim, gamma in enumerate(peak.lorentzian_gammas, start=1):
+                    row[f"lorentzian_gamma_{dim}"] = gamma
+
+            row["intensity"] = peak.intensity
+            row["volume"] = peak.volume
+
+            if include_peak_metadata and hasattr(peak, "metadata"):
+                peak_metadata = peak.metadata
+                if isinstance(peak_metadata, dict):
+                    for key, value in peak_metadata.items():
+                        row[f"metadata_{key}"] = value
+
+            rows.append(row)
+
+        return pd.DataFrame(rows)
+    
+    @staticmethod
+    def _clean_value(value: Any) -> Any:
+        if value is None:
+            return None
+
+        try:
+            if pd.isna(value):
+                return None
+        except TypeError:
+            pass
+
+        if isinstance(value, str):
+            value = value.strip()
+            if value in {"", ".", "?", "nan", "NaN", "None", "none"}:
+                return None
+
+        return value
+
+    @classmethod
+    def _as_float(cls, value: Any) -> float | None:
+        value = cls._clean_value(value)
+        if value is None:
+            return None
+        return float(value)
+
+    @staticmethod
+    def _first_existing_column(columns, candidates: Sequence[str]) -> str | None:
+        lookup = {str(col).strip().lower(): col for col in columns}
+
+        for candidate in candidates:
+            key = candidate.strip().lower()
+            if key in lookup:
+                return lookup[key]
+
+        return None
+
+    @staticmethod
+    def _normalize_optional_dimension_columns(
+        columns: Sequence[str] | None,
+        *,
+        ndim: int,
+        argument_name: str,
+        allow_single_shared_column: bool = False,
+    ) -> list[str] | None:
+        if columns is None:
+            return None
+
+        columns = list(columns)
+
+        if allow_single_shared_column and len(columns) == 1:
+            return columns
+
+        if len(columns) != ndim:
+            raise ValueError(f"{argument_name} must contain {ndim} columns.")
+
+        return columns
+
+    @staticmethod
+    def _extract_float_list(row, columns: Sequence[str] | None) -> list[float] | None:
+        if columns is None:
+            return None
+
+        values = [PeakList._as_float(row[col]) for col in columns]
+
+        if all(value is None for value in values):
+            return None
+
+        if any(value is None for value in values):
+            raise ValueError(f"Incomplete per-dimension numeric values: {columns}")
+
+        return values
+
+    @classmethod
+    def _infer_dimension_columns(
+        cls,
+        columns,
+        *,
+        prefixes: Sequence[str],
+    ) -> list[str]:
+        numbered: list[tuple[int, str]] = []
+
+        for col in columns:
+            col_str = str(col).strip()
+
+            for prefix in prefixes:
+                pattern = rf"^{re.escape(prefix)}[_\s-]*(\d+)$"
+                match = re.match(pattern, col_str, re.IGNORECASE)
+
+                if match:
+                    numbered.append((int(match.group(1)), col))
+                    break
+
+        if numbered:
+            return [col for _, col in sorted(numbered)]
+
+        # Common 2D NMR peak-table aliases.
+        lookup = {str(col).strip().lower(): col for col in columns}
+
+        common_sets = [
+            ("hn", "n"),
+            ("h", "n"),
+            ("1h", "15n"),
+            ("h_shift", "n_shift"),
+            ("c", "h"),
+            ("13c", "1h"),
+            ("c_shift", "h_shift"),
+        ]
+
+        for candidate_set in common_sets:
+            if all(candidate in lookup for candidate in candidate_set):
+                return [lookup[candidate] for candidate in candidate_set]
+
+        return []
+
+    @classmethod
+    def _extract_nuclei(
+        cls,
+        *,
+        row,
+        chemical_shift_columns: Sequence[str],
+        nuclei: Sequence[str] | None,
+        nucleus_columns: Sequence[str] | None,
+    ) -> list[str] | None:
+        if nuclei is not None:
+            return list(nuclei)
+
+        if nucleus_columns is not None:
+            values = [cls._clean_value(row[col]) for col in nucleus_columns]
+
+            # Important: do not pass [None, None] to NmrPeak,
+            # because NmrPeak would convert None to the string "None".
+            if all(value is None for value in values):
+                return None
+
+            if any(value is None for value in values):
+                raise ValueError("Incomplete nucleus labels.")
+
+            return [str(value) for value in values]
+
+        inferred = [cls._nucleus_from_column_name(col) for col in chemical_shift_columns]
+
+        if all(value is None for value in inferred):
+            return None
+
+        if any(value is None for value in inferred):
+            # Safer than passing mixed [str, None] into NmrPeak.
+            return None
+
+        return inferred
+
+    @classmethod
+    def _extract_assignments(
+        cls,
+        *,
+        row,
+        ndim: int,
+        assignment_columns: Sequence[str] | None,
+    ) -> list[str] | None:
+        if assignment_columns is None:
+            assignments = []
+
+            for dim in range(1, ndim + 1):
+                key = f"assignment_{dim}"
+                if key in row.index:
+                    assignments.append(cls._clean_value(row[key]))
+                else:
+                    assignments.append(None)
+
+            if any(value is not None for value in assignments):
+                return assignments
+
+            if "assignment" in row.index:
+                assignment = cls._clean_value(row["assignment"])
+                if assignment is not None:
+                    return [assignment] * ndim
+
+            return None
+
+        if len(assignment_columns) == 1 and ndim > 1:
+            assignment = cls._clean_value(row[assignment_columns[0]])
+            return [assignment] * ndim if assignment is not None else None
+
+        assignments = [cls._clean_value(row[col]) for col in assignment_columns]
+
+        if all(value is None for value in assignments):
+            return None
+
+        return assignments
+
+    @staticmethod
+    def _nucleus_from_column_name(column: str) -> str | None:
+        name = str(column).strip().lower()
+
+        if name in {"h", "hn", "1h", "h_shift", "hn_shift"}:
+            return "1H"
+
+        if name in {"n", "15n", "n_shift"}:
+            return "15N"
+
+        if name in {"c", "13c", "c_shift"}:
+            return "13C"
+
+        if name in {"p", "31p", "p_shift"}:
+            return "31P"
+
+        return None
+    
+        @classmethod
+    def from_nef(
+        cls,
+        file_path: str | Path,
+        *,
+        name: str | None = None,
+        spectrum_index: int = 0,
+        metadata: dict | None = None,
+    ) -> "PeakList":
+        """
+        Create a PeakList from a NEF file.
+
+        Requires:
+            pip install pynmrstar
+        """
+        file_path = Path(file_path)
+        df = cls._nef_to_dataframe(file_path, spectrum_index=spectrum_index)
+
+        return cls.from_dataframe(
+            df,
+            name=name or file_path.stem,
+            metadata={
+                "source": str(file_path),
+                "format": "nef",
+                "spectrum_index": spectrum_index,
+                **(metadata or {}),
+            },
+        )
+
+    @classmethod
+    def _nef_to_dataframe(
+        cls,
+        file_path: Path,
+        *,
+        spectrum_index: int = 0,
+    ) -> pd.DataFrame:
+        import pynmrstar
+
+        entry = pynmrstar.Entry.from_file(file_path)
+
+        try:
+            saveframes = entry.get_saveframes_by_category("nef_nmr_spectrum")
+        except Exception:
+            saveframes = []
+
+        if not saveframes:
+            saveframes = [
+                saveframe
+                for saveframe in entry
+                if cls._saveframe_has_loop(saveframe, "_nef_peak_dimension")
+            ]
+
+        if not saveframes:
+            raise ValueError(f"No NEF peak-list saveframe found in {file_path}")
+
+        if spectrum_index >= len(saveframes):
+            raise IndexError(
+                f"spectrum_index={spectrum_index} is out of range. "
+                f"Found {len(saveframes)} spectrum saveframe(s)."
+            )
+
+        saveframe = saveframes[spectrum_index]
+
+        dim_loop = cls._get_loop(saveframe, "_nef_peak_dimension")
+        dim_df = cls._loop_to_dataframe(dim_loop)
+
+        try:
+            peak_loop = cls._get_loop(saveframe, "_nef_peak")
+            peak_df = cls._loop_to_dataframe(peak_loop)
+        except ValueError:
+            peak_df = pd.DataFrame()
+
+        peak_id_col = cls._find_tag_column(dim_df, "peak_id")
+        dim_id_col = cls._find_tag_column(dim_df, "dimension_id")
+        position_col = cls._find_tag_column(dim_df, "position")
+        chain_col = cls._find_tag_column(dim_df, "chain_code")
+        seq_col = cls._find_tag_column(dim_df, "sequence_code")
+        residue_col = cls._find_tag_column(dim_df, "residue_name")
+        atom_col = cls._find_tag_column(dim_df, "atom_name")
+
+        if peak_id_col is None or position_col is None:
+            raise ValueError(
+                "Could not parse NEF peak dimensions. "
+                "Expected at least peak_id and position columns."
+            )
+
+        peak_info: dict[str, dict[str, Any]] = {}
+
+        if not peak_df.empty:
+            peak_peak_id_col = cls._find_tag_column(peak_df, "peak_id", "index")
+            height_col = cls._find_tag_column(peak_df, "height", "height_val", "intensity")
+            volume_col = cls._find_tag_column(peak_df, "volume", "volume_val")
+
+            if peak_peak_id_col is not None:
+                for _, peak_row in peak_df.iterrows():
+                    peak_id = str(peak_row[peak_peak_id_col])
+                    peak_info[peak_id] = {
+                        "intensity": cls._as_float(peak_row[height_col]) if height_col else None,
+                        "volume": cls._as_float(peak_row[volume_col]) if volume_col else None,
+                    }
+
+        dim_df = dim_df.copy()
+        dim_df["_peak_id"] = dim_df[peak_id_col].astype(str)
+
+        rows: list[dict[str, Any]] = []
+
+        for peak_id, group in dim_df.groupby("_peak_id", sort=False):
+            if dim_id_col is not None:
+                group = group.copy()
+                group["_dim_id_numeric"] = group[dim_id_col].map(cls._as_float)
+                group = group.sort_values("_dim_id_numeric", na_position="last")
+
+            row: dict[str, Any] = {}
+
+            for dim, (_, dim_row) in enumerate(group.iterrows(), start=1):
+                atom_name = cls._clean_value(dim_row[atom_col]) if atom_col else None
+                chain_code = cls._clean_value(dim_row[chain_col]) if chain_col else None
+                sequence_code = cls._clean_value(dim_row[seq_col]) if seq_col else None
+                residue_name = cls._clean_value(dim_row[residue_col]) if residue_col else None
+
+                row[f"chemical_shift_{dim}"] = cls._as_float(dim_row[position_col])
+                row[f"nucleus_{dim}"] = cls._nucleus_from_atom_name(atom_name)
+                row[f"assignment_{dim}"] = cls._format_nef_assignment(
+                    chain_code=chain_code,
+                    sequence_code=sequence_code,
+                    residue_name=residue_name,
+                    atom_name=atom_name,
+                )
+
+            row["nef_peak_id"] = peak_id
+
+            if peak_id in peak_info:
+                row["intensity"] = peak_info[peak_id].get("intensity")
+                row["volume"] = peak_info[peak_id].get("volume")
+
+            rows.append(row)
+
+        return pd.DataFrame(rows)
+
+    @staticmethod
+    def _saveframe_has_loop(saveframe, loop_category: str) -> bool:
+        target = loop_category.lower()
+
+        for loop in saveframe:
+            category = getattr(loop, "category", None)
+            if category and category.lower() == target:
+                return True
+
+        return False
+
+    @staticmethod
+    def _get_loop(saveframe, loop_category: str):
+        try:
+            return saveframe[loop_category]
+        except Exception:
+            pass
+
+        target = loop_category.lower()
+
+        for loop in saveframe:
+            category = getattr(loop, "category", None)
+            if category and category.lower() == target:
+                return loop
+
+        raise ValueError(f"Could not find loop {loop_category!r} in saveframe.")
+
+    @staticmethod
+    def _loop_to_dataframe(loop) -> pd.DataFrame:
+        rows = loop.get_tag(dict_result=True, whole_tag=True)
+        return pd.DataFrame(rows)
+
+    @staticmethod
+    def _tag_leaf(column: str) -> str:
+        return str(column).split(".")[-1].strip().lower()
+
+    @classmethod
+    def _find_tag_column(cls, df: pd.DataFrame, *names: str) -> str | None:
+        targets = {name.strip().lower() for name in names}
+
+        for col in df.columns:
+            if cls._tag_leaf(col) in targets:
+                return col
+
+        return None
+
+    @staticmethod
+    def _nucleus_from_atom_name(atom_name: str | None) -> str | None:
+        if atom_name is None:
+            return None
+
+        atom = str(atom_name).strip().upper()
+
+        if atom.startswith("H"):
+            return "1H"
+        if atom.startswith("N"):
+            return "15N"
+        if atom.startswith("C"):
+            return "13C"
+        if atom.startswith("P"):
+            return "31P"
+
+        return None
+
+    @staticmethod
+    def _format_nef_assignment(
+        *,
+        chain_code: str | None,
+        sequence_code: str | None,
+        residue_name: str | None,
+        atom_name: str | None,
+    ) -> str | None:
+        if sequence_code is None and atom_name is None:
+            return None
+
+        residue = PeakList._three_to_one(residue_name) if residue_name else ""
+
+        if sequence_code is not None and atom_name is not None:
+            assignment = f"{residue}{sequence_code}{atom_name}"
+        elif sequence_code is not None:
+            assignment = f"{residue}{sequence_code}"
+        else:
+            assignment = str(atom_name)
+
+        if chain_code:
+            return f"{chain_code}:{assignment}"
+
+        return assignment
+
+    @staticmethod
+    def _three_to_one(residue_name: str | None) -> str:
+        if residue_name is None:
+            return ""
+
+        mapping = {
+            "ALA": "A",
+            "ARG": "R",
+            "ASN": "N",
+            "ASP": "D",
+            "CYS": "C",
+            "GLN": "Q",
+            "GLU": "E",
+            "GLY": "G",
+            "HIS": "H",
+            "ILE": "I",
+            "LEU": "L",
+            "LYS": "K",
+            "MET": "M",
+            "PHE": "F",
+            "PRO": "P",
+            "SER": "S",
+            "THR": "T",
+            "TRP": "W",
+            "TYR": "Y",
+            "VAL": "V",
+        }
+
+        residue = str(residue_name).strip().upper()
+
+        if len(residue) == 1:
+            return residue
+
+        return mapping.get(residue, residue)
 
     def add(self, peak: NmrPeak) -> None:
         """
