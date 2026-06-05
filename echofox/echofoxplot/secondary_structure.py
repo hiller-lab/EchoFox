@@ -426,7 +426,6 @@ def _draw_sheet(
         )
 
 
-
 def _normalize_span(span: ResidueSpan) -> tuple[float, float]:
     """Return span as ordered floats."""
     start, end = float(span[0]), float(span[1])

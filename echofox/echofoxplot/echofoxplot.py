@@ -151,28 +151,28 @@ def plot_empty(
 
 
 def plot_csps(
-        ax,
-        df_ref: pd.DataFrame,
-        df_comp: pd.DataFrame,
-        chemical_shift_columns: list[str] | None = None,
-        weight: float = 1/5,
-        color_bars: str = "darkgray",
-        color_significant: str = "#f79132",
-        bar_kwargs: dict | None = None,
-        plot_average: bool = True,
-        avg_hline_kwargs: dict | None = None,
-        nr_sigmas: int = 1,
-        sigma_hline_kwargs: dict | None = None,
-        draw_legend: bool = True,
-        legend_kwargs: dict | None = None,
-        print_significant: bool | str = False,
-        bar_unassigned: bool = True,
-        unassigned_vspan_kwargs: dict | None = None,
-        ylim: tuple | None = None,
-        ylabel: str | None = None,
-        xlabel: str | None = "Residue Number",
-        title: str | None = None,
-    ):
+    ax,
+    df_ref: pd.DataFrame,
+    df_comp: pd.DataFrame,
+    chemical_shift_columns: list[str] | None = None,
+    weight: float = 1 / 5,
+    color_bars: str = "darkgray",
+    color_significant: str = "#f79132",
+    bar_kwargs: dict | None = None,
+    plot_average: bool = True,
+    avg_hline_kwargs: dict | None = None,
+    nr_sigmas: int = 1,
+    sigma_hline_kwargs: dict | None = None,
+    draw_legend: bool = True,
+    legend_kwargs: dict | None = None,
+    print_significant: bool | str = False,
+    bar_unassigned: bool = True,
+    unassigned_vspan_kwargs: dict | None = None,
+    ylim: tuple | None = None,
+    ylabel: str | None = None,
+    xlabel: str | None = "Residue Number",
+    title: str | None = None,
+):
     """
     Plot residue-wise chemical shift perturbations (CSPs) between two data frames.
 
@@ -249,14 +249,14 @@ def plot_csps(
     """
     if chemical_shift_columns is None:
         chemical_shift_columns = ["chemical_shift_1", "chemical_shift_2"]
-    
+
     if bar_kwargs is None:
         bar_kwargs = {
             "width": 1.05,
             "linewidth": 0.0,
             "edgecolor": "black",
         }
-        
+
     if avg_hline_kwargs is None:
         avg_hline_kwargs = {
             "color": color_significant,
@@ -265,7 +265,7 @@ def plot_csps(
             "lw": 1.0,
             "alpha": 0.9,
         }
-        
+
     if sigma_hline_kwargs is None:
         sigma_hline_kwargs = {
             "color": color_significant,
@@ -274,7 +274,7 @@ def plot_csps(
             "lw": 1.0,
             "alpha": 0.8,
         }
-        
+
     if legend_kwargs is None:
         legend_kwargs = {
             "loc": "lower left",
@@ -282,88 +282,68 @@ def plot_csps(
             "ncol": 3,
             "frameon": False,
         }
-        
-    
+
     if ylabel is None:
         ylabel = f"{GreekLetters.Delta}{GreekLetters.delta}HN\n[ppm]"
     ax.set_ylabel(ylabel, rotation=0, ha="right")
-    
+
     if xlabel is not None:
         ax.set_xlabel(xlabel)
-    
+
     df_ref = df_ref.reset_index()
     df_comp = df_comp.reset_index()
-    
+
     x = []
     y = []
     for row_index in range(len(df_comp)):
         res_comp_idx = df_comp["residue_index"][row_index]
-        pos_comp = (
-            df_comp[chemical_shift_columns[0]][row_index],
-            df_comp[chemical_shift_columns[1]][row_index]
-        )
-        
+        pos_comp = (df_comp[chemical_shift_columns[0]][row_index], df_comp[chemical_shift_columns[1]][row_index])
+
         row_ref = df_ref[df_ref["residue_index"] == res_comp_idx]
         if row_ref.empty:
             continue
-        
-        pos_ref = (
-            row_ref[chemical_shift_columns[0]].to_list()[0],
-            row_ref[chemical_shift_columns[1]].to_list()[0]
-        )
-        
+
+        pos_ref = (row_ref[chemical_shift_columns[0]].to_list()[0], row_ref[chemical_shift_columns[1]].to_list()[0])
+
         x.append(int(row_ref["residue_index"].to_list()[0]))
-        y.append(
-            np.sqrt(
-                (pos_comp[0] - pos_ref[0])**2 + ((pos_comp[1] - pos_ref[1])*weight)**2
-            )
-        )
-        
+        y.append(np.sqrt((pos_comp[0] - pos_ref[0]) ** 2 + ((pos_comp[1] - pos_ref[1]) * weight) ** 2))
+
     x = np.array(x)
     y = np.array(y)
 
     y_avg = np.average(y)
     y_std = np.std(y)
-    threshold = y_avg + y_std*nr_sigmas
+    threshold = y_avg + y_std * nr_sigmas
 
-    colors = [
-        {v <= threshold: color_bars,  threshold < v: color_significant}[True] for v in y
-    ]
-    
+    colors = [{v <= threshold: color_bars, threshold < v: color_significant}[True] for v in y]
+
     if print_significant or print_significant == "pymol":
-        print(
-            "select sign, resi " + "+".join([str(i) for i, v in zip(x, y) if threshold < v])
-        )
+        print("select sign, resi " + "+".join([str(i) for i, v in zip(x, y) if threshold < v]))
     elif print_significant == "blender":
-        print(
-            ",".join([str(i) for i, v in zip(x, y) if threshold < v])
-        )
+        print(",".join([str(i) for i, v in zip(x, y) if threshold < v]))
 
     if plot_average:
         ax.hlines(y_avg, *ax.get_xlim(), **avg_hline_kwargs)
-        
+
         if nr_sigmas > 0:
-            ax.hlines(
-                y_avg + y_std*nr_sigmas,
-                *ax.get_xlim(),
-                **sigma_hline_kwargs
-            )
-    
+            ax.hlines(y_avg + y_std * nr_sigmas, *ax.get_xlim(), **sigma_hline_kwargs)
+
     ax.bar(x, y, color=colors, **bar_kwargs)
-    
+
     if bar_unassigned:
         bar_unassigned_residues(ax, vspan_kwargs=unassigned_vspan_kwargs)
-    
+
     if draw_legend and plot_average:
         ax.legend(**legend_kwargs)
-        
+
     if ylim:
         ax.set_ylim(ylim)
-        
+
     if title:
         ax.set_title(title)
-    
+
     return ax
+
 
 def get_irs(
     df_ref: pd.DataFrame,
@@ -474,23 +454,20 @@ def get_property_ratios(
     """
     df_ref = df_ref.reset_index()
     df_comp = df_comp.reset_index()
-    
+
     x = []
     y = []
     for row_index in range(len(df_comp)):
         res_comp_idx = df_comp[res_index_col_name][row_index]
         val_comp = df_comp[property][row_index]
-        
+
         row_ref = df_ref[df_ref[res_index_col_name] == res_comp_idx]
         if row_ref.empty:
             continue
-        
+
         val_ref = row_ref[property].iloc[0]
-        
-        if (
-            pd.notna(val_ref) and pd.notna(val_comp)
-            and val_ref > 0 and val_comp > 0
-        ):
+
+        if pd.notna(val_ref) and pd.notna(val_comp) and val_ref > 0 and val_comp > 0:
             x.append(int(row_ref[res_index_col_name].iloc[0]))
             y.append(val_comp / val_ref)
 
@@ -498,36 +475,37 @@ def get_property_ratios(
     y = np.array(y)
     y_avg = np.average(y)
     y_std = np.std(y)
-    
+
     return x, y, y_avg, y_std
 
+
 def plot_irs(
-        ax,
-        df_ref: pd.DataFrame,
-        df_comp: pd.DataFrame,
-        intensity_column: str | None = None,
-        color_bars: str = "darkgray",
-        color_significant: str = "#f79132",
-        bar_kwargs: dict | None = None,
-        plot_average: bool = True,
-        avg_hline_kwargs: dict | None = None,
-        nr_sigmas: int = 1,
-        sigma_hline_kwargs: dict | None = None,
-        draw_legend: bool = True,
-        legend_kwargs: dict | None = None,
-        print_significant: bool = False,
-        bar_unassigned: bool = True,
-        unassigned_vspan_kwargs: dict | None = None,
-        bar_one: bool = False,
-        bar_one_kwargs: dict | None = None,
-        only_peaks_with_volume: bool = False,
-        lower_irs_only: bool = False,
-        ignore_outliers_over: float | int | None = None,
-        ylim: tuple | None = None,
-        ylabel: str | None = None,
-        xlabel: str | None = "Residue Number",
-        title: str | None = None,
-    ):
+    ax,
+    df_ref: pd.DataFrame,
+    df_comp: pd.DataFrame,
+    intensity_column: str | None = None,
+    color_bars: str = "darkgray",
+    color_significant: str = "#f79132",
+    bar_kwargs: dict | None = None,
+    plot_average: bool = True,
+    avg_hline_kwargs: dict | None = None,
+    nr_sigmas: int = 1,
+    sigma_hline_kwargs: dict | None = None,
+    draw_legend: bool = True,
+    legend_kwargs: dict | None = None,
+    print_significant: bool = False,
+    bar_unassigned: bool = True,
+    unassigned_vspan_kwargs: dict | None = None,
+    bar_one: bool = False,
+    bar_one_kwargs: dict | None = None,
+    only_peaks_with_volume: bool = False,
+    lower_irs_only: bool = False,
+    ignore_outliers_over: float | int | None = None,
+    ylim: tuple | None = None,
+    ylabel: str | None = None,
+    xlabel: str | None = "Residue Number",
+    title: str | None = None,
+):
     """
     Plot residue-wise intensity ratios between two data frames.
 
@@ -616,14 +594,14 @@ def plot_irs(
     """
     if intensity_column is None:
         intensity_column = "intensity"
-        
+
     if bar_kwargs is None:
         bar_kwargs = {
             "width": 1.05,
             "linewidth": 0.0,
             "edgecolor": "black",
         }
-        
+
     if avg_hline_kwargs is None:
         avg_hline_kwargs = {
             "color": color_significant,
@@ -632,7 +610,7 @@ def plot_irs(
             "lw": 1.0,
             "alpha": 0.9,
         }
-        
+
     if sigma_hline_kwargs is None:
         sigma_hline_kwargs = {
             "color": color_significant,
@@ -641,7 +619,7 @@ def plot_irs(
             "lw": 1.0,
             "alpha": 0.8,
         }
-    
+
     if legend_kwargs is None:
         legend_kwargs = {
             "loc": "lower left",
@@ -649,100 +627,96 @@ def plot_irs(
             "ncol": 3,
             "frameon": False,
         }
-    
+
     if bar_one_kwargs is None:
         bar_one_kwargs = {
             "linewidth": 1.0,
             "edgecolor": "black",
         }
-    
+
     if ylabel is None:
         ylabel = r"I/I$_{0}$"
     ax.set_ylabel(ylabel, rotation=0, ha="right")
-    
+
     if xlabel is not None:
         ax.set_xlabel(xlabel)
-    
+
     if only_peaks_with_volume:
         df_ref = df_ref[df_ref["volume"].notna()]
         df_comp = df_comp[df_comp["volume"].notna()]
-    
+
     x, y, y_avg, y_std = get_irs(df_ref, df_comp)
-    
+
     if ignore_outliers_over is not None:
         mask = y <= ignore_outliers_over
         x = x[mask]
         y = y[mask]
         y_avg = np.average(y)
         y_std = np.std(y)
-    
-    
+
     if not lower_irs_only:
         colors = [
             {
-                np.abs(v - y_avg) > y_std*nr_sigmas: color_significant, 
-            }.get(True, color_bars) for v in y
+                np.abs(v - y_avg) > y_std * nr_sigmas: color_significant,
+            }.get(True, color_bars)
+            for v in y
         ]
     else:
         colors = [
             {
-                v < y_avg - y_std*nr_sigmas: color_significant, 
-            }.get(True, color_bars) for v in y
+                v < y_avg - y_std * nr_sigmas: color_significant,
+            }.get(True, color_bars)
+            for v in y
         ]
-    
+
     if print_significant or print_significant == "pymol":
-        print(
-            "select sign, resi " + "+".join([str(i) for i, c in zip(x, colors) if c !=color_bars])
-        )
+        print("select sign, resi " + "+".join([str(i) for i, c in zip(x, colors) if c != color_bars]))
     elif print_significant == "blender":
-        print(
-            ",".join([str(i) for i, c in zip(x, colors) if c !=color_bars])
-        )
+        print(",".join([str(i) for i, c in zip(x, colors) if c != color_bars]))
 
     if plot_average:
         ax.hlines(y_avg, *ax.get_xlim(), **avg_hline_kwargs)
-        
+
         if nr_sigmas > 0:
-            ax.hlines(
-                y_avg - y_std*nr_sigmas,
-                *ax.get_xlim(),
-                **sigma_hline_kwargs
-            )
+            ax.hlines(y_avg - y_std * nr_sigmas, *ax.get_xlim(), **sigma_hline_kwargs)
             if not lower_irs_only:
                 ax.hlines(
-                    y_avg + y_std*nr_sigmas,
+                    y_avg + y_std * nr_sigmas,
                     *ax.get_xlim(),
                     **{**sigma_hline_kwargs, "label": "_nolegend_"},
                 )
-    
+
     ax.bar(x, y, color=colors, **bar_kwargs)
-    
+
     if bar_one:
         ax.axhspan(
-            ymin = 1.0, ymax = 1.0,
-            xmin = 0.0, xmax = 1.0,
+            ymin=1.0,
+            ymax=1.0,
+            xmin=0.0,
+            xmax=1.0,
             **bar_one_kwargs,
         )
-    
+
     if bar_unassigned:
         bar_unassigned_residues(ax, vspan_kwargs=unassigned_vspan_kwargs)
-    
+
     if draw_legend and plot_average:
         ax.legend(**legend_kwargs)
-    
+
     if ylim:
         ax.set_ylim(ylim)
-    
+
     if title:
         ax.set_title(title)
-    
+
     return ax
+
 
 def bar_unassigned_residues(
     axs,
-    x_range = None,
+    x_range=None,
     vspan_kwargs: dict | None = None,
-)-> None:
+) -> None:
     """
     Shade residue positions that do not contain plotted data on one or more axes.
 
@@ -775,11 +749,11 @@ def bar_unassigned_residues(
     """
     for ax in flatten_axs_list(axs):
         x_with_data = set()
-        
+
         # Lines
         for line in ax.lines:
             x_with_data.update(line.get_xdata())
-        
+
         # Bars
         for container in ax.containers:
             try:
@@ -793,7 +767,7 @@ def bar_unassigned_residues(
                             x_with_data.add(x)
             except TypeError:
                 pass
-            
+
         # Scatter
         for col in ax.collections:
             if hasattr(col, "get_offsets"):
@@ -801,28 +775,24 @@ def bar_unassigned_residues(
                 if len(offsets) > 0:
                     xs = offsets[:, 0]
                     x_with_data.update(xs)
-        
-        
+
         if not x_with_data:
             return
-        
+
         if x_range is None:
             xmin, xmax = ax.get_xlim()
-            x_range = range(int(np.floor(xmin)), int(np.ceil(xmax))+1)
-        
-        
+            x_range = range(int(np.floor(xmin)), int(np.ceil(xmax)) + 1)
+
         x_with_data = np.array(list(x_with_data))
-        
-        empty_positions = [
-            x for x in x_range if not np.any(np.isclose(x_with_data, x))
-        ]
-        
+
+        empty_positions = [x for x in x_range if not np.any(np.isclose(x_with_data, x))]
+
         bar_residues(
-            ax, 
+            ax,
             empty_positions,
             vspan_kwargs,
         )
-    
+
     return
 
 
@@ -859,16 +829,18 @@ def bar_residues(
             "alpha": 0.5,
             "lw": 0,
         }
-    
+
     for idx in indices:
         # Shade the entire vertical range from y_range[0] to y_range[1]
         ax.axvspan(
-            idx - 0.5,      # start shading half-step before residue center
-            idx + 0.5,      # to half-step after
-            ymin=0, ymax=1, # full vertical range of the axes
+            idx - 0.5,  # start shading half-step before residue center
+            idx + 0.5,  # to half-step after
+            ymin=0,
+            ymax=1,  # full vertical range of the axes
             zorder=0,
-            **vspan_kwargs
+            **vspan_kwargs,
         )
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Utility functions to set background colors
@@ -960,9 +932,7 @@ def subplots(
             ``matplotlib.pyplot.subplots``.
     """
     return plt.subplots(
-        *args,
-        figsize=tuple(map(convert_to_inches, figsize)) if figsize is not None else None,
-        **kwargs
+        *args, figsize=tuple(map(convert_to_inches, figsize)) if figsize is not None else None, **kwargs
     )
 
 

@@ -1,11 +1,9 @@
 import json
+import re
 from collections import defaultdict
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
 from typing import Any, Optional, Union
-import inspect
-import re
-from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -71,7 +69,7 @@ class PeakList:
     def peaks(self) -> list[NmrPeak]:
         """Returns a copy of the peak list."""
         return self._peaks.copy()
-    
+
     @property
     def metadata(self) -> dict:
         """Return a copy of peak-list metadata."""
@@ -160,7 +158,7 @@ class PeakList:
                 **(metadata or {}),
             },
         )
-    
+
     @staticmethod
     def _clean_value(value: Any) -> Any:
         """Normalize pandas/CCPNMR missing values."""
@@ -186,14 +184,14 @@ class PeakList:
         if value is None:
             return None
         return float(value)
-    
+
     @staticmethod
     def _safe_int(value) -> int | None:
         try:
             return int(value)
         except (TypeError, ValueError):
             return None
-    
+
     @staticmethod
     def _collapse_if_identical(values: list):
         """
@@ -208,7 +206,7 @@ class PeakList:
             return values[0]
 
         return values
-    
+
     @classmethod
     def from_ccpnmr_table(
         cls,
@@ -255,24 +253,24 @@ class PeakList:
 
         if is_raw_ccpnmr_table is None:
             is_raw_ccpnmr_table = any(str(col).startswith("Assign_F") for col in df.columns)
-        
+
         if is_raw_ccpnmr_table:
-            df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+            df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
             # Drop raw table specific columns
             for col_pattern in [
-              "aliasing_F",
-              "axisCode_F",
-              "className", 
-              "id",
-              "isDeleted" ,
-              "longPid",
-              "pid",
-              "pointPosition_F",
-              "position_F",
-              "serial",
-              "shortClassName",
-              "tartPosition_F1",
-              "tartPosition_F2",
+                "aliasing_F",
+                "axisCode_F",
+                "className",
+                "id",
+                "isDeleted",
+                "longPid",
+                "pid",
+                "pointPosition_F",
+                "position_F",
+                "serial",
+                "shortClassName",
+                "tartPosition_F1",
+                "tartPosition_F2",
             ]:
                 df = df[df.columns.drop(list(df.filter(regex=col_pattern)))]
         else:
@@ -368,14 +366,11 @@ class PeakList:
 
             # Keep useful non-dimensional CCPNMR columns as metadata,
             # but do not duplicate values already mapped to NmrPeak properties.
-            used_columns = {
-                col for col in (intensity_col, volume_col)
-                if col is not None
-            }
+            used_columns = {col for col in (intensity_col, volume_col) if col is not None}
             ccpnmr_metadata = {}
             for col in df.columns:
                 col_str = str(col)
-                
+
                 if col in used_columns:
                     continue
 
@@ -412,7 +407,7 @@ class PeakList:
                 **(metadata or {}),
             },
         )
-    
+
     @staticmethod
     def _ccpnmr_assignment_column(dim: int, is_raw_ccpnmr_table: bool) -> str:
         if is_raw_ccpnmr_table:
@@ -521,7 +516,7 @@ class PeakList:
         result["atom"] = atom
 
         return result
-    
+
     @staticmethod
     def _ccpnmr_first_existing_column(columns, candidates: list[str]) -> str | None:
         columns = list(columns)
@@ -547,7 +542,7 @@ class PeakList:
         ]
 
         return any(re.match(pattern, column) for pattern in patterns)
-    
+
     @classmethod
     def from_dataframe(
         cls,
@@ -720,7 +715,7 @@ class PeakList:
             peaks.append(peak)
 
         return cls(peaks, name=name, metadata=metadata)
-    
+
     def to_dataframe(
         self,
         *,
@@ -793,7 +788,7 @@ class PeakList:
             rows.append(row)
 
         df = pd.DataFrame(rows)
-        
+
         for col in df.columns:
             if col == "residue_index" or col.startswith("residue_index_"):
                 df[col] = pd.array(df[col], dtype="Int64")
@@ -819,10 +814,7 @@ class PeakList:
             if col in df.columns:
                 ordered_columns.append(col)
 
-        remaining_columns = [
-            col for col in df.columns
-            if col not in ordered_columns
-        ]
+        remaining_columns = [col for col in df.columns if col not in ordered_columns]
 
         df = df[ordered_columns + remaining_columns]
 
@@ -1025,7 +1017,7 @@ class PeakList:
             return "31P"
 
         return None
-    
+
     @classmethod
     def from_nef(
         cls,
@@ -1072,19 +1064,14 @@ class PeakList:
             saveframes = []
 
         if not saveframes:
-            saveframes = [
-                saveframe
-                for saveframe in entry
-                if cls._saveframe_has_loop(saveframe, "_nef_peak_dimension")
-            ]
+            saveframes = [saveframe for saveframe in entry if cls._saveframe_has_loop(saveframe, "_nef_peak_dimension")]
 
         if not saveframes:
             raise ValueError(f"No NEF peak-list saveframe found in {file_path}")
 
         if spectrum_index >= len(saveframes):
             raise IndexError(
-                f"spectrum_index={spectrum_index} is out of range. "
-                f"Found {len(saveframes)} spectrum saveframe(s)."
+                f"spectrum_index={spectrum_index} is out of range. Found {len(saveframes)} spectrum saveframe(s)."
             )
 
         saveframe = saveframes[spectrum_index]
@@ -1107,10 +1094,7 @@ class PeakList:
         atom_col = cls._find_tag_column(dim_df, "atom_name")
 
         if peak_id_col is None or position_col is None:
-            raise ValueError(
-                "Could not parse NEF peak dimensions. "
-                "Expected at least peak_id and position columns."
-            )
+            raise ValueError("Could not parse NEF peak dimensions. Expected at least peak_id and position columns.")
 
         peak_info: dict[str, dict[str, Any]] = {}
 
