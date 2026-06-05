@@ -8,6 +8,7 @@ import re
 from collections.abc import Sequence
 
 import numpy as np
+import pandas as pd
 
 from .peak import NmrPeak
 
@@ -589,7 +590,7 @@ class PeakList:
 
         return None
     
-        @classmethod
+    @classmethod
     def from_nef(
         cls,
         file_path: str | Path,
