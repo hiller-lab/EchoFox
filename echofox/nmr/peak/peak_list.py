@@ -560,24 +560,8 @@ class PeakList:
         intensity_column: str | None = None,
         volume_column: str | None = None,
         metadata: dict | None = None,
-        keep_extra_columns_as_peak_metadata: bool = True,
+        keep_extra_columns_as_peak_attributes: bool = True,
     ) -> "PeakList":
-        """
-        Convert a pandas DataFrame into a PeakList.
-
-        Preferred canonical column names:
-            chemical_shift_1, chemical_shift_2, ...
-            nucleus_1, nucleus_2, ...
-            assignment_1, assignment_2, ...
-            frequency_1, frequency_2, ...
-            linewidth_1, linewidth_2, ...
-            gaussian_sigma_1, gaussian_sigma_2, ...
-            lorentzian_gamma_1, lorentzian_gamma_2, ...
-            intensity
-            volume
-
-        For messy Excel files, pass the column names explicitly.
-        """
         if chemical_shift_columns is None:
             chemical_shift_columns = cls._infer_dimension_columns(
                 df.columns,
@@ -599,6 +583,18 @@ class PeakList:
             nuclei = list(nuclei)
             if len(nuclei) != ndim:
                 raise ValueError("nuclei must have the same length as chemical_shift_columns.")
+
+        if nucleus_columns is None:
+            nucleus_columns = cls._infer_dimension_columns(
+                df.columns,
+                prefixes=("nucleus", "nuclei"),
+            )
+
+        if assignment_columns is None:
+            assignment_columns = cls._infer_dimension_columns(
+                df.columns,
+                prefixes=("assignment", "assign"),
+            )
 
         nucleus_columns = cls._normalize_optional_dimension_columns(
             nucleus_columns,
@@ -645,6 +641,7 @@ class PeakList:
             )
 
         used_columns = set(chemical_shift_columns)
+
         for columns in [
             nucleus_columns,
             assignment_columns,
@@ -654,10 +651,11 @@ class PeakList:
             lorentzian_gamma_columns,
         ]:
             if columns:
-                used_columns.update(columns)
+                used_columns.update(col for col in columns if col is not None)
 
         if intensity_column:
             used_columns.add(intensity_column)
+
         if volume_column:
             used_columns.add(volume_column)
 
@@ -666,7 +664,6 @@ class PeakList:
         for _, row in df.iterrows():
             chemical_shifts = [cls._as_float(row[col]) for col in chemical_shift_columns]
 
-            # Skip empty or incomplete rows.
             if any(value is None for value in chemical_shifts):
                 continue
 
@@ -691,13 +688,17 @@ class PeakList:
             intensity = cls._as_float(row[intensity_column]) if intensity_column else None
             volume = cls._as_float(row[volume_column]) if volume_column else None
 
-            peak_metadata = {}
-            if keep_extra_columns_as_peak_metadata:
+            extra_peak_kwargs: dict[str, Any] = {}
+
+            if keep_extra_columns_as_peak_attributes:
                 for col in df.columns:
-                    if col not in used_columns:
-                        value = cls._clean_value(row[col])
-                        if value is not None:
-                            peak_metadata[str(col)] = value
+                    if col in used_columns:
+                        continue
+
+                    value = cls._clean_value(row[col])
+
+                    if value is not None:
+                        extra_peak_kwargs[str(col)] = value
 
             peak = NmrPeak(
                 chemical_shifts=chemical_shifts,
@@ -709,7 +710,7 @@ class PeakList:
                 assignments=assignments,
                 gaussian_sigmas=gaussian_sigmas,
                 lorentzian_gammas=lorentzian_gammas,
-                metadata=peak_metadata if peak_metadata else None,
+                **extra_peak_kwargs,
             )
 
             peaks.append(peak)
@@ -833,6 +834,11 @@ class PeakList:
                 raise ValueError(f"Columns requested for dropping are not present in the DataFrame: {missing_columns}")
 
             df = df.drop(columns=drop_columns)
+
+        if "residue_index" in df.columns:
+            df = df.sort_values("residue_index", na_position="last")
+
+        df = df.reset_index(drop=True)
 
         return df
 
@@ -1035,7 +1041,6 @@ class PeakList:
         """
         file_path = Path(file_path)
         df = cls._nef_to_dataframe(file_path, spectrum_index=spectrum_index)
-
         return cls.from_dataframe(
             df,
             name=name or file_path.stem,
@@ -1142,6 +1147,12 @@ class PeakList:
                     residue_name=residue_name,
                     atom_name=atom_name,
                 )
+                row["chain"] = chain_code
+                try:
+                    row["residue_index"] = int(sequence_code)
+                except (TypeError, ValueError):
+                    row["residue_index"] = np.nan
+                row["residue_type"] = residue_name
 
             row["nef_peak_id"] = peak_id
 
@@ -1267,14 +1278,11 @@ class PeakList:
                 residue_name = cls._clean_value(peak_row[residue_col]) if residue_col is not None else None
 
                 row[f"chemical_shift_{dim}"] = (
-                    cls._as_float(peak_row[position_col])
-                    if position_col is not None
-                    else None
+                    cls._as_float(peak_row[position_col]) if position_col is not None else None
                 )
 
-                row[f"nucleus_{dim}"] = (
-                    cls._nucleus_from_atom_name(atom_name)
-                    or cls._nucleus_from_axis_code(axis_codes.get(dim))
+                row[f"nucleus_{dim}"] = cls._nucleus_from_atom_name(atom_name) or cls._nucleus_from_axis_code(
+                    axis_codes.get(dim)
                 )
 
                 row[f"assignment_{dim}"] = cls._format_nef_assignment(
@@ -1283,10 +1291,40 @@ class PeakList:
                     residue_name=residue_name,
                     atom_name=atom_name,
                 )
+                if chain_code is not None:
+                    row["chain"] = chain_code
+                if residue_name is not None:
+                    row["residue_type"] = residue_name
+                if sequence_code is not None:
+                    try:
+                        row["residue_index"] = int(sequence_code)
+                    except (TypeError, ValueError):
+                        row["residue_index"] = np.nan
 
             rows.append(row)
 
-        return pd.DataFrame(rows)
+        df = pd.DataFrame(rows)
+        return df
+
+    @classmethod
+    def _nucleus_from_axis_code(cls, axis_code: Any) -> str | None:
+        axis_code = cls._clean_value(axis_code)
+
+        if axis_code is None:
+            return None
+
+        axis_code = str(axis_code).upper()
+
+        if axis_code in {"H", "1H"}:
+            return "1H"
+
+        if axis_code in {"N", "15N"}:
+            return "15N"
+
+        if axis_code in {"C", "13C"}:
+            return "13C"
+
+        return axis_code
 
     @staticmethod
     def _tag_leaf(column: str) -> str:
