@@ -1,7 +1,8 @@
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Literal, TypedDict
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import rcParams
 from matplotlib.axes import Axes
 from matplotlib.legend import Legend
@@ -174,3 +175,14 @@ def fancy_legend(
         raise ValueError("add_custom_legend() expected at least one Axes, got none.")
 
     return legend
+
+
+def flatten_axs_list(axs: Axes | Iterable[Axes]) -> list[Axes]:
+    """Normalize a single Axes or iterable/array of Axes to a flat list."""
+    if isinstance(axs, Axes):
+        return [axs]
+
+    if isinstance(axs, np.ndarray):
+        return list(axs.ravel())
+
+    return list(axs)
