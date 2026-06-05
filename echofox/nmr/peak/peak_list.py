@@ -1076,8 +1076,12 @@ class PeakList:
 
         saveframe = saveframes[spectrum_index]
 
-        dim_loop = cls._get_loop(saveframe, "_nef_peak_dimension")
-        dim_df = cls._loop_to_dataframe(dim_loop)
+        try:
+            dim_loop = cls._get_loop(saveframe, "_nef_peak_dimension")
+            dim_df = cls._loop_to_dataframe(dim_loop)
+        except ValueError:
+            peak_loop = cls._get_loop(saveframe, "_nef_peak")
+            return cls._nef_peak_loop_to_dataframe(saveframe, peak_loop)
 
         try:
             peak_loop = cls._get_loop(saveframe, "_nef_peak")
@@ -1179,6 +1183,109 @@ class PeakList:
     @staticmethod
     def _loop_to_dataframe(loop) -> pd.DataFrame:
         rows = loop.get_tag(dict_result=True, whole_tag=True)
+        return pd.DataFrame(rows)
+
+    @classmethod
+    def _nef_peak_loop_to_dataframe(cls, saveframe, peak_loop) -> pd.DataFrame:
+        """Parse NEF files where peak dimensions are stored directly in the _nef_peak loop."""
+        peak_df = cls._loop_to_dataframe(peak_loop)
+
+        # Read spectrum axis information, if present.
+        axis_codes: dict[int, str | None] = {}
+
+        try:
+            spectrum_dim_loop = cls._get_loop(saveframe, "_nef_spectrum_dimension")
+            spectrum_dim_df = cls._loop_to_dataframe(spectrum_dim_loop)
+
+            dim_id_col = cls._find_tag_column(spectrum_dim_df, "dimension_id")
+            axis_code_col = cls._find_tag_column(spectrum_dim_df, "axis_code")
+
+            if dim_id_col is not None and axis_code_col is not None:
+                for _, dim_row in spectrum_dim_df.iterrows():
+                    dim_id = cls._as_float(dim_row[dim_id_col])
+                    if dim_id is None:
+                        continue
+
+                    axis_codes[int(dim_id)] = cls._clean_value(dim_row[axis_code_col])
+
+        except ValueError:
+            pass
+
+        # Detect how many dimensions exist from position_1, position_2, ...
+        n_dims = 0
+        while cls._find_tag_column(peak_df, f"position_{n_dims + 1}") is not None:
+            n_dims += 1
+
+        if n_dims == 0:
+            raise ValueError("Could not parse NEF peak loop. No position_1, position_2, ... columns found.")
+
+        peak_id_col = cls._find_tag_column(peak_df, "peak_id", "index")
+        height_col = cls._find_tag_column(peak_df, "height", "height_val", "intensity")
+        volume_col = cls._find_tag_column(peak_df, "volume", "volume_val")
+
+        dim_columns: dict[int, dict[str, str | None]] = {}
+
+        for dim in range(1, n_dims + 1):
+            dim_columns[dim] = {
+                "position": cls._find_tag_column(peak_df, f"position_{dim}"),
+                "chain_code": cls._find_tag_column(peak_df, f"chain_code_{dim}"),
+                "sequence_code": cls._find_tag_column(peak_df, f"sequence_code_{dim}"),
+                "residue_name": cls._find_tag_column(peak_df, f"residue_name_{dim}"),
+                "atom_name": cls._find_tag_column(peak_df, f"atom_name_{dim}"),
+            }
+
+        rows: list[dict[str, Any]] = []
+
+        for row_index, peak_row in peak_df.iterrows():
+            row: dict[str, Any] = {}
+
+            if peak_id_col is not None:
+                peak_id = cls._clean_value(peak_row[peak_id_col])
+            else:
+                peak_id = str(row_index + 1)
+
+            row["nef_peak_id"] = str(peak_id)
+
+            if height_col is not None:
+                row["intensity"] = cls._as_float(peak_row[height_col])
+
+            if volume_col is not None:
+                row["volume"] = cls._as_float(peak_row[volume_col])
+
+            for dim in range(1, n_dims + 1):
+                cols = dim_columns[dim]
+
+                position_col = cols["position"]
+                atom_col = cols["atom_name"]
+                chain_col = cols["chain_code"]
+                seq_col = cols["sequence_code"]
+                residue_col = cols["residue_name"]
+
+                atom_name = cls._clean_value(peak_row[atom_col]) if atom_col is not None else None
+                chain_code = cls._clean_value(peak_row[chain_col]) if chain_col is not None else None
+                sequence_code = cls._clean_value(peak_row[seq_col]) if seq_col is not None else None
+                residue_name = cls._clean_value(peak_row[residue_col]) if residue_col is not None else None
+
+                row[f"chemical_shift_{dim}"] = (
+                    cls._as_float(peak_row[position_col])
+                    if position_col is not None
+                    else None
+                )
+
+                row[f"nucleus_{dim}"] = (
+                    cls._nucleus_from_atom_name(atom_name)
+                    or cls._nucleus_from_axis_code(axis_codes.get(dim))
+                )
+
+                row[f"assignment_{dim}"] = cls._format_nef_assignment(
+                    chain_code=chain_code,
+                    sequence_code=sequence_code,
+                    residue_name=residue_name,
+                    atom_name=atom_name,
+                )
+
+            rows.append(row)
+
         return pd.DataFrame(rows)
 
     @staticmethod

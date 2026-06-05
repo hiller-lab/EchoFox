@@ -32,6 +32,7 @@ dependencies = [
     "h5py>=3.8.0",
     "tqdm>=4.65.0",
     "biopython>=1.86",
+    "pynmrstar>=3.5.1",
 ]
 
 [project.optional-dependencies]
