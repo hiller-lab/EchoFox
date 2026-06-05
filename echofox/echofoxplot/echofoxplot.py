@@ -203,6 +203,46 @@ def figure(*args, **kwargs):
     return plt.figure(*args, **kwargs)
 
 
+def subplots(
+    *args,
+    figsize: tuple[Number, Number] | tuple[str, str] | None = None,
+    **kwargs,
+):
+    """
+    Create a matplotlib figure and axes, with optional unit-aware figure sizing.
+
+    This is a thin wrapper around ``matplotlib.pyplot.subplots``. All positional
+    and keyword arguments are forwarded to ``plt.subplots`` unchanged, except for
+    ``figsize``.
+
+    ``figsize`` may be given as a tuple of numbers or strings. Numeric values are
+    interpreted as inches, matching matplotlib's default behavior. String values
+    may include a unit, for example ``"8 cm"`` or ``"12cm"``, and are converted
+    to inches before the figure is created. If no unit is given, the value is
+    interpreted as inches.
+
+    Args:
+        *args:
+            Positional arguments passed to ``matplotlib.pyplot.subplots``.
+        figsize:
+            Optional figure size as ``(width, height)``. Values can be numbers
+            in inches or strings such as ``"8 cm"``. If ``None``, matplotlib's
+            default figure size is used.
+        **kwargs:
+            Additional keyword arguments passed to ``matplotlib.pyplot.subplots``.
+
+    Returns:
+        tuple:
+            The ``(fig, ax)`` or ``(fig, axes)`` tuple returned by
+            ``matplotlib.pyplot.subplots``.
+    """
+    return plt.subplots(
+        *args,
+        figsize=tuple(map(convert_to_inches, figsize)) if figsize is not None else None,
+        **kwargs
+    )
+
+
 def show(*args, **kwargs) -> None:
     """Display the plot."""
     plt.show(*args, **kwargs)
