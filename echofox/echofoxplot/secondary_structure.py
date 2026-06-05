@@ -20,6 +20,8 @@ from matplotlib.axes import Axes
 
 from echofox.core.colors import Color
 
+from .plot.utils import flatten_axs_list
+
 Number: TypeAlias = int | float
 ResidueSpan: TypeAlias = tuple[Number, Number]
 SecondaryStructureType: TypeAlias = Literal["helix", "sheet"]
@@ -424,17 +426,6 @@ def _draw_sheet(
         )
 
 
-def _as_axes_list(axs: Axes | Iterable[Axes]) -> list[Axes]:
-    """Normalize a single Axes or iterable/array of Axes to a flat list."""
-    if isinstance(axs, Axes):
-        return [axs]
-
-    if isinstance(axs, np.ndarray):
-        return list(axs.ravel())
-
-    return list(axs)
-
-
 def _normalize_span(span: ResidueSpan) -> tuple[float, float]:
     """Return span as ordered floats."""
     start, end = float(span[0]), float(span[1])
@@ -582,7 +573,7 @@ def draw_secondary_structure(
     ValueError
         If an unknown secondary-structure type is encountered.
     """
-    axes = _as_axes_list(axs)
+    axes = flatten_axs_list(axs)
 
     if isinstance(secondary_structure_map, str):
         secondary_structure_map = get_secondary_structure_map(secondary_structure_map)

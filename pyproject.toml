@@ -7,7 +7,7 @@ name = "echofox"
 version = "0.1.0"
 description = "NMR Data Processing and Analysis Package"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 license = {text = "GPL-3.0-or-later"}
 authors = [
     {name = "EchoFox", email = "hillerlab@unibas.ch"}
@@ -17,10 +17,6 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
@@ -36,6 +32,7 @@ dependencies = [
     "h5py>=3.8.0",
     "tqdm>=4.65.0",
     "biopython>=1.86",
+    "pynmrstar>=3.5.1",
 ]
 
 [project.optional-dependencies]
