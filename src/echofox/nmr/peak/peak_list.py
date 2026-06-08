@@ -193,17 +193,34 @@ class PeakList:
             return None
 
     @staticmethod
-    def _collapse_if_identical(values: list):
+    def _collapse_if_uniform_non_missing(values: list):
         """
-        Return the single value if all values in the list are identical.
-        Otherwise return the original list.
+        Collapse a list to a single value if all non-missing values are identical.
+
+        Missing values include None, NaN, pandas.NA and NaT.
 
         Examples:
             ["A", "A"] -> "A"
+            ["A", None] -> "A"
+            ["A", "A", None] -> "A"
+            [None, float("nan"), "A"] -> "A"
             ["H", "N"] -> ["H", "N"]
+            [None, float("nan")] -> [None, float("nan")]
         """
-        if values and all(value == values[0] for value in values):
-            return values[0]
+
+        def is_missing(value) -> bool:
+            if value is None:
+                return True
+
+            try:
+                return bool(pd.isna(value))
+            except (TypeError, ValueError):
+                return False
+
+        non_missing_values = [value for value in values if not is_missing(value)]
+
+        if non_missing_values and all(value == non_missing_values[0] for value in non_missing_values):
+            return non_missing_values[0]
 
         return values
 
@@ -353,9 +370,9 @@ class PeakList:
             volume = cls._as_float(row[volume_col]) if volume_col else None
 
             extra_properties = {
-                "chain": cls._collapse_if_identical(chains),
-                "residue_index": cls._collapse_if_identical(residue_indices),
-                "residue_type": cls._collapse_if_identical(residue_types),
+                "chain": cls._collapse_if_uniform_non_missing(chains),
+                "residue_index": cls._collapse_if_uniform_non_missing(residue_indices),
+                "residue_type": cls._collapse_if_uniform_non_missing(residue_types),
                 "atom": atoms,
             }
 
@@ -790,6 +807,17 @@ class PeakList:
 
         df = pd.DataFrame(rows)
 
+        columns_to_drop = [
+            col
+            for base_col in df.columns
+            if re.search(r"_\d+$", base_col) is None
+            for col in df.columns
+            if re.fullmatch(rf"{re.escape(base_col)}_\d+", col)
+        ]
+
+        if columns_to_drop:
+            df = df.drop(columns=columns_to_drop)
+
         for col in df.columns:
             if col == "residue_index" or col.startswith("residue_index_"):
                 df[col] = pd.array(df[col], dtype="Int64")
@@ -819,21 +847,45 @@ class PeakList:
 
         df = df[ordered_columns + remaining_columns]
 
+        def _resolve_columns(
+            selectors: list[str],
+            *,
+            action: str,
+        ) -> list[str]:
+            resolved_columns: list[str] = []
+            missing_selectors: list[str] = []
+
+            for selector in selectors:
+                if selector in df.columns:
+                    matches = [selector]
+                else:
+                    try:
+                        pattern = re.compile(selector)
+                    except re.error as error:
+                        raise ValueError(f"Invalid regex pattern for {action}: {selector!r}") from error
+
+                    matches = [col for col in df.columns if pattern.search(col)]
+
+                if not matches:
+                    missing_selectors.append(selector)
+                    continue
+
+                for col in matches:
+                    if col not in resolved_columns:
+                        resolved_columns.append(col)
+
+            if missing_selectors:
+                raise ValueError(
+                    f"Requested columns/patterns for {action} did not match any DataFrame columns: {missing_selectors}"
+                )
+
+            return resolved_columns
+
         if keep_columns is not None:
-            missing_columns = [col for col in keep_columns if col not in df.columns]
-
-            if missing_columns:
-                raise ValueError(f"Requested columns are not present in the DataFrame: {missing_columns}")
-
-            df = df[keep_columns]
+            df = df[_resolve_columns(keep_columns, action="keeping")]
 
         if drop_columns is not None:
-            missing_columns = [col for col in drop_columns if col not in df.columns]
-
-            if missing_columns:
-                raise ValueError(f"Columns requested for dropping are not present in the DataFrame: {missing_columns}")
-
-            df = df.drop(columns=drop_columns)
+            df = df.drop(columns=_resolve_columns(drop_columns, action="dropping"))
 
         if "residue_index" in df.columns:
             df = df.sort_values("residue_index", na_position="last")
