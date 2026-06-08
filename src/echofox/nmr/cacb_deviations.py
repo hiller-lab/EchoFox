@@ -11,6 +11,55 @@ def get_cacb_deviations(
     index_column: str,
     chemical_shift_column: str,
 ):
+    """
+    Calculate secondary CA-CB chemical-shift deviations.
+
+    For each residue in `df_random_coil`, this function extracts the random-coil
+    CA and CB chemical shifts and compares them to the corresponding observed
+    CA and CB shifts in `df_cacb`.
+
+    The returned deviation is calculated as:
+
+        (CA_observed - CA_random_coil) - (CB_observed - CB_random_coil)
+
+    Positive values are commonly associated with alpha-helical secondary
+    structure propensity, whereas negative values are commonly associated with
+    beta-sheet propensity.
+
+    Parameters
+    ----------
+    df_random_coil:
+        DataFrame containing random-coil reference chemical shifts. It must
+        contain `index_column`, `"CA"` and `"CB"` columns.
+
+    df_cacb:
+        DataFrame, or list of DataFrames, containing observed CA/CB chemical
+        shifts. If a list is passed, the DataFrames are concatenated before
+        processing.
+
+    atom_column:
+        Name of the column in `df_cacb` that identifies the atom type, e.g.
+        `"CA"` or `"CB"`.
+
+    index_column:
+        Name of the residue-index column shared by `df_random_coil` and
+        `df_cacb`.
+
+    chemical_shift_column:
+        Name of the column in `df_cacb` containing the observed chemical shift.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns `"residue_index"` and `"cacb_deviation"`.
+        Rows for which the random-coil values are non-numeric or for which the
+        calculated deviation is missing are skipped.
+
+    Notes
+    -----
+    If more than one observed CA or CB value is present for a residue, the mean
+    value is used.
+    """
     if isinstance(df_cacb, pd.DataFrame):
         df_atoms = df_cacb.copy()
     else:
@@ -21,7 +70,7 @@ def get_cacb_deviations(
 
     rows = []
     for _index, row in df_random_coil.iterrows():
-        residue_index = residue_index = row[index_column]
+        residue_index = row[index_column]
         ca_rc = row["CA"]
         cb_rc = row["CB"]
 
@@ -58,14 +107,48 @@ def smooth_cacb_deviations(
     sort_by_index: bool = True,
 ):
     """
-    Smooth CA-CB deviations using neighboring values with exponentially
-    decreasing weights.
+    Smooth CA-CB deviations using neighboring values.
 
-    If `data` is a DataFrame, a copy is returned where `deviation_column`
-    is replaced by the smoothed values.
+    Each value is replaced by a weighted average of itself and its neighboring
+    values. The central value receives weight 1.0, and neighboring values receive
+    exponentially decreasing weights according to:
 
-    If `data` is a list or NumPy array, the smoothed values are returned in
-    the same general format.
+        weight = 1 / power**distance
+
+    Missing values are ignored during smoothing.
+
+    Parameters
+    ----------
+    data:
+        Either a DataFrame containing CA-CB deviations, a list of numeric
+        values, or a NumPy array.
+
+    index_column:
+        Name of the residue-index column. Only used when `data` is a DataFrame.
+
+    deviation_column:
+        Name of the column containing CA-CB deviation values. Only used when
+        `data` is a DataFrame.
+
+    power:
+        Weight-decay factor for neighboring values. Larger values reduce the
+        influence of more distant neighbors.
+
+    max_neighbors:
+        Maximum number of neighboring positions to include on each side.
+
+    sort_by_index:
+        If True, DataFrame input is sorted by `index_column` before smoothing.
+
+    Returns
+    -------
+    pd.DataFrame | list[float] | np.ndarray
+        If `data` is a DataFrame, returns a copy in which `deviation_column`
+        contains the smoothed values. The original DataFrame is not modified.
+
+        If `data` is a list, returns a list of smoothed values.
+
+        If `data` is a NumPy array, returns a NumPy array of smoothed values.
     """
 
     def _smooth_values(values: list[float] | np.ndarray) -> np.ndarray:

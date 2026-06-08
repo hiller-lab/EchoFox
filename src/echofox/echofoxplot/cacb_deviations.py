@@ -28,6 +28,85 @@ def plot_cacb_deviations(
     title: str | None = None,
     annotate_ylabel: bool = True,
 ):
+    """
+    Plot CA-CB chemical-shift deviations as a residue-wise bar plot.
+
+    The function can either calculate CA-CB deviations internally from
+    random-coil and observed chemical-shift DataFrames, or plot precomputed
+    deviations supplied via `cacb_deviations`.
+
+    Parameters
+    ----------
+    ax:
+        Matplotlib axes object on which the plot is drawn.
+
+    df_random_coil:
+        DataFrame containing random-coil reference CA and CB chemical shifts.
+        Required only if `cacb_deviations` is not supplied.
+
+    df_cacb:
+        DataFrame, or list of DataFrames, containing observed CA/CB chemical
+        shifts. Required only if `cacb_deviations` is not supplied.
+
+    cacb_deviations:
+        Optional precomputed DataFrame containing `index_column` and
+        `"cacb_deviation"` columns. If supplied, no deviations are calculated
+        internally.
+
+    atom_column:
+        Column identifying atom names in `df_cacb`. Defaults to `"atom_3"`.
+
+    index_column:
+        Residue-index column. Defaults to `"residue_index"`.
+
+    chemical_shift_column:
+        Chemical-shift column in `df_cacb`. Defaults to `"chemical_shift_3"`.
+
+    colors:
+        Bar color specification. If a single color string is passed, all bars
+        use that color. If a list of two colors is passed, the first color is
+        used for positive deviations and the second for negative deviations.
+
+    bar_kwargs:
+        Additional keyword arguments passed to `ax.bar`.
+
+    bar_missing:
+        If True, mark unassigned or missing residues using
+        `bar_unassigned_residues`.
+
+    unassigned_vspan_kwargs:
+        Keyword arguments passed to `bar_unassigned_residues`.
+
+    bar_zero:
+        If True, draw a horizontal zero line.
+
+    bar_zero_kwargs:
+        Keyword arguments used for the zero line.
+
+    ylim:
+        Optional y-axis limits.
+
+    xlim:
+        Optional x-axis limits.
+
+    ylabel:
+        Optional y-axis label. If None, a CA-CB deviation label is used.
+
+    xlabel:
+        Optional x-axis label. If None, no x-axis label is set.
+
+    title:
+        Optional plot title.
+
+    annotate_ylabel:
+        If True, annotate the y-axis with alpha-helix and beta-sheet labels.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The modified axes object.
+    """
+
     if atom_column is None:
         atom_column = "atom_3"
 
