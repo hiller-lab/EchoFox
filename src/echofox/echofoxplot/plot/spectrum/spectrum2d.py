@@ -1,5 +1,5 @@
 # echofox imports
-from typing import Literal, TypeAlias
+from typing import Literal
 
 import numpy as np
 
@@ -27,14 +27,14 @@ rcParams["pdf.fonttype"] = 42  # Configure Matplotlib to use TrueType fonts
 rcParams["ps.fonttype"] = 42  # If exporting to PostScript as well
 
 
-Spectra: TypeAlias = NmrSpectrum | list[NmrSpectrum]
-TraceType2D: TypeAlias = list[
+Spectra: type = NmrSpectrum | list[NmrSpectrum]
+TraceType2D: type = list[
     ChemicalShift | Number,
     Literal["f1", "f2"],
     int | list[int] | Literal["all"],
     dict,
 ]
-ProjectionType2D: TypeAlias = list[Literal["f1", "f2"], int | list[int] | Literal["all"], bool, dict]
+ProjectionType2D: type = list[Literal["f1", "f2"], int | list[int] | Literal["all"], bool, dict]
 
 
 class Trace2D:

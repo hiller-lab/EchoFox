@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from typing import Literal, TypeAlias
+from typing import Literal
 
 try:
     from typing import NotRequired, TypedDict
 except ImportError:
-    from typing_extensions import NotRequired, TypedDict
+    from typing import NotRequired
+
+    from typing_extensions import TypedDict
 
 from io import StringIO
 from typing import TypedDict
@@ -22,9 +24,9 @@ from echofox.core.colors import Color
 
 from .plot.utils import flatten_axs_list
 
-Number: TypeAlias = int | float
-ResidueSpan: TypeAlias = tuple[Number, Number]
-SecondaryStructureType: TypeAlias = Literal["helix", "sheet"]
+Number: type = int | float
+ResidueSpan: type = tuple[Number, Number]
+SecondaryStructureType: type = Literal["helix", "sheet"]
 
 
 class SecondaryStructureSpan(TypedDict):

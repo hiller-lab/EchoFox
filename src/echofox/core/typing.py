@@ -1,10 +1,10 @@
 # typing
-from typing import Literal, TypeAlias, get_args, get_origin
+from typing import Literal, get_args, get_origin
 
 from echofox.core.colors import Color
 
-Colors: TypeAlias = list[Color]
-Number: TypeAlias = int | float
+Colors: type = list[Color]
+Number: type = int | float
 
 
 # functions to check types
