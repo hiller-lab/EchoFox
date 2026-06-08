@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pytest
 from matplotlib.colors import to_rgba
 
-from echofox.echofoxplot import echofoxplot as efp
+import echofox as ef
 
 
 def _helix_line(
@@ -68,12 +68,12 @@ def test_get_secondary_structure_map_returns_expected_spans(
     )
 
     monkeypatch.setitem(
-        efp.get_secondary_structure_map.__globals__,
+        ef.get_secondary_structure_map.__globals__,
         "_download_pdb_text",
         lambda pdb_code: pdb_text,
     )
 
-    ss_map = efp.get_secondary_structure_map(
+    ss_map = ef.get_secondary_structure_map(
         "fake",
         residue_index_offset=10,
         chain_id="A",
@@ -94,7 +94,7 @@ def test_draw_secondary_structure_with_user_defined_map() -> None:
         {"type": "sheet", "span": (20, 27)},
     ]
 
-    efp.draw_secondary_structure(
+    ef.draw_secondary_structure(
         ax,
         secondary_structure_map,
         residue_range=(1, 40),
@@ -114,7 +114,7 @@ def test_draw_secondary_structure_with_user_defined_styles() -> None:
         {"type": "sheet", "span": (25, 35)},
     ]
 
-    efp.draw_secondary_structure(
+    ef.draw_secondary_structure(
         ax,
         secondary_structure_map,
         residue_range=(1, 40),
@@ -178,7 +178,7 @@ def test_draw_secondary_structure_with_domain_color_map() -> None:
         {"name": "CTD1", "range": (159, 246), "color": "#68a7ce"},
     ]
 
-    efp.draw_secondary_structure(
+    ef.draw_secondary_structure(
         ax,
         secondary_structure_map,
         residue_range=(1, 340),
