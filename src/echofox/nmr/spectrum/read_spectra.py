@@ -1,13 +1,13 @@
 from pathlib import Path
-from typing import Literal, TypeAlias
+from typing import Literal
 
 from echofox.core.typing import Number, is_typealias_instance
 
 from .spectrum import NmrSpectrum
 
-SpectrumFormat: TypeAlias = Literal["bruker", "pipe"]
-SpectrumParam: TypeAlias = tuple[str | Number, str | Path, SpectrumFormat]
-SpectrumParams: TypeAlias = list[SpectrumParam]
+SpectrumFormat: type = Literal["bruker", "pipe"]
+SpectrumParam: type = tuple[str | Number, str | Path, SpectrumFormat]
+SpectrumParams: type = list[SpectrumParam]
 
 
 def read_spectra(

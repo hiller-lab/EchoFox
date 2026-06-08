@@ -63,12 +63,16 @@ Homepage = "https://pypi.org/project/echofox/"
 Repository = "https://github.com/hiller-lab/EchoFox"
 Documentation = "https://echofox.readthedocs.io"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["echofox*"]
 
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py313']
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]
@@ -79,7 +83,7 @@ python_functions = "test_*"
 addopts = "-v --cov=echofox --cov-report=html --cov-report=term"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -101,7 +105,7 @@ exclude = ["build", "dist", ".eggs", "*.egg-info"]
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py310"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
