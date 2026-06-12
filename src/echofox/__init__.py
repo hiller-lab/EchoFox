@@ -19,11 +19,20 @@ from .core import (
 )
 from .echofoxplot import (
     SpectrumAxes,
+    bar_residues,
+    bar_unassigned_residues,
     configure_font,
     draw_secondary_structure,
     fancy_legend,
     flatten_axs_list,
+    get_irs,
+    get_property_ratios,
     get_secondary_structure_map,
+    get_vrs,
+    plot_cacb_deviations,
+    plot_csps,
+    plot_irs,
+    subplots,
 )
 from .nmr import (
     ChemicalShift,
@@ -33,7 +42,9 @@ from .nmr import (
     PeakListCollection,
     PpmRange,
     SyntheticPeak,
+    get_cacb_deviations,
     read_spectra,
+    smooth_cacb_deviations,
 )
 from .utils import (
     GreekLetters,
@@ -47,8 +58,17 @@ __all__ = [
     "TimeRange",
     "TimeValue",
     # echofoxplot
+    "bar_residues",
+    "bar_unassigned_residues",
     "draw_secondary_structure",
     "get_secondary_structure_map",
+    "plot_cacb_deviations",
+    "get_irs",
+    "get_property_ratios",
+    "get_vrs",
+    "plot_csps",
+    "plot_irs",
+    "subplots",
     "SpectrumAxes",
     "configure_font",
     "fancy_legend",
@@ -61,6 +81,8 @@ __all__ = [
     "PeakListCollection",
     "SyntheticPeak",
     "NmrSpectrum",
+    "get_cacb_deviations",
+    "smooth_cacb_deviations",
     "read_spectra",
     # utils
     "GreekLetters",
