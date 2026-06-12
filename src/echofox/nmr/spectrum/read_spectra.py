@@ -14,7 +14,6 @@ def read_spectra(
     spec: SpectrumParam | SpectrumParams | NmrSpectrum | list[NmrSpectrum],
 ) -> list[NmrSpectrum]:
     # return spec if we are passed NmrSpectrum or a list[NmrSpectrum]
-
     if isinstance(spec, NmrSpectrum):
         return [spec]  # It's a single instance of a NmrSpectrum
     elif isinstance(spec, list) and all(isinstance(item, NmrSpectrum) for item in spec):

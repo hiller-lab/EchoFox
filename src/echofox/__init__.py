@@ -29,9 +29,12 @@ from .echofoxplot import (
     get_property_ratios,
     get_secondary_structure_map,
     get_vrs,
+    plot1d,
+    plot2d,
     plot_cacb_deviations,
     plot_csps,
     plot_irs,
+    savefig,
     subplots,
 )
 from .nmr import (
@@ -66,6 +69,8 @@ __all__ = [
     "get_irs",
     "get_property_ratios",
     "get_vrs",
+    "plot1d",
+    "plot2d",
     "plot_csps",
     "plot_irs",
     "subplots",
@@ -73,6 +78,7 @@ __all__ = [
     "configure_font",
     "fancy_legend",
     "flatten_axs_list",
+    "savefig",
     # nmr
     "ChemicalShift",
     "PpmRange",
