@@ -19,6 +19,7 @@ from .core import (
 )
 from .echofoxplot import (
     SpectrumAxes,
+    add_res_labels,
     bar_residues,
     bar_unassigned_residues,
     configure_font,
@@ -29,6 +30,7 @@ from .echofoxplot import (
     get_property_ratios,
     get_secondary_structure_map,
     get_vrs,
+    highlight_res_labels,
     plot1d,
     plot2d,
     plot_cacb_deviations,
@@ -61,6 +63,7 @@ __all__ = [
     "TimeRange",
     "TimeValue",
     # echofoxplot
+    "add_res_labels",
     "bar_residues",
     "bar_unassigned_residues",
     "draw_secondary_structure",
@@ -69,6 +72,7 @@ __all__ = [
     "get_irs",
     "get_property_ratios",
     "get_vrs",
+    "highlight_res_labels",
     "plot1d",
     "plot2d",
     "plot_csps",

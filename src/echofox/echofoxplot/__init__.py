@@ -13,7 +13,7 @@ from .echofoxplot import (
     savefig,
     subplots,
 )
-from .plot import configure_font, fancy_legend, flatten_axs_list
+from .plot import add_res_labels, configure_font, fancy_legend, flatten_axs_list, highlight_res_labels
 from .secondary_structure import draw_secondary_structure, get_secondary_structure_map
 
 __all__ = [
@@ -31,8 +31,10 @@ __all__ = [
     "plot_irs",
     "subplots",
     "SpectrumAxes",
+    "add_res_labels",
     "configure_font",
     "fancy_legend",
     "flatten_axs_list",
     "savefig",
+    "highlight_res_labels",
 ]
