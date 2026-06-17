@@ -1,5 +1,6 @@
-from collections.abc import Iterable, Sequence
-from typing import Literal, TypedDict
+import re
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, Literal, TypedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -186,3 +187,110 @@ def flatten_axs_list(axs: Axes | Iterable[Axes]) -> list[Axes]:
         return list(axs.ravel())
 
     return list(axs)
+
+
+def add_res_labels(
+    axs: Axes | Iterable[Axes],
+    seq: str,
+    *,
+    seq_offset: int = 0,
+    xticklabel_kwargs: dict | None = None,
+) -> None:
+    """Add residue labels to the x-axis of one or more Matplotlib axes.
+
+    The x-axis ticks are set to residue positions and labeled with the
+    one-letter amino acid code plus residue number, for example ``A1``,
+    ``G2``, ``S3``. ``seq_offset`` can be used when the sequence does not
+    start at residue 1.
+
+    Parameters
+    ----------
+    axs : Axes or Iterable[Axes]
+        Single Matplotlib axis or iterable of axes to label.
+    seq : str
+        Amin acid sequence used to generate residue labels.
+    seq_offset : int, optional
+        Offset added to residue numbering. For example, ``seq_offset=10``
+        labels the first residue as position 11.
+    xticklabel_kwargs : dict, optional
+        Keyword arguments passed to ``ax.set_xticklabels`` for formatting the
+        x-axis tick labels. If omitted, labels are rotated vertically and
+        shown with the default Matplotlib x-tick label size.
+
+    Returns
+    -------
+    None
+        The axes are modified in place.
+    """
+    if xticklabel_kwargs is None:
+        xticklabel_kwargs = {
+            "rotation": 90,
+            "fontsize": plt.rcParams["xtick.labelsize"],
+        }
+
+    res_full_ids = [f"{seq[i]}{i + 1 + seq_offset}" for i in range(len(seq))]
+    ticks = np.arange(seq_offset + 1, seq_offset + len(seq) + 1)
+
+    for ax in flatten_axs_list(axs):
+        ax.set_xlim(
+            seq_offset + 1 - 0.5,
+            seq_offset + len(seq) + 1 - 0.5,
+        )
+        ax.set_xticks(ticks)
+        ax.set_xticklabels(res_full_ids, **xticklabel_kwargs)
+
+
+def highlight_res_labels(
+    axs: Axes | Iterable[Axes],
+    res_list: str | re.Pattern[str] | Iterable[str | re.Pattern[str]],
+    *,
+    label_styles: Mapping[str, Any] | None = None,
+) -> None:
+    """
+    Highlight selected residue labels on the x-axis of one or more Matplotlib axes.
+
+    Residue labels are matched against the existing x-axis tick-label text. Items in
+    ``res_list`` are interpreted as regular expressions when possible. If a string is
+    not a valid regular expression, it is treated as a literal label.
+
+    Parameters
+    ----------
+    axs : Axes or Iterable[Axes]
+        Single Matplotlib axis or iterable of axes whose x-axis labels should be
+        modified.
+    res_list : str, re.Pattern, or Iterable[str | re.Pattern]
+        Residue label pattern or patterns to highlight. Examples include ``"A12"``,
+        ``"A12|G13"``, ``"[ST]\\d+"``, or a compiled regular expression.
+    label_styles : Mapping[str, Any], optional
+        Matplotlib text properties applied to matching tick labels. For example:
+        ``{"weight": "bold", "color": "red", "fontsize": 12}``.
+
+        By default, matching labels are made bold.
+
+    Returns
+    -------
+    None
+        The axes are modified in place.
+    """
+    if label_styles is None:
+        label_styles = {"weight": "bold"}
+
+    if isinstance(res_list, str | re.Pattern):
+        res_list = [res_list]
+
+    compiled_patterns: list[re.Pattern[str]] = []
+
+    for item in res_list:
+        if isinstance(item, re.Pattern):
+            compiled_patterns.append(item)
+            continue
+
+        try:
+            compiled_patterns.append(re.compile(item))
+        except re.error:
+            compiled_patterns.append(re.compile(re.escape(item)))
+
+    for ax in flatten_axs_list(axs):
+        for label in ax.get_xticklabels():
+            if any(pattern.search(label.get_text()) for pattern in compiled_patterns):
+                label.set(**label_styles)
