@@ -50,6 +50,7 @@ from .nmr import (
     get_cacb_deviations,
     read_spectra,
     smooth_cacb_deviations,
+    read_talos_table,
 )
 from .utils import (
     GreekLetters,
@@ -94,6 +95,7 @@ __all__ = [
     "get_cacb_deviations",
     "smooth_cacb_deviations",
     "read_spectra",
+    "read_talos_table",
     # utils
     "GreekLetters",
     "convert_to_inches",
