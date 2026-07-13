@@ -44,16 +44,10 @@ def read_talos_table(
     try:
         lines = path.read_text(encoding=encoding).splitlines()
     except UnicodeDecodeError as exc:
-        raise ValueError(
-            f"Could not decode TALOS table {path!s} using {encoding!r}."
-        ) from exc
+        raise ValueError(f"Could not decode TALOS table {path!s} using {encoding!r}.") from exc
 
     vars_index = next(
-        (
-            index
-            for index, line in enumerate(lines)
-            if line.strip().split(maxsplit=1)[0:1] == ["VARS"]
-        ),
+        (index for index, line in enumerate(lines) if line.strip().split(maxsplit=1)[0:1] == ["VARS"]),
         None,
     )
 
@@ -63,9 +57,7 @@ def read_talos_table(
     columns = lines[vars_index].strip().split()[1:]
 
     if not columns:
-        raise ValueError(
-            f"The VARS line in TALOS table {path!s} contains no column names."
-        )
+        raise ValueError(f"The VARS line in TALOS table {path!s} contains no column names.")
 
     format_index = next(
         (
@@ -77,17 +69,12 @@ def read_talos_table(
     )
 
     if format_index is None:
-        raise ValueError(
-            f"No FORMAT line found after the VARS line in TALOS table {path!s}."
-        )
+        raise ValueError(f"No FORMAT line found after the VARS line in TALOS table {path!s}.")
 
     data_lines = [
         line
         for line in lines[format_index + 1 :]
-        if line.strip()
-        and not line.lstrip().startswith(
-            ("#", "REMARK", "DATA", "VARS", "FORMAT")
-        )
+        if line.strip() and not line.lstrip().startswith(("#", "REMARK", "DATA", "VARS", "FORMAT"))
     ]
 
     if not data_lines:

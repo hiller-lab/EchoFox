@@ -25,7 +25,7 @@ def plot_talos_ss(
             "linewidth": 0.5,
             "edgecolor": "black",
         }
-    
+
     if legend_kwargs is None:
         legend_kwargs = {
             "loc": "lower left",
@@ -33,33 +33,23 @@ def plot_talos_ss(
             "ncol": 2,
             "frameon": False,
         }
-    
+
     ss_list = [
         {"type": "H", "regex_pattern": pattern_helix, "label": "Helix", "color": color_helix},
         {"type": "E", "regex_pattern": pattern_sheet, "label": "Sheet", "color": color_sheet},
     ]
-    
+
     for ss in ss_list:
         regex_pattern = ss.get("regex_pattern")
-        table_filt = table[
-            table["SS_CLASS"].str.match(regex_pattern)
-            & table["CONFIDENCE"].ge(minimum_confidence)
-        ]
-        
+        table_filt = table[table["SS_CLASS"].str.match(regex_pattern) & table["CONFIDENCE"].ge(minimum_confidence)]
+
         color = ss.get("color")
-        
-        ax.bar(
-            table_filt["RESID"],
-            table_filt[f"Q_{ss["type"]}"],
-            color=color,
-            label=ss.get("label"),
-            **bar_kwargs
-        )
-    
+
+        ax.bar(table_filt["RESID"], table_filt[f"Q_{ss['type']}"], color=color, label=ss.get("label"), **bar_kwargs)
 
     if xlabel:
         ax.set_xlabel(xlabel, rotation=0, ha="right")
-    
+
     ax.set_ylabel(ylabel, rotation=0, ha="right")
 
     if draw_legend:
@@ -83,7 +73,7 @@ def plot_talos_s2(
             "marker": "o",
             "linestyle": "-",
         }
-    
+
     if legend_kwargs is None:
         legend_kwargs = {
             "loc": "lower left",
@@ -91,19 +81,18 @@ def plot_talos_s2(
             "ncol": 2,
             "frameon": False,
         }
-    
+
     ax.plot(
         table["RESID"],
         table["S2"],
         **plot_kwargs,
     )
-    
 
     if xlabel:
         ax.set_xlabel(xlabel, rotation=0, ha="right")
-    
+
     ax.set_ylabel(ylabel, rotation=0, ha="right")
-    
+
     ax.set_ylim(ylim)
 
     if draw_legend:
@@ -129,11 +118,10 @@ def plot_talos_chi1_rotamer(
         ellipse_kwargs = {
             "alpha": 0.5,
         }
-        
+
     if ylabel is None:
         ylabel = f"{GreekLetters.Chi}$_1$"
-    
-    
+
     rotamer_class_map = {
         "g-": {"angle": -60, "color": gm_color, "conf_col": "Q_Gm"},
         "t": {"angle": 60, "color": t_color, "conf_col": "Q_T"},
@@ -141,29 +129,26 @@ def plot_talos_chi1_rotamer(
     }
 
     for rotamer_class, rotamer_prop in rotamer_class_map.items():
-        table_filt = table[
-            table["CLASS"].eq(rotamer_class)
-        ]
-        
+        table_filt = table[table["CLASS"].eq(rotamer_class)]
+
         res_idx = table_filt["RESID"].to_numpy()
         confidences = table_filt[rotamer_prop["conf_col"]].to_numpy()
-        
+
         for res_id, conf in zip(res_idx, confidences):
             ax.add_patch(
                 Ellipse(
                     xy=(res_id, rotamer_prop["angle"]),
                     width=ellipse_width,
-                    height=ellipse_max_height*conf,
+                    height=ellipse_max_height * conf,
                     color=rotamer_prop["color"],
                     **ellipse_kwargs,
                 )
             )
-    
 
     if xlabel:
         ax.set_xlabel(xlabel, rotation=0, ha="right")
-    
+
     ax.set_ylabel(ylabel, rotation=0, ha="right")
-    
+
     ax.set_ylim(ylim)
     return

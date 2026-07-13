@@ -15,5 +15,5 @@ __all__ = [
     "SyntheticPeak",
     "NmrSpectrum",
     "read_spectra",
-    "read_talos_table"
+    "read_talos_table",
 ]

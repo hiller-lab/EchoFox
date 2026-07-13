@@ -40,5 +40,5 @@ __all__ = [
     "highlight_res_labels",
     "plot_talos_chi1_rotamer",
     "plot_talos_s2",
-    "plot_talos_ss"
+    "plot_talos_ss",
 ]

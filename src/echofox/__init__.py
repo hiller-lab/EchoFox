@@ -52,8 +52,8 @@ from .nmr import (
     SyntheticPeak,
     get_cacb_deviations,
     read_spectra,
-    smooth_cacb_deviations,
     read_talos_table,
+    smooth_cacb_deviations,
 )
 from .utils import (
     GreekLetters,
