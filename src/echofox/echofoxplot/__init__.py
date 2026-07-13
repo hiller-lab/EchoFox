@@ -15,6 +15,7 @@ from .echofoxplot import (
 )
 from .plot import add_res_labels, configure_font, fancy_legend, flatten_axs_list, highlight_res_labels
 from .secondary_structure import draw_secondary_structure, get_secondary_structure_map
+from .talos import plot_talos_chi1_rotamer, plot_talos_s2, plot_talos_ss
 
 __all__ = [
     "draw_secondary_structure",
@@ -37,4 +38,7 @@ __all__ = [
     "flatten_axs_list",
     "savefig",
     "highlight_res_labels",
+    "plot_talos_chi1_rotamer",
+    "plot_talos_s2",
+    "plot_talos_ss",
 ]

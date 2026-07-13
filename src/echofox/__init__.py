@@ -36,6 +36,9 @@ from .echofoxplot import (
     plot_cacb_deviations,
     plot_csps,
     plot_irs,
+    plot_talos_chi1_rotamer,
+    plot_talos_s2,
+    plot_talos_ss,
     savefig,
     subplots,
 )
@@ -49,6 +52,7 @@ from .nmr import (
     SyntheticPeak,
     get_cacb_deviations,
     read_spectra,
+    read_talos_table,
     smooth_cacb_deviations,
 )
 from .utils import (
@@ -77,6 +81,9 @@ __all__ = [
     "plot2d",
     "plot_csps",
     "plot_irs",
+    "plot_talos_chi1_rotamer",
+    "plot_talos_s2",
+    "plot_talos_ss",
     "subplots",
     "SpectrumAxes",
     "configure_font",
@@ -94,6 +101,7 @@ __all__ = [
     "get_cacb_deviations",
     "smooth_cacb_deviations",
     "read_spectra",
+    "read_talos_table",
     # utils
     "GreekLetters",
     "convert_to_inches",
